@@ -46,6 +46,15 @@ await Science.run({
 			await promise
 			expect(mutationCount).is(1)
 		}),
+
+		"onMutation is fired when array item is pushed": Science.test(async() => {
+			const strata = new Strata({items: ["hello", "world"]})
+			let mutationCount = 0
+			strata.onMutation.sub(() => {mutationCount++})
+			await strata.mutate(state => state.items.push("lol"))
+			expect(mutationCount).is(1)
+			expect(strata.state.items.length).is(3)
+		}),
 	}),
 
 	"substrata": Science.suite({
