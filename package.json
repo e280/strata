@@ -1,0 +1,46 @@
+{
+	"name": "@e280/strata",
+	"version": "0.0.0",
+	"description": "state management",
+	"license": "MIT",
+	"author": "Chase Moskal <chasemoskal@gmail.com>",
+	"type": "module",
+	"main": "x/index.js",
+	"files": [
+		"x",
+		"s"
+	],
+	"scripts": {
+		"build": "run-s _clean _links _tsc",
+		"test": "node x/tests.test.js",
+		"test-watch": "node --watch x/tests.test.js",
+		"test-inspect": "node inspect x/tests.test.js",
+		"count": "find s -path '*/_archive' -prune -o -name '*.ts' -exec wc -l {} +",
+		"watch": "run-p _tscw test-watch",
+		"_clean": "rm -rf x && mkdir x",
+		"_links": "ln -s \"$(realpath node_modules)\" x/node_modules",
+		"_tsc": "tsc",
+		"_tscw": "tsc -w"
+	},
+	"devDependencies": {
+		"@e280/science": "^0.0.5",
+		"@types/node": "^24.0.3",
+		"npm-run-all": "^4.1.5",
+		"typescript": "^5.8.3"
+	},
+	"keywords": [
+		"state",
+		"state management"
+	],
+	"homepage": "https://github.com/e280/strata#readme",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/e280/strata.git"
+	},
+	"bugs": {
+		"url": "https://github.com/e280/strata/issues"
+	},
+	"dependencies": {
+		"@e280/stz": "^0.0.0-24"
+	}
+}
