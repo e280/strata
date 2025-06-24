@@ -19,14 +19,14 @@
 
   const strata = new Strata({
     count: 0,
-    stuff: {
+    snacks: {
       peanuts: 8,
-      items: ["hello", "world"],
+      bag: ["popcorn", "chocolate"],
     },
   })
 
   strata.state.count // 0
-  strata.state.stuff.peanuts // 8
+  strata.state.snacks.peanuts // 8
   ```
 
 ### how mutations work
@@ -42,15 +42,15 @@
 ### substrata and selectors
 - a substrata is a view into a subset of the state tree
   ```ts
-  const stuff = strata.substrata(s => s.stuff)
+  const snacks = strata.substrata(s => s.snacks)
   ```
 - run substrata mutations
   ```ts
-  await stuff.mutate(s => s.peanuts++)
+  await snacks.mutate(s => s.peanuts++)
   ```
 - array mutations are cool, actually
   ```ts
-  await stuff.mutate(s => s.items.push("lol"))
+  await snacks.mutate(s => s.bag.push("butter"))
   ```
 
 ### onMutation events
@@ -61,7 +61,7 @@
 
 - substrata listeners don't care about outside changes
   ```ts
-  stuff.onMutation(s => console.log(s.peanuts))
+  snacks.onMutation(s => console.log(s.peanuts))
   ```
 
 - onMutation returns a fn to stop listening
@@ -79,24 +79,24 @@
   ```ts
   const strata = new Strata({
     count: 0,
-    stuff: Strata.chronicle({
+    snacks: Strata.chronicle({
       peanuts: 8,
-      items: ["hello", "world"],
+      bag: ["popcorn", "chocolate"],
     }),
   })
   ```
 - access the chronicle using the `Chronstrata` helper
   ```ts
-  const stuff = strata.chronstrata(64, s => s.stuff)
+  const snacks = strata.chronstrata(64, s => s.snacks)
   ```
 - mutations will advance history (undoable/redoable)
   ```ts
-  await stuff.mutate(s => s.peanuts = 101)
+  await snacks.mutate(s => s.peanuts = 101)
 
-  await stuff.undo()
+  await snacks.undo()
     // back to 8 peanuts
 
-  await stuff.redo()
+  await snacks.redo()
     // forward to 101 peanuts
   ```
 - chronstrata can have its own substrata, and all such substrata mutations will advance history (undoable/redoable)
