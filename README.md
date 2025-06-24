@@ -89,7 +89,7 @@
   ```ts
   const stuff = strata.historical(64, s => s.stuff)
   ```
-- now, mutations there are undoable and redoable
+- mutations will advance history (undoable/redoable)
   ```ts
   await stuff.mutate(s => s.peanuts = 101)
 
@@ -99,6 +99,7 @@
   await stuff.redo()
     // forward to 101 peanuts
   ```
+- historical can have its own substrata, and all such substrata mutations will advance history (undoable/redoable)
 
 <br/>
 

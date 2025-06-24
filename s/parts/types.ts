@@ -24,8 +24,8 @@ export type Chronicle<S extends Substate> = {
 	//     \   \   future
 	//      \   present
 	//       past
-	present: S
 	past: S[]
+	present: S
 	future: S[]
 }
 
