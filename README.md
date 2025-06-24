@@ -71,7 +71,7 @@
 
 <br/>
 
-## fancy state management for cultivated high-society connoisseurs
+## only high-class discerning aristocrats permitted beyond this point
 
 ### `Chronstrata` for undo/redo history
 - first, put a `Chronicle` into your state tree
@@ -117,6 +117,7 @@
   snacks.redoable // 1
   ```
 - chronstrata can have its own substrata — all their mutations advance history
+- plz pinky-swear right now, that you won't create a chronstrata under a substrata under a chronstrata
 
 <br/>
 
