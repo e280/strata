@@ -53,15 +53,15 @@ export class Strata<S extends State> implements Stratum<S> {
 		return this.#immutable
 	}
 
-	substrata<Sub extends Substate>(selector: Selector<S, Sub>) {
-		return new Substrata(this, selector)
+	substrata<Sub extends Substate>(selector: Selector<S, Sub>): Substrata<S, Sub> {
+		return new Substrata(this, selector, this.options)
 	}
 
 	historical<Sub extends Substate>(
 			limit: number,
 			selector: Selector<S, Chronicle<Sub>>,
 		) {
-		return new Historical(limit, this, selector)
+		return new Historical(limit, this, selector, this.options)
 	}
 }
 

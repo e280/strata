@@ -1,19 +1,19 @@
 
-import {Strata} from "./strata.js"
 import {Substrata} from "./substrata.js"
-import {Chronicle, Mutator, Selector, State, Stratum, Substate} from "./types.js"
+import {Chronicle, Mutator, Options, Selector, Stratum, Substate} from "./types.js"
 
-export class Historical<ParentState extends State, S extends Substate> implements Stratum<S> {
+export class Historical<ParentState extends Substate, S extends Substate> implements Stratum<S> {
 	limit: number
 	#substrata: Substrata<ParentState, Chronicle<S>>
 
 	constructor(
 			limit: number,
-			public strata: Strata<ParentState>,
-			selector: Selector<ParentState, Chronicle<S>>,
+			public parent: Stratum<ParentState>,
+			public selector: Selector<ParentState, Chronicle<S>>,
+			public options: Options,
 		) {
 		this.limit = Math.max(1, limit)
-		this.#substrata = strata.substrata(selector)
+		this.#substrata = parent.substrata(selector)
 	}
 
 	get state() {
@@ -34,7 +34,7 @@ export class Historical<ParentState extends State, S extends Substate> implement
 
 	/** progress forwards in history */
 	async mutate(mutator: Mutator<S>) {
-		const snapshot = this.strata.options.clone(this.#substrata.state.present)
+		const snapshot = this.options.clone(this.#substrata.state.present)
 		await this.#substrata.mutate(chronicle => {
 			mutator(chronicle.present)
 			chronicle.past.push(snapshot)
@@ -68,6 +68,10 @@ export class Historical<ParentState extends State, S extends Substate> implement
 				chronicle.future = chronicle.future.slice(n)
 			}
 		})
+	}
+
+	substrata<Sub extends Substate>(selector: Selector<S, Sub>): Substrata<S, Sub> {
+		return new Substrata(this, selector, this.options)
 	}
 }
 

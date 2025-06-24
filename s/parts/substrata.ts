@@ -1,10 +1,8 @@
 
 import {debounce, deep, sub} from "@e280/stz"
+import {Mutator, Options, Selector, Stratum, Substate} from "./types.js"
 
-import {Strata} from "./strata.js"
-import {Mutator, Selector, State, Stratum, Substate} from "./types.js"
-
-export class Substrata<ParentState extends State, S extends Substate> implements Stratum<S> {
+export class Substrata<ParentState extends Substate, S extends Substate> implements Stratum<S> {
 	dispose: () => void
 	onMutation = sub<[state: S]>()
 
@@ -12,14 +10,15 @@ export class Substrata<ParentState extends State, S extends Substate> implements
 	#dispatchMutation = debounce(0, (state: S) => this.onMutation.pub(state))
 
 	constructor(
-			private strata: Strata<ParentState>,
+			private parent: Stratum<ParentState>,
 			private selector: Selector<ParentState, S>,
+			private options: Options,
 		) {
 
-		const state = this.selector(this.strata.state)
-		this.#immutable = deep.freeze(this.strata.options.clone(state))
+		const state = this.selector(this.parent.state)
+		this.#immutable = deep.freeze(this.options.clone(state))
 
-		this.dispose = this.strata.onMutation(async parentState => {
+		this.dispose = this.parent.onMutation(async parentState => {
 			const oldState = this.#immutable
 			const newState = this.selector(parentState)
 			const isChanged = !deep.equal(newState, oldState)
@@ -32,7 +31,7 @@ export class Substrata<ParentState extends State, S extends Substate> implements
 	}
 
 	#updateState(state: S) {
-		this.#immutable = deep.freeze(this.strata.options.clone(state))
+		this.#immutable = deep.freeze(this.options.clone(state))
 	}
 
 	get state(): S {
@@ -40,12 +39,12 @@ export class Substrata<ParentState extends State, S extends Substate> implements
 	}
 
 	async mutate(mutator: Mutator<S>) {
-		await this.strata.mutate(parentState => mutator(this.selector(parentState)))
+		await this.parent.mutate(parentState => mutator(this.selector(parentState)))
 		return this.#immutable
 	}
 
-	substrata<Sub extends Substate>(selector: Selector<S, Sub>) {
-		return this.strata.substrata(parentState => selector(this.selector(parentState)))
+	substrata<Sub extends Substate>(selector: Selector<S, Sub>): Substrata<S, Sub> {
+		return new Substrata(this, selector, this.options)
 	}
 }
 
