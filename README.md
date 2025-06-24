@@ -8,7 +8,9 @@
 - straightforward with no spooky proxy magic
 - undo/redo history, cross-tab sync, localStorage persistence
 
-## good state management
+<br/>
+
+## solid state management
 
 ### establish a strata with some state
 - better stick to json-friendly serializable data
@@ -67,6 +69,38 @@
   const stop = strata.onMutation(s => console.log(s.count))
   stop() // stop listening
   ```
+
+<br/>
+
+## fancy state management for fancy people
+
+### undo/redo history
+- put a `Chronicle` into your state tree
+  ```ts
+  const strata = new Strata({
+    count: 0,
+    stuff: Strata.chronicle({
+      peanuts: 8,
+      items: ["hello", "world"],
+    }),
+  })
+  ```
+- access the chronicle using the `Historical` helper
+  ```ts
+  const stuff = strata.historical(64, s => s.stuff)
+  ```
+- now, mutations there are undoable and redoable
+  ```ts
+  await stuff.mutate(s => s.peanuts = 101)
+
+  await stuff.undo()
+    // back to 8 peanuts
+
+  await stuff.redo()
+    // forward to 101 peanuts
+  ```
+
+<br/>
 
 ## a buildercore e280 project
 free and open source by https://e280.org/  
