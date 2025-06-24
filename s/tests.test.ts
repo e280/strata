@@ -66,6 +66,21 @@ await Science.run({
 			expect(mutationCount).is(1)
 			expect(strata.state.items.length).is(3)
 		}),
+
+		"prevent mutation loops": Science.test(async() => {
+			const strata = new Strata({count: 0})
+			let mutationCount = 0
+			strata.onMutation.sub(async() => {
+				mutationCount++
+				if (mutationCount > 100)
+					return
+				await strata.mutate(s => s.count++)
+			})
+			await expect(async() => {
+				await strata.mutate(state => state.count++)
+			}).throwsAsync()
+			expect(mutationCount).is(1)
+		}),
 	}),
 
 	"substrata": Science.suite({
