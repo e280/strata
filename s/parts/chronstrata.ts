@@ -3,16 +3,14 @@ import {Substrata} from "./substrata.js"
 import {Chronicle, Mutator, Options, Selector, Stratum, Substate} from "./types.js"
 
 export class Chronstrata<ParentState extends Substate, S extends Substate> implements Stratum<S> {
-	limit: number
 	#substrata: Substrata<ParentState, Chronicle<S>>
 
 	constructor(
-			limit: number,
+			public limit: number,
 			public parent: Stratum<ParentState>,
 			public selector: Selector<ParentState, Chronicle<S>>,
 			public options: Options,
 		) {
-		this.limit = Math.max(1, limit)
 		this.#substrata = parent.substrata(selector)
 	}
 
@@ -34,11 +32,12 @@ export class Chronstrata<ParentState extends Substate, S extends Substate> imple
 
 	/** progress forwards in history */
 	async mutate(mutator: Mutator<S>) {
+		const limit = Math.max(0, this.limit)
 		const snapshot = this.options.clone(this.#substrata.state.present)
 		await this.#substrata.mutate(chronicle => {
 			mutator(chronicle.present)
 			chronicle.past.push(snapshot)
-			chronicle.past = chronicle.past.slice(-this.limit)
+			chronicle.past = chronicle.past.slice(-limit)
 			chronicle.future = []
 		})
 		return this.state
