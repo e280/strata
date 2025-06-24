@@ -3,12 +3,13 @@
 
 # ⛏️ strata
 
-**my 10th state management library, probably**
+**strata isn't just state management. *it's pure sex.***
 - 📦 `npm install @e280/strata`
 - single-source-of-truth state tree
 - immutable except for `mutate(fn)` calls
 - no spooky-dookie proxy magic — just god's honest javascript
 - undo/redo history, cross-tab sync, localStorage persistence
+- probably my 10th state management library, lol
 
 <br/>
 
