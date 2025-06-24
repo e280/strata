@@ -1,5 +1,6 @@
 
-export {Strata} from "./parts/strata.js"
-export {Substrata} from "./parts/substrata.js"
-export {Options, Mutator, Selector} from "./parts/types.js"
+export * from "./parts/chronstrata.js"
+export * from "./parts/strata.js"
+export * from "./parts/substrata.js"
+export * from "./parts/types.js"
 
