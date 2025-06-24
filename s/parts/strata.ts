@@ -2,7 +2,7 @@
 import {debounce, deep, sub} from "@e280/stz"
 
 import {Substrata} from "./substrata.js"
-import {Historical} from "./historical.js"
+import {Chronstrata} from "./chronstrata.js"
 import {processOptions} from "./utils/process-options.js"
 import {Chronicle, Mutator, Options, Selector, State, Stratum, Substate} from "./types.js"
 
@@ -57,11 +57,11 @@ export class Strata<S extends State> implements Stratum<S> {
 		return new Substrata(this, selector, this.options)
 	}
 
-	historical<Sub extends Substate>(
+	chronstrata<Sub extends Substate>(
 			limit: number,
 			selector: Selector<S, Chronicle<Sub>>,
 		) {
-		return new Historical(limit, this, selector, this.options)
+		return new Chronstrata(limit, this, selector, this.options)
 	}
 }
 

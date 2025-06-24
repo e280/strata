@@ -1,6 +1,7 @@
 
 import {debounce, deep, sub} from "@e280/stz"
-import {Mutator, Options, Selector, Stratum, Substate} from "./types.js"
+import {Chronstrata} from "./chronstrata.js"
+import {Chronicle, Mutator, Options, Selector, Stratum, Substate} from "./types.js"
 
 export class Substrata<ParentState extends Substate, S extends Substate> implements Stratum<S> {
 	dispose: () => void
@@ -45,6 +46,13 @@ export class Substrata<ParentState extends Substate, S extends Substate> impleme
 
 	substrata<Sub extends Substate>(selector: Selector<S, Sub>): Substrata<S, Sub> {
 		return new Substrata(this, selector, this.options)
+	}
+
+	chronstrata<Sub extends Substate>(
+			limit: number,
+			selector: Selector<S, Chronicle<Sub>>,
+		) {
+		return new Chronstrata(limit, this, selector, this.options)
 	}
 }
 

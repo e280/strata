@@ -151,12 +151,12 @@ await Science.run({
 		}),
 	}),
 
-	"historical": (() => {
+	"chronstrata": (() => {
 		const setup = () => {
 			const strata = new Strata({
 				chron: Strata.chronicle({count: 0}),
 			})
-			const chron = strata.historical(64, s => s.chron)
+			const chron = strata.chronstrata(64, s => s.chron)
 			return {strata, chron}
 		}
 
@@ -278,7 +278,7 @@ await Science.run({
 						group: {count: 0},
 					}),
 				})
-				const chron = strata.historical(64, s => s.chron)
+				const chron = strata.chronstrata(64, s => s.chron)
 				const group = chron.substrata(s => s.group)
 				expect(group.state.count).is(0)
 				await group.mutate(g => g.count = 101)

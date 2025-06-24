@@ -74,7 +74,7 @@
 
 ## fancy state management for fancy people
 
-### undo/redo history
+### chronstrata for undo/redo history
 - put a `Chronicle` into your state tree
   ```ts
   const strata = new Strata({
@@ -85,9 +85,9 @@
     }),
   })
   ```
-- access the chronicle using the `Historical` helper
+- access the chronicle using the `Chronstrata` helper
   ```ts
-  const stuff = strata.historical(64, s => s.stuff)
+  const stuff = strata.chronstrata(64, s => s.stuff)
   ```
 - mutations will advance history (undoable/redoable)
   ```ts
@@ -99,7 +99,7 @@
   await stuff.redo()
     // forward to 101 peanuts
   ```
-- historical can have its own substrata, and all such substrata mutations will advance history (undoable/redoable)
+- chronstrata can have its own substrata, and all such substrata mutations will advance history (undoable/redoable)
 
 <br/>
 

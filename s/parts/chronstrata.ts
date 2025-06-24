@@ -2,7 +2,7 @@
 import {Substrata} from "./substrata.js"
 import {Chronicle, Mutator, Options, Selector, Stratum, Substate} from "./types.js"
 
-export class Historical<ParentState extends Substate, S extends Substate> implements Stratum<S> {
+export class Chronstrata<ParentState extends Substate, S extends Substate> implements Stratum<S> {
 	limit: number
 	#substrata: Substrata<ParentState, Chronicle<S>>
 
