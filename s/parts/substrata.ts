@@ -2,26 +2,22 @@
 import {debounce, deep, sub} from "@e280/stz"
 
 import {Strata} from "./strata.js"
-import {processOptions} from "./utils/process-options.js"
-import {Mutator, Options, Selector, State, Substate} from "./types.js"
+import {Mutator, Selector, State, Stratum, Substate} from "./types.js"
 
-export class Substrata<ParentState extends State, S extends Substate> {
+export class Substrata<ParentState extends State, S extends Substate> implements Stratum<S> {
 	dispose: () => void
 	onMutation = sub<[state: S]>()
 
-	#options: Options
 	#immutable: S
 	#dispatchMutation = debounce(0, (state: S) => this.onMutation.pub(state))
 
 	constructor(
 			private strata: Strata<ParentState>,
 			private selector: Selector<ParentState, S>,
-			options: Partial<Options> = {},
 		) {
 
-		this.#options = processOptions(options)
 		const state = this.selector(this.strata.state)
-		this.#immutable = deep.freeze(this.#options.clone(state))
+		this.#immutable = deep.freeze(this.strata.options.clone(state))
 
 		this.dispose = this.strata.onMutation(async parentState => {
 			const oldState = this.#immutable
@@ -36,7 +32,7 @@ export class Substrata<ParentState extends State, S extends Substate> {
 	}
 
 	#updateState(state: S) {
-		this.#immutable = deep.freeze(this.#options.clone(state))
+		this.#immutable = deep.freeze(this.strata.options.clone(state))
 	}
 
 	get state(): S {

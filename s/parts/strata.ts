@@ -2,39 +2,42 @@
 import {debounce, deep, sub} from "@e280/stz"
 
 import {Substrata} from "./substrata.js"
+import {Historical} from "./historical.js"
 import {processOptions} from "./utils/process-options.js"
-import {Mutator, Options, Selector, State, Substate} from "./types.js"
+import {Chronicle, Mutator, Options, Selector, State, Stratum, Substate} from "./types.js"
 
-export class Strata<S extends State> {
+export class Strata<S extends State> implements Stratum<S> {
+	static chronicle = <S extends Substate>(state: S): Chronicle<S> => ({
+		present: state,
+		past: [],
+		future: [],
+	})
+
 	onMutation = sub<[state: S]>()
 
-	#options: Options
+	options: Options
 	#mutable: S
 	#immutable: S
 	#mutationLock = false
 	#dispatchMutation = debounce(0, (state: S) => this.onMutation.pub(state))
 
 	constructor(state: S, options: Partial<Options> = {}) {
-		this.#options = processOptions(options)
+		this.options = processOptions(options)
 		this.#mutable = state
-		this.#immutable = deep.freeze(this.#options.clone(state))
+		this.#immutable = deep.freeze(this.options.clone(state))
 	}
 
 	#updateState(state: S) {
 		this.#mutable = state
-		this.#immutable = deep.freeze(this.#options.clone(state))
+		this.#immutable = deep.freeze(this.options.clone(state))
 	}
 
 	get state() {
 		return this.#immutable
 	}
 
-	substrata<Sub extends Substate>(selector: Selector<S, Sub>) {
-		return new Substrata(this, selector, this.#options)
-	}
-
 	async mutate(mutator: Mutator<S>) {
-		const oldState = this.#options.clone(this.#mutable)
+		const oldState = this.options.clone(this.#mutable)
 		if (this.#mutationLock)
 			throw new Error("nested mutations are forbidden")
 		this.#mutationLock = true
@@ -48,6 +51,17 @@ export class Strata<S extends State> {
 			await this.#dispatchMutation(immutable)
 		}
 		return this.#immutable
+	}
+
+	substrata<Sub extends Substate>(selector: Selector<S, Sub>) {
+		return new Substrata(this, selector)
+	}
+
+	historical<Sub extends Substate>(
+			limit: number,
+			selector: Selector<S, Chronicle<Sub>>,
+		) {
+		return new Historical(limit, this, selector)
 	}
 }
 

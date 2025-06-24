@@ -150,5 +150,44 @@ await Science.run({
 			}).throwsAsync()
 		}),
 	}),
+
+	"historical": (() => {
+		const setup = () => {
+			const strata = new Strata({
+				groceries: Strata.chronicle([] as string[]),
+			})
+			const groceries = strata.historical(64, s => s.groceries)
+			return {strata, groceries}
+		}
+
+		return Science.suite({
+			"get state": Science.test(async() => {
+				const {groceries} = setup()
+				expect(groceries.state.length).is(0)
+			}),
+
+			"mutate": Science.test(async() => {
+				const {groceries} = setup()
+				expect(groceries.state.length).is(0)
+				await groceries.mutate(s => s.push("hello"))
+				expect(groceries.state.length).is(1)
+			}),
+
+			"undo": Science.test(async() => {
+				const {groceries} = setup()
+				await groceries.mutate(s => s.push("hello"))
+				await groceries.undo()
+				expect(groceries.state.length).is(0)
+			}),
+
+			"redo": Science.test(async() => {
+				const {groceries} = setup()
+				await groceries.mutate(s => s.push("hello"))
+				await groceries.undo()
+				await groceries.redo()
+				expect(groceries.state.length).is(1)
+			}),
+		})
+	})(),
 })
 
