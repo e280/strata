@@ -57,18 +57,18 @@
   ```
 - you can make a substrata of another substrata
 
-### onMutation events
+### watch mutations
 - you can listen to global mutations on the strata
   ```ts
-  strata.onMutation(s => console.log(s.count))
+  strata.watch(s => console.log(s.count))
   ```
 - substrata listeners don't care about outside changes
   ```ts
-  snacks.onMutation(s => console.log(s.peanuts))
+  snacks.watch(s => console.log(s.peanuts))
   ```
-- onMutation returns a fn to stop listening
+- watch returns a fn to stop listening
   ```ts
-  const stop = strata.onMutation(s => console.log(s.count))
+  const stop = strata.watch(s => console.log(s.count))
   stop() // stop listening
   ```
 

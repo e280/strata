@@ -40,28 +40,28 @@ await Science.run({
 			expect(() => strata.state.x = 3).throws()
 		}),
 
-		"onMutation is published": Science.test(async() => {
+		"watch is published": Science.test(async() => {
 			const strata = new Strata({count: 0})
 			let mutationCount = 0
-			strata.onMutation.sub(() => {mutationCount++})
+			strata.watch.sub(() => {mutationCount++})
 			await strata.mutate(state => state.count++)
 			expect(mutationCount).is(1)
 		}),
 
-		"onMutation is debounced": Science.test(async() => {
+		"watch is debounced": Science.test(async() => {
 			const strata = new Strata({count: 0})
 			let mutationCount = 0
-			strata.onMutation.sub(() => {mutationCount++})
+			strata.watch.sub(() => {mutationCount++})
 			const promise = strata.mutate(state => state.count++)
 			expect(mutationCount).is(0)
 			await promise
 			expect(mutationCount).is(1)
 		}),
 
-		"onMutation is fired when array item is pushed": Science.test(async() => {
+		"watch is fired when array item is pushed": Science.test(async() => {
 			const strata = new Strata({items: ["hello", "world"]})
 			let mutationCount = 0
-			strata.onMutation.sub(() => {mutationCount++})
+			strata.watch.sub(() => {mutationCount++})
 			await strata.mutate(state => state.items.push("lol"))
 			expect(mutationCount).is(1)
 			expect(strata.state.items.length).is(3)
@@ -70,7 +70,7 @@ await Science.run({
 		"prevent mutation loops": Science.test(async() => {
 			const strata = new Strata({count: 0})
 			let mutationCount = 0
-			strata.onMutation.sub(async() => {
+			strata.watch.sub(async() => {
 				mutationCount++
 				if (mutationCount > 100)
 					return
@@ -131,12 +131,12 @@ await Science.run({
 			expect(b.state.c).is(103)
 		}),
 
-		"onMutation ignores outside mutations": Science.test(async() => {
+		"watch ignores outside mutations": Science.test(async() => {
 			const strata = new Strata({a: {x: 0}, b: {x: 0}})
 			const a = strata.substrata(s => s.a)
 			const b = strata.substrata(s => s.b)
 			let counted = 0
-			b.onMutation.sub(() => {counted++})
+			b.watch.sub(() => {counted++})
 			await a.mutate(a => a.x = 1)
 			expect(counted).is(0)
 		}),

@@ -14,14 +14,14 @@ export class Strata<S extends State> implements Stratum<S> {
 	})
 
 	options: Options
-	onMutation = sub<[state: S]>()
+	watch = sub<[state: S]>()
 
 	#mutable: S
 	#immutable: S
 	#mutationLock = 0
 	#dispatchMutation = debounce(0, async(state: S) => {
 		this.#mutationLock++
-		try { await this.onMutation.pub(state) }
+		try { await this.watch.pub(state) }
 		finally { this.#mutationLock-- }
 	})
 

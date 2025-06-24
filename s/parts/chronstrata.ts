@@ -26,8 +26,8 @@ export class Chronstrata<ParentState extends Substate, S extends Substate> imple
 		return this.#substrata.state.future.length
 	}
 
-	onMutation(fn: (state: S) => void) {
-		return this.#substrata.onMutation(chronicle => fn(chronicle.present))
+	watch(fn: (state: S) => void) {
+		return this.#substrata.watch(chronicle => fn(chronicle.present))
 	}
 
 	/** progress forwards in history */

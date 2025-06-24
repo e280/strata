@@ -5,10 +5,10 @@ import {Chronicle, Mutator, Options, Selector, Stratum, Substate} from "./types.
 
 export class Substrata<ParentState extends Substate, S extends Substate> implements Stratum<S> {
 	dispose: () => void
-	onMutation = sub<[state: S]>()
+	watch = sub<[state: S]>()
 
 	#immutable: S
-	#dispatchMutation = debounce(0, (state: S) => this.onMutation.pub(state))
+	#dispatchMutation = debounce(0, (state: S) => this.watch.pub(state))
 
 	constructor(
 			private parent: Stratum<ParentState>,
@@ -19,7 +19,7 @@ export class Substrata<ParentState extends Substate, S extends Substate> impleme
 		const state = this.selector(this.parent.state)
 		this.#immutable = deep.freeze(this.options.clone(state))
 
-		this.dispose = this.parent.onMutation(async parentState => {
+		this.dispose = this.parent.watch(async parentState => {
 			const oldState = this.#immutable
 			const newState = this.selector(parentState)
 			const isChanged = !deep.equal(newState, oldState)

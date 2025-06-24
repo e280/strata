@@ -13,7 +13,7 @@ export type Substate = {} | null | undefined
 
 export type Stratum<S extends Substate> = {
 	readonly state: S
-	onMutation(fn: (s: S) => void): () => void
+	watch(fn: (s: S) => void): () => void
 	mutate(mutator: Mutator<S>): Promise<S>
 	substrata<Sub extends Substate>(selector: Selector<S, Sub>): Substrata<S, Sub>
 }
