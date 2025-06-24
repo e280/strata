@@ -70,6 +70,14 @@ export class Chronstrata<ParentState extends Substate, S extends Substate> imple
 		})
 	}
 
+	/** wipe past and future snapshots */
+	async wipe() {
+		await this.#substrata.mutate(chronicle => {
+			chronicle.past = []
+			chronicle.future = []
+		})
+	}
+
 	substrata<Sub extends Substate>(selector: Selector<S, Sub>): Substrata<S, Sub> {
 		return new Substrata(this, selector, this.options)
 	}
