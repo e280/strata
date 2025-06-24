@@ -1,12 +1,14 @@
 
 import {debounce, deep, sub} from "@e280/stz"
 
+import {strataSetup} from "./utils/setup.js"
 import {Substrata} from "./substrata.js"
 import {Chronstrata} from "./chronstrata.js"
 import {processOptions} from "./utils/process-options.js"
 import {Chronicle, Mutator, Options, Selector, State, Stratum, Substate} from "./types.js"
 
 export class Strata<S extends State> implements Stratum<S> {
+	static setup = strataSetup
 	static chronicle = <S extends Substate>(state: S): Chronicle<S> => ({
 		present: state,
 		past: [],

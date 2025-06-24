@@ -76,6 +76,31 @@
 
 ## only high-class discerning aristocrats permitted beyond this point
 
+### `Strata.setup` for localStorage persistence etc
+- simple setup
+  ```ts
+  const {strata} = await Strata.setup({
+    version: 1, // 👈 bump whenever your change state schema!
+    initialState: {count: 0},
+  })
+  ```
+- it's compatible with [`@e280/kv`](https://github.com/e280/kv)
+  ```ts
+  import {Kv, StorageDriver} from "@e280/kv"
+
+  const kv = new Kv(new StorageDriver())
+  const store = kv.store<any>("strata")
+
+  const {strata} = await Strata.setup({
+    version: 1,
+    initialState: {count: 0},
+    persistence: {
+      store,
+      onChange: StorageDriver.onStorageEvent,
+    },
+  })
+  ```
+
 ### `Chronstrata` for undo/redo history
 - first, put a `Chronicle` into your state tree
   ```ts

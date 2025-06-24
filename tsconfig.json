@@ -4,7 +4,7 @@
 		"rootDir": "s",
 		"outDir": "x",
 		"target": "es2023",
-		"lib": ["es2023"],
+		"lib": ["es2023", "dom"],
 		"module": "nodenext",
 		"moduleResolution": "nodenext",
 		"experimentalDecorators": true,
