@@ -19,19 +19,9 @@ export class Strata<S extends State> implements Stratum<S> {
 	#mutable: S
 	#immutable: S
 	#mutationLock = 0
-	#dispatchMutation = debounce(0, async(state: S) => {
-		this.#mutationLock++
-		try { await this.watch.pub(state) }
-		finally { this.#mutationLock-- }
-	})
 
 	constructor(state: S, options: Partial<Options> = {}) {
 		this.options = processOptions(options)
-		this.#mutable = state
-		this.#immutable = deep.freeze(this.options.clone(state))
-	}
-
-	#updateState(state: S) {
 		this.#mutable = state
 		this.#immutable = deep.freeze(this.options.clone(state))
 	}
@@ -49,12 +39,14 @@ export class Strata<S extends State> implements Stratum<S> {
 		finally { this.#mutationLock-- }
 		const newState = this.#mutable
 		const isChanged = !deep.equal(newState, oldState)
-		if (isChanged) {
-			this.#updateState(newState)
-			const immutable = this.state
-			await this.#dispatchMutation(immutable)
-		}
+		if (isChanged) await this.overwrite(newState)
 		return this.#immutable
+	}
+
+	async overwrite(state: S) {
+		this.#mutable = state
+		this.#immutable = deep.freeze(this.options.clone(state))
+		await this.#dispatchMutation()
 	}
 
 	substrata<Sub extends Substate>(selector: Selector<S, Sub>): Substrata<S, Sub> {
@@ -67,5 +59,11 @@ export class Strata<S extends State> implements Stratum<S> {
 		) {
 		return new Chronstrata(limit, this, selector, this.options)
 	}
+
+	#dispatchMutation = debounce(0, async() => {
+		this.#mutationLock++
+		try { await this.watch.pub(this.#immutable) }
+		finally { this.#mutationLock-- }
+	})
 }
 
