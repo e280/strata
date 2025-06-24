@@ -5,14 +5,14 @@
 - 📦 `npm install @e280/strata`
 - single-source-of-truth state tree
 - immutable except for `mutate(fn)` calls
-- straightforward with no spooky proxy magic
+- no spooky-dookie proxy magic — just god's honest javascript
 - undo/redo history, cross-tab sync, localStorage persistence
 
 <br/>
 
-## solid state management
+## get in loser, we're managing state
 
-### establish a strata with some state
+### `Strata` is your app's state tree root
 - better stick to json-friendly serializable data
   ```ts
   import {Strata} from "@e280/strata"
@@ -21,7 +21,7 @@
     count: 0,
     snacks: {
       peanuts: 8,
-      bag: ["popcorn", "chocolate"],
+      bag: ["popcorn", "butter"],
     },
   })
 
@@ -29,18 +29,18 @@
   strata.state.snacks.peanuts // 8
   ```
 
-### how mutations work
+### formal mutations to change state
 - ⛔ informal mutations are denied
   ```ts
   strata.state.count++ // error is thrown
   ```
-- ✅ formal mutation is allowed
+- ✅ formal mutations are allowed
   ```ts
   await strata.mutate(s => s.count++)
   ```
 
-### substrata and selectors
-- a substrata is a view into a subset of the state tree
+### `Substrata` is a view into a subtree
+- it's a lens, make lots of them, pass 'em around your app
   ```ts
   const snacks = strata.substrata(s => s.snacks)
   ```
@@ -48,22 +48,21 @@
   ```ts
   await snacks.mutate(s => s.peanuts++)
   ```
-- array mutations are cool, actually
+- array mutations are unironically based, actually
   ```ts
-  await snacks.mutate(s => s.bag.push("butter"))
+  await snacks.mutate(s => s.bag.push("salt"))
   ```
+- you can make a substrata of another substrata
 
 ### onMutation events
 - you can listen to global mutations on the strata
   ```ts
   strata.onMutation(s => console.log(s.count))
   ```
-
 - substrata listeners don't care about outside changes
   ```ts
   snacks.onMutation(s => console.log(s.peanuts))
   ```
-
 - onMutation returns a fn to stop listening
   ```ts
   const stop = strata.onMutation(s => console.log(s.count))
@@ -72,22 +71,25 @@
 
 <br/>
 
-## fancy state management for fancy people
+## fancy state management for cultivated high-society connoisseurs
 
-### chronstrata for undo/redo history
-- put a `Chronicle` into your state tree
+### `Chronstrata` for undo/redo history
+- first, put a `Chronicle` into your state tree
   ```ts
   const strata = new Strata({
     count: 0,
     snacks: Strata.chronicle({
       peanuts: 8,
-      bag: ["popcorn", "chocolate"],
+      bag: ["popcorn", "butter"],
     }),
   })
   ```
-- access the chronicle using the `Chronstrata` helper
+  - *big-brain moment:* the whole chronicle *itself* is stored in the state.. serializable.. think persistence — user can close their project, reopen, and their undo/redo history is still chillin' — *brat girl summer*
+- second, make a `Chronstrata` which is like a substrata
   ```ts
   const snacks = strata.chronstrata(64, s => s.snacks)
+    //                               \
+    //               how many past snapshots to store
   ```
 - mutations will advance history (undoable/redoable)
   ```ts
@@ -99,7 +101,22 @@
   await snacks.redo()
     // forward to 101 peanuts
   ```
-- chronstrata can have its own substrata, and all such substrata mutations will advance history (undoable/redoable)
+- you can check how many undoable or redoable steps are available
+  ```ts
+  snacks.undoable // 0
+
+  await snacks.mutate(s => s.peanuts = 101)
+  await snacks.mutate(s => s.peanuts = 102)
+  await snacks.mutate(s => s.peanuts = 103)
+
+  snacks.undoable // 3
+
+  await snacks.undo()
+
+  snacks.undoable // 2
+  snacks.redoable // 1
+  ```
+- chronstrata can have its own substrata — all their mutations advance history
 
 <br/>
 
