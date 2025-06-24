@@ -1,4 +1,6 @@
 
+![](https://i.imgur.com/h7FohWa.jpeg)
+
 # ⛏️ strata
 
 **my 10th state management library, probably**
