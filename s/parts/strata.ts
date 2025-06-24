@@ -11,6 +11,7 @@ export class Strata<S extends State> {
 	#options: Options
 	#mutable: S
 	#immutable: S
+	#mutationLock = false
 	#dispatchMutation = debounce(0, (state: S) => this.onMutation.pub(state))
 
 	constructor(state: S, options: Partial<Options> = {}) {
@@ -34,7 +35,11 @@ export class Strata<S extends State> {
 
 	async mutate(mutator: Mutator<S>) {
 		const oldState = this.#options.clone(this.#mutable)
+		if (this.#mutationLock)
+			throw new Error("nested mutations are forbidden")
+		this.#mutationLock = true
 		mutator(this.#mutable)
+		this.#mutationLock = false
 		const newState = this.#mutable
 		const isChanged = !deep.equal(newState, oldState)
 		if (isChanged) {

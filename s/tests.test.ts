@@ -23,6 +23,17 @@ await Science.run({
 			expect(strata.state.count).is(2)
 		}),
 
+		"forbidden mutation nesting": Science.test(async() => {
+			const strata = new Strata({count: 0})
+			await expect(async() => {
+				let promise!: Promise<any>
+				await strata.mutate(() => {
+					promise = strata.mutate(() => {})
+				})
+				await promise
+			}).throwsAsync()
+		}),
+
 		"state after mutation is frozen": Science.test(async () => {
 			const strata = new Strata({x: 1})
 			await strata.mutate(s => { s.x = 2 })
@@ -113,6 +124,30 @@ await Science.run({
 			b.onMutation.sub(() => {counted++})
 			await a.mutate(a => a.x = 1)
 			expect(counted).is(0)
+		}),
+
+		"forbid submutation in mutation": Science.test(async() => {
+			const strata = new Strata({a: {b: 0}})
+			const a = strata.substrata(s => s.a)
+			await expect(async() => {
+				let promise!: Promise<any>
+				await strata.mutate(() => {
+					promise = a.mutate(() => {})
+				})
+				await promise
+			}).throwsAsync()
+		}),
+
+		"forbid mutation in submutation": Science.test(async() => {
+			const strata = new Strata({a: {b: 0}})
+			const a = strata.substrata(s => s.a)
+			await expect(async() => {
+				let promise!: Promise<any>
+				await a.mutate(() => {
+					promise = strata.mutate(() => {})
+				})
+				await promise
+			}).throwsAsync()
 		}),
 	}),
 })
