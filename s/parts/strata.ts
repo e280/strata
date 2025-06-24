@@ -13,9 +13,9 @@ export class Strata<S extends State> implements Stratum<S> {
 		future: [],
 	})
 
+	options: Options
 	onMutation = sub<[state: S]>()
 
-	options: Options
 	#mutable: S
 	#immutable: S
 	#mutationLock = 0
