@@ -63,7 +63,7 @@ export class Historical<ParentState extends Substate, S extends Substate> implem
 			const snapshots = chronicle.future.slice(0, n)
 			if (snapshots.length >= n) {
 				const oldPresent = chronicle.present
-				chronicle.present = snapshots.pop()!
+				chronicle.present = snapshots.shift()!
 				chronicle.past.push(oldPresent, ...snapshots)
 				chronicle.future = chronicle.future.slice(n)
 			}

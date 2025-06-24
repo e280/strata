@@ -154,38 +154,137 @@ await Science.run({
 	"historical": (() => {
 		const setup = () => {
 			const strata = new Strata({
-				groceries: Strata.chronicle([] as string[]),
+				chron: Strata.chronicle({count: 0}),
 			})
-			const groceries = strata.historical(64, s => s.groceries)
-			return {strata, groceries}
+			const chron = strata.historical(64, s => s.chron)
+			return {strata, chron}
 		}
 
 		return Science.suite({
 			"get state": Science.test(async() => {
-				const {groceries} = setup()
-				expect(groceries.state.length).is(0)
+				const {chron} = setup()
+				expect(chron.state.count).is(0)
 			}),
 
 			"mutate": Science.test(async() => {
-				const {groceries} = setup()
-				expect(groceries.state.length).is(0)
-				await groceries.mutate(s => s.push("hello"))
-				expect(groceries.state.length).is(1)
+				const {chron} = setup()
+				expect(chron.state.count).is(0)
+				await chron.mutate(s => s.count++)
+				expect(chron.state.count).is(1)
+				await chron.mutate(s => s.count++)
+				expect(chron.state.count).is(2)
+			}),
+
+			"undoable/redoable": Science.test(async() => {
+				const {chron} = setup()
+				expect(chron.undoable).is(0)
+				expect(chron.redoable).is(0)
+				expect(chron.state.count).is(0)
+				await chron.mutate(s => s.count++)
+				expect(chron.undoable).is(1)
+				await chron.mutate(s => s.count++)
+				expect(chron.undoable).is(2)
+				await chron.undo()
+				expect(chron.undoable).is(1)
+				expect(chron.redoable).is(1)
+				await chron.undo()
+				expect(chron.undoable).is(0)
+				expect(chron.redoable).is(2)
+				await chron.redo()
+				expect(chron.undoable).is(1)
+				expect(chron.redoable).is(1)
 			}),
 
 			"undo": Science.test(async() => {
-				const {groceries} = setup()
-				await groceries.mutate(s => s.push("hello"))
-				await groceries.undo()
-				expect(groceries.state.length).is(0)
+				const {chron} = setup()
+				await chron.mutate(s => s.count++)
+				await chron.undo()
+				expect(chron.state.count).is(0)
 			}),
 
 			"redo": Science.test(async() => {
-				const {groceries} = setup()
-				await groceries.mutate(s => s.push("hello"))
-				await groceries.undo()
-				await groceries.redo()
-				expect(groceries.state.length).is(1)
+				const {chron} = setup()
+				await chron.mutate(s => s.count++)
+				await chron.undo()
+				expect(chron.state.count).is(0)
+				await chron.redo()
+				expect(chron.state.count).is(1)
+			}),
+
+			"undo/redo well ordered": Science.test(async() => {
+				const {chron} = setup()
+				await chron.mutate(s => s.count++)
+				await chron.mutate(s => s.count++)
+				await chron.mutate(s => s.count++)
+				expect(chron.state.count).is(3)
+
+				await chron.undo()
+				expect(chron.state.count).is(2)
+
+				await chron.undo()
+				expect(chron.state.count).is(1)
+
+				await chron.redo()
+				expect(chron.state.count).is(2)
+
+				await chron.redo()
+				expect(chron.state.count).is(3)
+
+				await chron.undo()
+				expect(chron.state.count).is(2)
+
+				await chron.undo()
+				expect(chron.state.count).is(1)
+
+				await chron.undo()
+				expect(chron.state.count).is(0)
+			}),
+
+			"undo nothing does nothing": Science.test(async() => {
+				const {chron} = setup()
+				await chron.undo()
+				expect(chron.state.count).is(0)
+			}),
+
+			"redo nothing does nothing": Science.test(async() => {
+				const {chron} = setup()
+				await chron.redo()
+				expect(chron.state.count).is(0)
+			}),
+
+			"undo 2x": Science.test(async() => {
+				const {chron} = setup()
+				await chron.mutate(s => s.count++)
+				await chron.mutate(s => s.count++)
+				expect(chron.state.count).is(2)
+				await chron.undo(2)
+				expect(chron.state.count).is(0)
+			}),
+
+			"redo 2x": Science.test(async() => {
+				const {chron} = setup()
+				await chron.mutate(s => s.count++)
+				await chron.mutate(s => s.count++)
+				expect(chron.state.count).is(2)
+				await chron.undo(2)
+				expect(chron.state.count).is(0)
+				await chron.redo(2)
+				expect(chron.state.count).is(2)
+			}),
+
+			"substrata mutations are tracked": Science.test(async() => {
+				const strata = new Strata({
+					chron: Strata.chronicle({
+						group: {count: 0},
+					}),
+				})
+				const chron = strata.historical(64, s => s.chron)
+				const group = chron.substrata(s => s.group)
+				expect(group.state.count).is(0)
+				await group.mutate(g => g.count = 101)
+				expect(group.state.count).is(101)
+				await chron.undo()
+				expect(group.state.count).is(0)
 			}),
 		})
 	})(),
