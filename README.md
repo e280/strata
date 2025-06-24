@@ -5,6 +5,7 @@
 - 📦 `npm install @e280/strata`
 - single-source-of-truth state tree
 - immutable except for `mutate(fn)` calls
+- straightforward with no spooky proxy magic
 - undo/redo history, cross-tab sync, localStorage persistence
 
 ## good state management
