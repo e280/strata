@@ -131,16 +131,6 @@
   ```
 - you can check how many undoable or redoable steps are available
   ```ts
-  snacks.undoable // 0
-
-  await snacks.mutate(s => s.peanuts = 101)
-  await snacks.mutate(s => s.peanuts = 102)
-  await snacks.mutate(s => s.peanuts = 103)
-
-  snacks.undoable // 3
-
-  await snacks.undo()
-
   snacks.undoable // 2
   snacks.redoable // 1
   ```
