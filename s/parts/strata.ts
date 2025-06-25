@@ -51,13 +51,13 @@ export class Strata<S extends State> implements Stratum<S> {
 		await this.#dispatchMutation()
 	}
 
-	substrata<Sub extends Substate>(selector: Selector<S, Sub>): Substrata<S, Sub> {
+	substrata<Sub extends Substate>(selector: Selector<Sub, S>): Substrata<Sub, S> {
 		return new Substrata(this, selector, this.options)
 	}
 
 	chronstrata<Sub extends Substate>(
 			limit: number,
-			selector: Selector<S, Chronicle<Sub>>,
+			selector: Selector<Chronicle<Sub>, S>,
 		) {
 		return new Chronstrata(limit, this, selector, this.options)
 	}

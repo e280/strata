@@ -3,7 +3,7 @@ import {debounce, deep, sub} from "@e280/stz"
 import {Chronstrata} from "./chronstrata.js"
 import {Chronicle, Mutator, Options, Selector, Stratum, Substate} from "./types.js"
 
-export class Substrata<ParentState extends Substate, S extends Substate> implements Stratum<S> {
+export class Substrata<S extends Substate, ParentState extends Substate = any> implements Stratum<S> {
 	dispose: () => void
 	watch = sub<[state: S]>()
 
@@ -12,7 +12,7 @@ export class Substrata<ParentState extends Substate, S extends Substate> impleme
 
 	constructor(
 			private parent: Stratum<ParentState>,
-			private selector: Selector<ParentState, S>,
+			private selector: Selector<S, ParentState>,
 			private options: Options,
 		) {
 
@@ -44,13 +44,13 @@ export class Substrata<ParentState extends Substate, S extends Substate> impleme
 		return this.#immutable
 	}
 
-	substrata<Sub extends Substate>(selector: Selector<S, Sub>): Substrata<S, Sub> {
+	substrata<Sub extends Substate>(selector: Selector<Sub, S>): Substrata<Sub, S> {
 		return new Substrata(this, selector, this.options)
 	}
 
 	chronstrata<Sub extends Substate>(
 			limit: number,
-			selector: Selector<S, Chronicle<Sub>>,
+			selector: Selector<Chronicle<Sub>, S>,
 		) {
 		return new Chronstrata(limit, this, selector, this.options)
 	}

@@ -5,7 +5,7 @@ export type Options = {
 	clone: <X>(x: X) => X
 }
 
-export type Selector<S, Sub> = (state: S) => Sub
+export type Selector<Sub, S> = (state: S) => Sub
 export type Mutator<S> = (state: S) => void
 
 export type State = {}
@@ -20,7 +20,7 @@ export type Stratum<S extends Substate> = {
 	readonly state: S
 	watch(fn: (s: S) => void): () => void
 	mutate(mutator: Mutator<S>): Promise<S>
-	substrata<Sub extends Substate>(selector: Selector<S, Sub>): Substrata<S, Sub>
+	substrata<Sub extends Substate>(selector: Selector<Sub, S>): Substrata<Sub, S>
 }
 
 export type SetupOptions<S extends State> = {

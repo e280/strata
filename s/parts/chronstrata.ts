@@ -2,13 +2,13 @@
 import {Substrata} from "./substrata.js"
 import {Chronicle, Mutator, Options, Selector, Stratum, Substate} from "./types.js"
 
-export class Chronstrata<ParentState extends Substate, S extends Substate> implements Stratum<S> {
-	#substrata: Substrata<ParentState, Chronicle<S>>
+export class Chronstrata<S extends Substate, ParentState extends Substate = any> implements Stratum<S> {
+	#substrata: Substrata<Chronicle<S>, ParentState>
 
 	constructor(
 			public limit: number,
 			public parent: Stratum<ParentState>,
-			public selector: Selector<ParentState, Chronicle<S>>,
+			public selector: Selector<Chronicle<S>, ParentState>,
 			public options: Options,
 		) {
 		this.#substrata = parent.substrata(selector)
@@ -77,7 +77,7 @@ export class Chronstrata<ParentState extends Substate, S extends Substate> imple
 		})
 	}
 
-	substrata<Sub extends Substate>(selector: Selector<S, Sub>): Substrata<S, Sub> {
+	substrata<Sub extends Substate>(selector: Selector<Sub, S>): Substrata<Sub, S> {
 		return new Substrata(this, selector, this.options)
 	}
 }
