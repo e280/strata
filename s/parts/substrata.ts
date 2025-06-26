@@ -1,5 +1,6 @@
 
-import {debounce, deep, sub} from "@e280/stz"
+import {debounce, deep, sub, tracker} from "@e280/stz"
+
 import {Chronstrata} from "./chronstrata.js"
 import {Chronicle, Mutator, Options, Selector, Stratum, Substate} from "./types.js"
 
@@ -8,7 +9,10 @@ export class Substrata<S extends Substate, ParentState extends Substate = any> i
 	watch = sub<[state: S]>()
 
 	#immutable: S
-	#dispatchMutation = debounce(0, (state: S) => this.watch.pub(state))
+	#dispatchMutation = debounce(0, async(state: S) => {
+		await this.watch.pub(state)
+		tracker.change(this)
+	})
 
 	constructor(
 			private parent: Stratum<ParentState>,
@@ -36,6 +40,7 @@ export class Substrata<S extends Substate, ParentState extends Substate = any> i
 	}
 
 	get state(): S {
+		tracker.see(this)
 		return this.#immutable
 	}
 

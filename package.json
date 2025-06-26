@@ -41,6 +41,6 @@
 		"url": "https://github.com/e280/strata/issues"
 	},
 	"dependencies": {
-		"@e280/stz": "^0.0.0-24"
+		"@e280/stz": "^0.0.0-27"
 	}
 }

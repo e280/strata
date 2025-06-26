@@ -1,8 +1,8 @@
 
-import {debounce, deep, sub} from "@e280/stz"
+import {debounce, deep, sub, tracker} from "@e280/stz"
 
-import {strataSetup} from "./utils/setup.js"
 import {Substrata} from "./substrata.js"
+import {strataSetup} from "./utils/setup.js"
 import {Chronstrata} from "./chronstrata.js"
 import {processOptions} from "./utils/process-options.js"
 import {Chronicle, Mutator, Options, Selector, State, Stratum, Substate} from "./types.js"
@@ -29,6 +29,7 @@ export class Strata<S extends State> implements Stratum<S> {
 	}
 
 	get state() {
+		tracker.see(this)
 		return this.#immutable
 	}
 
@@ -66,6 +67,7 @@ export class Strata<S extends State> implements Stratum<S> {
 		this.#mutationLock++
 		try { await this.watch.pub(this.#immutable) }
 		finally { this.#mutationLock-- }
+		tracker.change(this)
 	})
 }
 
