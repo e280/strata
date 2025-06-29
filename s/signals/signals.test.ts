@@ -49,6 +49,17 @@ export default Science.suite({
 		expect(doubled).is(6)
 	}),
 
+	"signal set promise waits for effects": test(async() => {
+		const count = signal(1)
+		let doubled = 0
+
+		effect(() => doubled = count.value * 2)
+		expect(doubled).is(2)
+
+		await count.set(3)
+		expect(doubled).is(6)
+	}),
+
 	"effect only runs on change": test(async() => {
 		const sig = signal("a")
 		let runs = 0
