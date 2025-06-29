@@ -1,27 +1,44 @@
 
-import {Signal} from "./signal.js"
 import {Effect} from "./effect.js"
+import {PlainSignal} from "./signal.js"
+
+export type Computed<V> = {(): V} & PlainComputed<V>
 
 export function computed<V>(fn: () => V) {
-	return new Computed<V>(fn)
+	const plain = new PlainComputed<V>(fn)
+
+	function f(): V {
+		return plain.value
+	}
+
+	Object.setPrototypeOf(f, PlainComputed.prototype)
+	Object.assign(f, plain)
+
+	const f2 = f as Computed<V>
+	PlainComputed.init(f2)
+
+	return f2
 }
 
-export class Computed<V> extends Signal<V> {
-	#dirty = false
-	#formula: () => V
-	#effect: Effect<V>
+export class PlainComputed<V> extends PlainSignal<V> {
+	static init<V>(self: Computed<V>) {
+		self._effect = new Effect(self._formula, () => self._dirty = true)
+		self.sneak = self._effect.initial
+	}
+
+	_dirty = false
+	_formula: () => V
+	_effect!: Effect<V>
 
 	constructor(formula: () => V) {
-		const effect = new Effect(formula, () => this.#dirty = true)
-		super(effect.initial)
-		this.#effect = effect
-		this.#formula = formula
+		super(undefined as any)
+		this._formula = formula
 	}
 
 	get value() {
-		if (this.#dirty) {
-			this.#dirty = false
-			super.value = this.#formula()
+		if (this._dirty) {
+			this._dirty = false
+			super.value = this._formula()
 		}
 		return super.value
 	}
@@ -31,11 +48,11 @@ export class Computed<V> extends Signal<V> {
 	}
 
 	get wait() {
-		return this.#effect.wait
+		return this._effect.wait
 	}
 
 	dispose() {
-		this.#effect.dispose()
+		this._effect.dispose()
 		super.dispose()
 	}
 }

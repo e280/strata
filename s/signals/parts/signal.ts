@@ -2,11 +2,30 @@
 import {sub} from "@e280/stz"
 import {tracker} from "../../tracker/tracker.js"
 
-export function signal<V>(value: V) {
-	return new Signal<V>(value)
+export type Signal<V> = {
+	(): V
+	(v: V): Promise<void>
+	(v?: V): V | Promise<void>
+} & PlainSignal<V>
+
+export function signal<V>(v: V) {
+	const signal = new PlainSignal<V>(v)
+
+	function f(): V
+	function f(v: V): Promise<void>
+	function f(v?: V): V | Promise<void> {
+		return (v !== undefined)
+			? signal.set(v)
+			: signal.value
+	}
+
+	Object.setPrototypeOf(f, PlainSignal.prototype)
+	Object.assign(f, signal)
+
+	return f as Signal<V>
 }
 
-export class Signal<V> {
+export class PlainSignal<V> {
 	on = sub<[V]>()
 	published: Promise<V>
 

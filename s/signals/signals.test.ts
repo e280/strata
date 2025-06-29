@@ -17,6 +17,24 @@ export default Science.suite({
 		expect(count.value).is(5)
 	}),
 
+	"signal fn syntax": test(async() => {
+		const count = signal(0)
+		expect(count()).is(0)
+
+		count(count() + 1)
+		expect(count()).is(1)
+
+		count(5)
+		expect(count()).is(5)
+	}),
+
+	"signal syntax interop": test(async() => {
+		const count = signal(0)
+
+		count.value = 1
+		expect(count()).is(1)
+	}),
+
 	"effect tracks signal changes": test(async() => {
 		const count = signal(1)
 		let doubled = 0
