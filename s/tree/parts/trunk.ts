@@ -57,7 +57,7 @@ export class Trunk<S extends Treestate> implements Tree<S> {
 		return new Branch(this, selector, this.options)
 	}
 
-	chronstrata<Sub extends Branchstate>(
+	chronobranch<Sub extends Branchstate>(
 			limit: number,
 			selector: Selector<Chronicle<Sub>, S>,
 		) {

@@ -54,7 +54,7 @@ export class Branch<S extends Branchstate, ParentState extends Branchstate = any
 		return new Branch(this, selector, this.options)
 	}
 
-	chronstrata<Sub extends Branchstate>(
+	chronobranch<Sub extends Branchstate>(
 			limit: number,
 			selector: Selector<Chronicle<Sub>, S>,
 		) {

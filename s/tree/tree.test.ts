@@ -171,7 +171,7 @@ export default Science.suite({
 			const strata = new Trunk({
 				chron: Trunk.chronicle({count: 0}),
 			})
-			const chron = strata.chronstrata(64, s => s.chron)
+			const chron = strata.chronobranch(64, s => s.chron)
 			return {strata, chron}
 		}
 
@@ -293,7 +293,7 @@ export default Science.suite({
 						group: {count: 0},
 					}),
 				})
-				const chron = strata.chronstrata(64, s => s.chron)
+				const chron = strata.chronobranch(64, s => s.chron)
 				const group = chron.branch(s => s.group)
 				expect(group.state.count).is(0)
 				await group.mutate(g => g.count = 101)
