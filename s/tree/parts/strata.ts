@@ -1,9 +1,10 @@
 
-import {debounce, deep, sub, tracker} from "@e280/stz"
+import {debounce, deep, sub} from "@e280/stz"
 
 import {Substrata} from "./substrata.js"
 import {strataSetup} from "./utils/setup.js"
 import {Chronstrata} from "./chronstrata.js"
+import {tracker} from "../../tracker/tracker.js"
 import {processOptions} from "./utils/process-options.js"
 import {Chronicle, Mutator, Options, Selector, State, Stratum, Substate} from "./types.js"
 

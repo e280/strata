@@ -1,7 +1,8 @@
 
-import {debounce, deep, sub, tracker} from "@e280/stz"
+import {debounce, deep, sub} from "@e280/stz"
 
 import {Chronstrata} from "./chronstrata.js"
+import {tracker} from "../../tracker/tracker.js"
 import {Chronicle, Mutator, Options, Selector, Stratum, Substate} from "./types.js"
 
 export class Substrata<S extends Substate, ParentState extends Substate = any> implements Stratum<S> {
