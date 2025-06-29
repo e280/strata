@@ -42,25 +42,49 @@
   ```
   - components/views rerender when relevant signals change  
     (if your component/view library is cool an integrates with `tracker`)
+  - three ways to get it
+    ```ts
+    count() // 1
+    count.get() // 1
+    count.value // 1
+    ```
+  - three ways to set it
+    ```ts
+    await count(2)
+    await count.set(2)
+    count.value = 2
+    ```
+  - and yes, when you `await` set, all downstream effects are finished
 - **effects re-run when relevant signals change**
   ```ts
   effect(() => console.log(count.value))
-    // 1
+    // 2
 
   count.value++
-    // 2
+    // 3
   ```
 - **computed signals are super lazy**
   ```ts
-  computed(() => count.value * 10)
+  const tenly = computed(() => count.value * 10)
 
-  console.log(computed.value)
-    // 20
+  console.log(tenly.value)
+    // 30
 
   count.value++
 
-  console.log(computed.value)
-    // 30
+  console.log(tenly.value)
+    // 40
+  ```
+- **computed.eager is not lazy**
+  ```ts
+  const beaver = computed.eager(() => count.value * 10)
+
+  // you can get notified on changes because it isn't lazy
+  beaver.on(v => console.log(v))
+
+  count++
+
+  // 50
   ```
 
 <br/>
