@@ -18,6 +18,7 @@ export type TrackableItem = object | symbol
 export class Tracker<Item extends TrackableItem = any> {
 	#seeables: Set<Item>[] = []
 	#changeables = new WeakMap<Item, Sub>()
+	#changeStack: Set<Promise<void>>[] = []
 
 	/** indicate item was accessed */
 	see(item: Item) {
@@ -33,13 +34,21 @@ export class Tracker<Item extends TrackableItem = any> {
 	}
 
 	/** indicate item was changed */
-	change(item: Item) {
-		this.#guaranteeChangeable(item).pub()
+	async change(item: Item) {
+		const prom = this.#guaranteeChangeable(item).pub()
+		this.#changeStack.at(-1)?.add(prom)
+		return prom
 	}
 
 	/** respond to changes by calling fn */
-	changed(item: Item, fn: () => void) {
-		return this.#guaranteeChangeable(item)(fn)
+	changed(item: Item, fn: () => Promise<void>) {
+		return this.#guaranteeChangeable(item)(async () => {
+			const collected = new Set<Promise<void>>()
+			this.#changeStack.push(collected)
+			collected.add(fn())
+			await Promise.all(collected)
+			this.#changeStack.pop()
+		})
 	}
 
 	#guaranteeChangeable(item: Item) {
@@ -52,7 +61,9 @@ export class Tracker<Item extends TrackableItem = any> {
 	}
 }
 
-const key = Symbol.for("e280.tracker")
+// export const tracker = new Tracker()
+
+const key = Symbol.for("e280.tracker.v2")
 
 /** standard global tracker for integrations */
 export const tracker: Tracker = (globalThis as any)[key] ??= new Tracker()

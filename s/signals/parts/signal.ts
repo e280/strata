@@ -20,14 +20,20 @@ export class Signal<V> {
 	}
 
 	set value(v: V) {
-		if (v !== this.sneak)
-			this.publish(v)
+		this.set(v)
 	}
 
-	publish(v = this.value) {
+	async set(v: V) {
+		if (v !== this.sneak)
+			await this.publish(v)
+	}
+
+	async publish(v = this.value) {
 		this.sneak = v
-		tracker.change(this)
-		this.published = this.on.pub(v).then(() => v)
+		await Promise.all([
+			tracker.change(this),
+			this.published = this.on.pub(v).then(() => v),
+		])
 	}
 
 	dispose() {

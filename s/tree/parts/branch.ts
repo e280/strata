@@ -12,7 +12,7 @@ export class Branch<S extends Branchstate, ParentState extends Branchstate = any
 	#immutable: S
 	#dispatchMutation = debounce(0, async(state: S) => {
 		await this.watch.pub(state)
-		tracker.change(this)
+		await tracker.change(this)
 	})
 
 	constructor(

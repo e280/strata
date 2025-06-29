@@ -68,7 +68,7 @@ export class Trunk<S extends Treestate> implements Tree<S> {
 		this.#mutationLock++
 		try { await this.watch.pub(this.#immutable) }
 		finally { this.#mutationLock-- }
-		tracker.change(this)
+		await tracker.change(this)
 	})
 }
 
