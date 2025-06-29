@@ -1,11 +1,11 @@
 
 import {debounce} from "@e280/stz"
 
-import {Strata} from "../strata.js"
-import {State, SetupOptions} from "../types.js"
+import {Trunk} from "../trunk.js"
+import {Treestate, SetupOptions} from "../types.js"
 import {localPersistence} from "../persistence.js"
 
-export async function strataSetup<S extends State>(options: SetupOptions<S>) {
+export async function trunkSetup<S extends Treestate>(options: SetupOptions<S>) {
 	const {
 		version,
 		initialState,
@@ -13,7 +13,7 @@ export async function strataSetup<S extends State>(options: SetupOptions<S>) {
 		persistence = localPersistence("strata"),
 	} = options
 
-	const strata = new Strata<S>(initialState)
+	const strata = new Trunk<S>(initialState)
 
 	async function load() {
 		const pickle = await persistence.store.get()

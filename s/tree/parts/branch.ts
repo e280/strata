@@ -1,11 +1,11 @@
 
 import {debounce, deep, sub} from "@e280/stz"
 
-import {Chronstrata} from "./chronstrata.js"
+import {Chronobranch} from "./chronobranch.js"
 import {tracker} from "../../tracker/tracker.js"
-import {Chronicle, Mutator, Options, Selector, Stratum, Substate} from "./types.js"
+import {Chronicle, Mutator, Options, Selector, Tree, Branchstate} from "./types.js"
 
-export class Substrata<S extends Substate, ParentState extends Substate = any> implements Stratum<S> {
+export class Branch<S extends Branchstate, ParentState extends Branchstate = any> implements Tree<S> {
 	dispose: () => void
 	watch = sub<[state: S]>()
 
@@ -16,7 +16,7 @@ export class Substrata<S extends Substate, ParentState extends Substate = any> i
 	})
 
 	constructor(
-			private parent: Stratum<ParentState>,
+			private parent: Tree<ParentState>,
 			private selector: Selector<S, ParentState>,
 			private options: Options,
 		) {
@@ -50,15 +50,15 @@ export class Substrata<S extends Substate, ParentState extends Substate = any> i
 		return this.#immutable
 	}
 
-	substrata<Sub extends Substate>(selector: Selector<Sub, S>): Substrata<Sub, S> {
-		return new Substrata(this, selector, this.options)
+	branch<Sub extends Branchstate>(selector: Selector<Sub, S>): Branch<Sub, S> {
+		return new Branch(this, selector, this.options)
 	}
 
-	chronstrata<Sub extends Substate>(
+	chronstrata<Sub extends Branchstate>(
 			limit: number,
 			selector: Selector<Chronicle<Sub>, S>,
 		) {
-		return new Chronstrata(limit, this, selector, this.options)
+		return new Chronobranch(limit, this, selector, this.options)
 	}
 }
 

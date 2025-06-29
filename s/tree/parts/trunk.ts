@@ -1,16 +1,16 @@
 
 import {debounce, deep, sub} from "@e280/stz"
 
-import {Substrata} from "./substrata.js"
-import {strataSetup} from "./utils/setup.js"
-import {Chronstrata} from "./chronstrata.js"
+import {Branch} from "./branch.js"
+import {trunkSetup} from "./utils/setup.js"
+import {Chronobranch} from "./chronobranch.js"
 import {tracker} from "../../tracker/tracker.js"
 import {processOptions} from "./utils/process-options.js"
-import {Chronicle, Mutator, Options, Selector, State, Stratum, Substate} from "./types.js"
+import {Chronicle, Mutator, Options, Selector, Treestate, Tree, Branchstate} from "./types.js"
 
-export class Strata<S extends State> implements Stratum<S> {
-	static setup = strataSetup
-	static chronicle = <S extends Substate>(state: S): Chronicle<S> => ({
+export class Trunk<S extends Treestate> implements Tree<S> {
+	static setup = trunkSetup
+	static chronicle = <S extends Branchstate>(state: S): Chronicle<S> => ({
 		present: state,
 		past: [],
 		future: [],
@@ -53,15 +53,15 @@ export class Strata<S extends State> implements Stratum<S> {
 		await this.#dispatchMutation()
 	}
 
-	substrata<Sub extends Substate>(selector: Selector<Sub, S>): Substrata<Sub, S> {
-		return new Substrata(this, selector, this.options)
+	branch<Sub extends Branchstate>(selector: Selector<Sub, S>): Branch<Sub, S> {
+		return new Branch(this, selector, this.options)
 	}
 
-	chronstrata<Sub extends Substate>(
+	chronstrata<Sub extends Branchstate>(
 			limit: number,
 			selector: Selector<Chronicle<Sub>, S>,
 		) {
-		return new Chronstrata(limit, this, selector, this.options)
+		return new Chronobranch(limit, this, selector, this.options)
 	}
 
 	#dispatchMutation = debounce(0, async() => {

@@ -1,5 +1,5 @@
 
-import {Substrata} from "./substrata.js"
+import {Branch} from "./branch.js"
 
 export type Options = {
 	clone: <X>(x: X) => X
@@ -8,29 +8,29 @@ export type Options = {
 export type Selector<Sub, S> = (state: S) => Sub
 export type Mutator<S> = (state: S) => void
 
-export type State = {}
-export type Substate = {} | null | undefined
+export type Treestate = {}
+export type Branchstate = {} | null | undefined
 
-export type Versioned<S extends State> = {
+export type Versioned<S extends Treestate> = {
 	state: S
 	version: number
 }
 
-export type Stratum<S extends Substate> = {
+export type Tree<S extends Branchstate> = {
 	readonly state: S
 	watch(fn: (s: S) => void): () => void
 	mutate(mutator: Mutator<S>): Promise<S>
-	substrata<Sub extends Substate>(selector: Selector<Sub, S>): Substrata<Sub, S>
+	branch<Sub extends Branchstate>(selector: Selector<Sub, S>): Branch<Sub, S>
 }
 
-export type SetupOptions<S extends State> = {
+export type SetupOptions<S extends Treestate> = {
 	version: number
 	initialState: S
 	saveDebounceTime?: number
 	persistence?: Persistence<Versioned<S>>
 }
 
-export type Chronicle<S extends Substate> = {
+export type Chronicle<S extends Branchstate> = {
 	// [abc] d [efg]
 	//    \   \   \
 	//     \   \   future

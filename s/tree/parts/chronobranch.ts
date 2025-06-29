@@ -1,17 +1,17 @@
 
-import {Substrata} from "./substrata.js"
-import {Chronicle, Mutator, Options, Selector, Stratum, Substate} from "./types.js"
+import {Branch} from "./branch.js"
+import {Chronicle, Mutator, Options, Selector, Tree, Branchstate} from "./types.js"
 
-export class Chronstrata<S extends Substate, ParentState extends Substate = any> implements Stratum<S> {
-	#substrata: Substrata<Chronicle<S>, ParentState>
+export class Chronobranch<S extends Branchstate, ParentState extends Branchstate = any> implements Tree<S> {
+	#substrata: Branch<Chronicle<S>, ParentState>
 
 	constructor(
 			public limit: number,
-			public parent: Stratum<ParentState>,
+			public parent: Tree<ParentState>,
 			public selector: Selector<Chronicle<S>, ParentState>,
 			public options: Options,
 		) {
-		this.#substrata = parent.substrata(selector)
+		this.#substrata = parent.branch(selector)
 	}
 
 	get state() {
@@ -77,8 +77,8 @@ export class Chronstrata<S extends Substate, ParentState extends Substate = any>
 		})
 	}
 
-	substrata<Sub extends Substate>(selector: Selector<Sub, S>): Substrata<Sub, S> {
-		return new Substrata(this, selector, this.options)
+	branch<Sub extends Branchstate>(selector: Selector<Sub, S>): Branch<Sub, S> {
+		return new Branch(this, selector, this.options)
 	}
 }
 

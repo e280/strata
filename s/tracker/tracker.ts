@@ -1,19 +1,21 @@
 
 import {sub, Sub} from "@e280/stz"
 
+export type TrackableItem = object | symbol
+
 /**
- * tracking system for state management.
+ * tracking system for state management
  *  - it tracks when items are seen or changed
  *
- * for item integration,
+ * for state item integration (like you're integrating a new kind of state object)
  *  - items can call `tracker.see(this)` when they are accessed
  *  - items can call `tracker.change(this)` when they are reassigned
  *
- * for reactivity integration,
+ * for reactivity integration (like you're integrating a new view library that reacts to state changes)
  *  - run `tracker.seen(renderFn)`, collecting a set of seen items
  *  - loop over each seen item, attach a changed handler `tracker.changed(item, handlerFn)`
  */
-export class Tracker<Item extends object = any> {
+export class Tracker<Item extends TrackableItem = any> {
 	#seeables: Set<Item>[] = []
 	#changeables = new WeakMap<Item, Sub>()
 

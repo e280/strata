@@ -1,21 +1,21 @@
 
 import {Science, expect} from "@e280/science"
-import {Strata} from "./parts/strata.js"
+import {Trunk} from "./parts/trunk.js"
 
 export default Science.suite({
 	"strata": Science.suite({
 		"get state": Science.test(async() => {
-			const strata = new Strata({count: 0})
+			const strata = new Trunk({count: 0})
 			expect(strata.state.count).is(0)
 		}),
 
 		"state is immutable": Science.test(async() => {
-			const strata = new Strata({count: 0})
+			const strata = new Trunk({count: 0})
 			expect(() => strata.state.count++).throws()
 		}),
 
 		"run a proper mutation": Science.test(async() => {
-			const strata = new Strata({count: 0})
+			const strata = new Trunk({count: 0})
 			expect(strata.state.count).is(0)
 			await strata.mutate(state => state.count++)
 			expect(strata.state.count).is(1)
@@ -24,7 +24,7 @@ export default Science.suite({
 		}),
 
 		"forbidden mutation nesting": Science.test(async() => {
-			const strata = new Strata({count: 0})
+			const strata = new Trunk({count: 0})
 			await expect(async() => {
 				let promise!: Promise<any>
 				await strata.mutate(() => {
@@ -35,13 +35,13 @@ export default Science.suite({
 		}),
 
 		"state after mutation is frozen": Science.test(async () => {
-			const strata = new Strata({x: 1})
+			const strata = new Trunk({x: 1})
 			await strata.mutate(s => { s.x = 2 })
 			expect(() => strata.state.x = 3).throws()
 		}),
 
 		"watch is published": Science.test(async() => {
-			const strata = new Strata({count: 0})
+			const strata = new Trunk({count: 0})
 			let mutationCount = 0
 			strata.watch.sub(() => {mutationCount++})
 			await strata.mutate(state => state.count++)
@@ -49,7 +49,7 @@ export default Science.suite({
 		}),
 
 		"watch is debounced": Science.test(async() => {
-			const strata = new Strata({count: 0})
+			const strata = new Trunk({count: 0})
 			let mutationCount = 0
 			strata.watch.sub(() => {mutationCount++})
 			const promise = strata.mutate(state => state.count++)
@@ -59,7 +59,7 @@ export default Science.suite({
 		}),
 
 		"watch is fired when array item is pushed": Science.test(async() => {
-			const strata = new Strata({items: ["hello", "world"]})
+			const strata = new Trunk({items: ["hello", "world"]})
 			let mutationCount = 0
 			strata.watch.sub(() => {mutationCount++})
 			await strata.mutate(state => state.items.push("lol"))
@@ -68,7 +68,7 @@ export default Science.suite({
 		}),
 
 		"prevent mutation loops": Science.test(async() => {
-			const strata = new Strata({count: 0})
+			const strata = new Trunk({count: 0})
 			let mutationCount = 0
 			strata.watch.sub(async() => {
 				mutationCount++
@@ -85,16 +85,16 @@ export default Science.suite({
 
 	"substrata": Science.suite({
 		"get state": Science.test(async() => {
-			const strata = new Strata({count: 0, sub: {rofls: 0}})
-			const substrata = strata.substrata(s => s.sub)
+			const strata = new Trunk({count: 0, sub: {rofls: 0}})
+			const substrata = strata.branch(s => s.sub)
 			expect(substrata.state.rofls).is(0)
 		}),
 
 		"nullable selector": Science.test(async () => {
-			const strata = new Strata({
+			const strata = new Trunk({
 				a: {b: 0}  as (null | {b: number}),
 			})
-			const a = strata.substrata(s => s.a)
+			const a = strata.branch(s => s.a)
 			expect(strata.state.a?.b).is(0)
 			expect(a.state?.b).is(0)
 			await a.mutate(a => { a!.b = 1 })
@@ -106,17 +106,17 @@ export default Science.suite({
 		}),
 
 		"composition": Science.test(async () => {
-			const strata = new Strata({a: {b: {c: 0}}})
-			const a = strata.substrata(s => s.a)
-			const b = a.substrata(s => s.b)
+			const strata = new Trunk({a: {b: {c: 0}}})
+			const a = strata.branch(s => s.a)
+			const b = a.branch(s => s.b)
 			expect(strata.state.a.b.c).is(0)
 			expect(b.state.c).is(0)
 		}),
 
 		"deep mutations": Science.test(async () => {
-			const strata = new Strata({a: {b: {c: 0}}})
-			const a = strata.substrata(s => s.a)
-			const b = a.substrata(s => s.b)
+			const strata = new Trunk({a: {b: {c: 0}}})
+			const a = strata.branch(s => s.a)
+			const b = a.branch(s => s.b)
 			await b.mutate(b => { b.c = 101 })
 			expect(strata.state.a.b.c).is(101)
 			expect(a.state.b.c).is(101)
@@ -132,9 +132,9 @@ export default Science.suite({
 		}),
 
 		"watch ignores outside mutations": Science.test(async() => {
-			const strata = new Strata({a: {x: 0}, b: {x: 0}})
-			const a = strata.substrata(s => s.a)
-			const b = strata.substrata(s => s.b)
+			const strata = new Trunk({a: {x: 0}, b: {x: 0}})
+			const a = strata.branch(s => s.a)
+			const b = strata.branch(s => s.b)
 			let counted = 0
 			b.watch.sub(() => {counted++})
 			await a.mutate(a => a.x = 1)
@@ -142,8 +142,8 @@ export default Science.suite({
 		}),
 
 		"forbid submutation in mutation": Science.test(async() => {
-			const strata = new Strata({a: {b: 0}})
-			const a = strata.substrata(s => s.a)
+			const strata = new Trunk({a: {b: 0}})
+			const a = strata.branch(s => s.a)
 			await expect(async() => {
 				let promise!: Promise<any>
 				await strata.mutate(() => {
@@ -154,8 +154,8 @@ export default Science.suite({
 		}),
 
 		"forbid mutation in submutation": Science.test(async() => {
-			const strata = new Strata({a: {b: 0}})
-			const a = strata.substrata(s => s.a)
+			const strata = new Trunk({a: {b: 0}})
+			const a = strata.branch(s => s.a)
 			await expect(async() => {
 				let promise!: Promise<any>
 				await a.mutate(() => {
@@ -168,8 +168,8 @@ export default Science.suite({
 
 	"chronstrata": (() => {
 		const setup = () => {
-			const strata = new Strata({
-				chron: Strata.chronicle({count: 0}),
+			const strata = new Trunk({
+				chron: Trunk.chronicle({count: 0}),
 			})
 			const chron = strata.chronstrata(64, s => s.chron)
 			return {strata, chron}
@@ -288,13 +288,13 @@ export default Science.suite({
 			}),
 
 			"substrata mutations are tracked": Science.test(async() => {
-				const strata = new Strata({
-					chron: Strata.chronicle({
+				const strata = new Trunk({
+					chron: Trunk.chronicle({
 						group: {count: 0},
 					}),
 				})
 				const chron = strata.chronstrata(64, s => s.chron)
-				const group = chron.substrata(s => s.group)
+				const group = chron.branch(s => s.group)
 				expect(group.state.count).is(0)
 				await group.mutate(g => g.count = 101)
 				expect(group.state.count).is(101)
