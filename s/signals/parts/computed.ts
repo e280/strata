@@ -8,7 +8,7 @@ export function computed<V>(fn: () => V) {
 	const core = new ComputedCore<V>(fn)
 
 	function f(): V {
-		return core.value
+		return (f as any).value
 	}
 
 	Object.setPrototypeOf(f, ComputedCore.prototype)

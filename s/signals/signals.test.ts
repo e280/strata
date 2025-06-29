@@ -104,5 +104,17 @@ export default Science.suite({
 		expect(comp.value).is(20)
 		expect(runs).is(2)
 	}),
+
+	"computed fn syntax": test(async() => {
+		const a = signal(2)
+		const b = signal(3)
+		const sum = computed(() => a.value + b.value)
+		expect(sum.value).is(5)
+
+		a.value = 5
+		await sum.wait
+		expect(sum.value).is(8)
+		expect(sum()).is(8)
+	}),
 })
 
