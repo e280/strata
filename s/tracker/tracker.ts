@@ -61,8 +61,6 @@ export class Tracker<Item extends TrackableItem = any> {
 	}
 }
 
-// export const tracker = new Tracker()
-
 const key = Symbol.for("e280.tracker.v2")
 
 /** standard global tracker for integrations */

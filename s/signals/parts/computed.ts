@@ -1,26 +1,26 @@
 
 import {Effect} from "./effect.js"
-import {PlainSignal} from "./signal.js"
+import {SignalCore} from "./signal.js"
 
-export type Computed<V> = {(): V} & PlainComputed<V>
+export type Computed<V> = {(): V} & ComputedCore<V>
 
 export function computed<V>(fn: () => V) {
-	const plain = new PlainComputed<V>(fn)
+	const core = new ComputedCore<V>(fn)
 
 	function f(): V {
-		return plain.value
+		return core.value
 	}
 
-	Object.setPrototypeOf(f, PlainComputed.prototype)
-	Object.assign(f, plain)
+	Object.setPrototypeOf(f, ComputedCore.prototype)
+	Object.assign(f, core)
 
 	const f2 = f as Computed<V>
-	PlainComputed.init(f2)
+	ComputedCore.init(f2)
 
 	return f2
 }
 
-export class PlainComputed<V> extends PlainSignal<V> {
+export class ComputedCore<V> extends SignalCore<V> {
 	static init<V>(self: Computed<V>) {
 		self._effect = new Effect(self._formula, () => self._dirty = true)
 		self.sneak = self._effect.initial
@@ -35,15 +35,15 @@ export class PlainComputed<V> extends PlainSignal<V> {
 		this._formula = formula
 	}
 
-	get value() {
+	get() {
 		if (this._dirty) {
 			this._dirty = false
-			super.value = this._formula()
+			super.set(this._formula())
 		}
-		return super.value
+		return super.get()
 	}
 
-	set value(_) {
+	async set() {
 		throw new Error("computed is readonly")
 	}
 

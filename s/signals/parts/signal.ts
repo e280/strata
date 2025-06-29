@@ -6,26 +6,26 @@ export type Signal<V> = {
 	(): V
 	(v: V): Promise<void>
 	(v?: V): V | Promise<void>
-} & PlainSignal<V>
+} & SignalCore<V>
 
-export function signal<V>(v: V) {
-	const signal = new PlainSignal<V>(v)
+export function signal<V>(value: V) {
+	const core = new SignalCore(value)
 
-	function f(): V
-	function f(v: V): Promise<void>
-	function f(v?: V): V | Promise<void> {
-		return (v !== undefined)
-			? signal.set(v)
-			: signal.value
+	function fn(): V
+	function fn(v: V): Promise<void>
+	function fn(v?: V): V | Promise<void> {
+		return v !== undefined
+			? (fn as any).set(v)
+			: (fn as any).get()
 	}
 
-	Object.setPrototypeOf(f, PlainSignal.prototype)
-	Object.assign(f, signal)
+	Object.setPrototypeOf(fn, SignalCore.prototype)
+	Object.assign(fn, core)
 
-	return f as Signal<V>
+	return fn as Signal<V>
 }
 
-export class PlainSignal<V> {
+export class SignalCore<V> {
 	on = sub<[V]>()
 	published: Promise<V>
 
@@ -33,13 +33,9 @@ export class PlainSignal<V> {
 		this.published = Promise.resolve(sneak)
 	}
 
-	get value() {
+	get() {
 		tracker.see(this)
 		return this.sneak
-	}
-
-	set value(v: V) {
-		this.set(v)
 	}
 
 	async set(v: V) {
@@ -47,7 +43,15 @@ export class PlainSignal<V> {
 			await this.publish(v)
 	}
 
-	async publish(v = this.value) {
+	get value() {
+		return this.get()
+	}
+
+	set value(v: V) {
+		this.set(v)
+	}
+
+	async publish(v = this.get()) {
 		this.sneak = v
 		await Promise.all([
 			tracker.change(this),
