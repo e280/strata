@@ -205,7 +205,7 @@ import {signal, effect, computed} from "@e280/strata"
   })
   ```
   - *big-brain moment:* the whole chronicle *itself* is stored in the state.. serializable.. think persistence — user can close their project, reopen, and their undo/redo history is still chillin' — *brat girl summer*
-- second, make a `Chronobranch` which is like a branch
+- second, make a `Chronobranch` which is like a branch, but is concerned with history
   ```ts
   const snacks = trunk.chronobranch(64, s => s.snacks)
     //                               \
@@ -226,7 +226,7 @@ import {signal, effect, computed} from "@e280/strata"
   snacks.undoable // 2
   snacks.redoable // 1
   ```
-- chronobranch can have its own branch — all their mutations advance history
+- chronobranch can have its own branches — all their mutations advance history
 - plz pinky-swear right now, that you won't create a chronobranch under a branch under another chronobranch 💀
 
 <br/>
