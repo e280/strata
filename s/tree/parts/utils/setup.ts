@@ -2,39 +2,39 @@
 import {debounce} from "@e280/stz"
 
 import {Trunk} from "../trunk.js"
-import {Treestate, SetupOptions} from "../types.js"
 import {localPersistence} from "../persistence.js"
+import {Treestate, SetupOptions} from "../types.js"
 
 export async function trunkSetup<S extends Treestate>(options: SetupOptions<S>) {
 	const {
 		version,
 		initialState,
 		saveDebounceTime = 500,
-		persistence = localPersistence("strata"),
+		persistence = localPersistence("strataTree"),
 	} = options
 
-	const strata = new Trunk<S>(initialState)
+	const trunk = new Trunk<S>(initialState)
 
 	async function load() {
 		const pickle = await persistence.store.get()
 		if (pickle && pickle.version === version)
-			await strata.overwrite(pickle.state)
+			await trunk.overwrite(pickle.state)
 	}
 
 	const save = debounce(saveDebounceTime, async() => persistence.store.set({
 		version,
-		state: strata.state,
+		state: trunk.state,
 	}))
 
 	// persistence: initial load from store
 	await load()
 
 	// persistence: save to store
-	strata.watch(save)
+	trunk.watch(save)
 
 	// cross-tab sync
 	const dispose = persistence.onChange(load)
 
-	return {strata, load, save, dispose}
+	return {trunk, load, save, dispose}
 }
 
