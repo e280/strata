@@ -8,6 +8,7 @@
 ### get in loser, we're managing state
 📦 `npm install @e280/strata`  
 🧙‍♂️ probably my tenth state management library, lol  
+💁 it's all about rerendering ui when data changes  
 
 🚦 **signals** — ephemeral view-level state  
 🌳 **tree** — persistent app-level state  
@@ -43,9 +44,6 @@ import {signal, effect, computed} from "@e280/strata"
   ```ts
   await count(2)
   ```
-- **signals are for auto rerendering your ui.**  
-  components/views will auto rerender when relevant signals change  
-  — well only if your ui lib is cool and integrates `tracker`.
 
 ### pick your poison
 - **signals hipster fn syntax**
@@ -104,9 +102,9 @@ import {signal, effect, computed} from "@e280/strata"
 ## 🌳 tree — *persistent app-level state*
 - single-source-of-truth state tree
 - immutable except for `mutate(fn)` calls
-- undo/redo history, cross-tab sync, localStorage persistence
+- localStorage persistence, cross-tab sync, undo/redo history
 - no spooky-dookie proxy magic — just god's honest javascript
-- separate but compatible with signals
+- compatible with signals, but different
 
 #### `Trunk` is your app's state tree root
 - better stick to json-friendly serializable data
