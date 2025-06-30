@@ -17,14 +17,13 @@
 <br/>
 
 > [!TIP]  
-> incredibly, signals and trees are fully interoperable.  
-> that means, effects, computeds, branches, they'll all be responsive to changes across signals and tree state.  
+> incredibly, signals and trees are interoperable.  
+> that means, effects and computeds are responsive to changes in tree state.  
 
 <br/>
 
 ## 🚦 signals — *ephemeral view-level state*
 - `@e280/strata/signals`
-- **import the signal stuff**
   ```ts
   import {signal, effect, computed} from "@e280/strata"
   ```
@@ -32,15 +31,15 @@
   ```ts
   const count = signal(0)
 
-  console.log(count.value)
+  console.log(count.get())
     // 0
 
-  count.value = 1
+  count.set(1)
 
   console.log(count.value)
     // 1
   ```
-  - components/views rerender when relevant signals change  
+  - components/views will auto rerender when relevant signals change  
     (if your component/view library is cool an integrates with `tracker`)
   - three ways to get it
     ```ts
@@ -54,10 +53,10 @@
     await count.set(2)
     count.value = 2
     ```
-  - and yes, when you `await` set, all downstream effects are finished
-- **effects re-run when relevant signals change**
+  - using `await` here allows you to wait for downstream effects to finish
+- **effects are run when the relevant signals change**
   ```ts
-  effect(() => console.log(count.value))
+  effect(() => console.log(count()))
     // 2
 
   count.value++
@@ -65,26 +64,20 @@
   ```
 - **computed signals are super lazy**
   ```ts
-  const tenly = computed(() => count.value * 10)
+  const tenly = computed(() => {
+    console.log("recomputed!")
+    return count() * 10
+  })
 
-  console.log(tenly.value)
+  console.log(tenly())
+    // "recomputed!"
     // 30
 
-  count.value++
+  await count(4)
 
   console.log(tenly.value)
+    // "recomputed!"
     // 40
-  ```
-- **computed.eager is not lazy**
-  ```ts
-  const beaver = computed.eager(() => count.value * 10)
-
-  // you can get notified on changes because it isn't lazy
-  beaver.on(v => console.log(v))
-
-  count++
-
-  // 50
   ```
 
 <br/>
@@ -222,7 +215,7 @@
 ## 🪄 tracker — integrations
 - `@e280/strata/tracker`
 - all reactivity is orchestrated by the `tracker`
-- if you are integrating a new state object, or a new view layer that needs to react to state changes, just read [tracker.ts](./s/tracker/tracker.ts), it's like 60 lines and has some doc comments
+- if you are integrating a new state object, or a new view layer that needs to react to state changes, just read [tracker.ts](./s/tracker/tracker.ts)
 
 <br/>
 
