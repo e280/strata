@@ -35,19 +35,42 @@ export default Science.suite({
 		expect(count()).is(1)
 	}),
 
+	"signal on is not debounced": test(async() => {
+		const count = signal(1)
+		let runs = 0
+		count.on(() => void runs++)
+		await count.set(2)
+		await count.set(3)
+		expect(runs).is(2)
+	}),
+
+	"signal on only fires on change": test(async() => {
+		const count = signal(1)
+		let runs = 0
+		count.on(() => void runs++)
+		await count.set(2)
+		await count.set(2)
+		expect(runs).is(1)
+	}),
+
 	"effect tracks signal changes": test(async() => {
 		const count = signal(1)
 		let doubled = 0
 
-		const eff = effect(() => doubled = count.value * 2)
-
-		await eff.wait
+		effect(() => doubled = count.value * 2)
 		expect(doubled).is(2)
 
-		count.value = 3
-		await eff.wait
+		await count.set(3)
 		expect(doubled).is(6)
 	}),
+
+	// "effect is only called when signal actually changes": test(async() => {
+	// 	const count = signal(1)
+	// 	let runs = 0
+	// 	effect(() => {runs++})
+	// 	await count.set(2)
+	// 	expect(runs).is(1)
+	// }),
 
 	"signal set promise waits for effects": test(async() => {
 		const count = signal(1)
@@ -64,19 +87,16 @@ export default Science.suite({
 		const sig = signal("a")
 		let runs = 0
 
-		const eff = effect(() => {
+		effect(() => {
 			sig.value
 			runs++
 		})
-		await eff.wait
 		expect(runs).is(1)
 
-		sig.value = "a"
-		await eff.wait
+		await sig.set("a")
 		expect(runs).is(1)
 
-		sig.value = "b"
-		await eff.wait
+		await sig.set("b")
 		expect(runs).is(2)
 	}),
 
@@ -86,12 +106,10 @@ export default Science.suite({
 		const sum = computed(() => a.value + b.value)
 		expect(sum.value).is(5)
 
-		a.value = 5
-		await sum.wait
+		await a.set(5)
 		expect(sum.value).is(8)
 
-		b.value = 7
-		await sum.wait
+		await b.set(7)
 		expect(sum.value).is(12)
 	}),
 
@@ -104,13 +122,11 @@ export default Science.suite({
 			return a.value * 10
 		})
 
-		await comp.wait
-		expect(runs).is(1)
+		expect(runs).is(0)
 		expect(comp.value).is(10)
 		expect(runs).is(1)
 
-		a.value = 2
-		await comp.wait
+		await a.set(2)
 		expect(runs).is(1)
 		expect(comp.value).is(20)
 		expect(runs).is(2)
@@ -122,8 +138,7 @@ export default Science.suite({
 		const sum = computed(() => a.value + b.value)
 		expect(sum.value).is(5)
 
-		a.value = 5
-		await sum.wait
+		await a.set(5)
 		expect(sum.value).is(8)
 		expect(sum()).is(8)
 	}),

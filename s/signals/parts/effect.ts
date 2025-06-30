@@ -2,28 +2,22 @@
 import {debounce} from "@e280/stz"
 import {tracker} from "../../tracker/tracker.js"
 
-export function effect<C = void>(collector: () => C, responder?: () => void) {
-	return new Effect<C>(collector, responder)
+export function effect<C = void>(collector: () => C, responder: () => void = collector) {
+	return initEffect<C>(collector, responder).dispose
 }
 
-export class Effect<C = void> {
-	initial: C
-	wait = Promise.resolve()
-	dispose: () => void
+export function initEffect<C = void>(collector: () => C, responder: () => void = collector) {
+	const {seen, result} = tracker.seen(collector)
+	const fn1 = debounce(0, responder)
 
-	constructor(collector: () => C, responder: () => void = collector) {
-		const {seen, result} = tracker.seen(collector)
-		this.initial = result
-		const fn1 = debounce(0, responder)
-		const fn2 = () => this.wait = fn1()
+	const disposers: (() => void)[] = []
+	const dispose = () => disposers.forEach(d => d())
 
-		const disposers: (() => void)[] = []
-		this.dispose = () => disposers.forEach(d => d())
-
-		for (const saw of seen) {
-			const dispose = tracker.changed(saw, fn2)
-			disposers.push(dispose)
-		}
+	for (const saw of seen) {
+		const dispose = tracker.changed(saw, fn1)
+		disposers.push(dispose)
 	}
+
+	return {result, dispose}
 }
 
