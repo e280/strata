@@ -3,14 +3,14 @@ import {debounce, deep, sub} from "@e280/stz"
 
 import {Chronobranch} from "./chronobranch.js"
 import {tracker} from "../../tracker/tracker.js"
-import {Chronicle, Mutator, Options, Selector, Tree, Branchstate} from "./types.js"
+import {Chronicle, Mutator, Options, Selector, Tree, Branchstate, Immutable} from "./types.js"
 
 export class Branch<S extends Branchstate, ParentState extends Branchstate = any> implements Tree<S> {
 	dispose: () => void
-	watch = sub<[state: S]>()
+	watch = sub<[state: Immutable<S>]>()
 
-	#immutable: S
-	#dispatchMutation = debounce(0, async(state: S) => {
+	#immutable: Immutable<S>
+	#dispatchMutation = debounce(0, async(state: Immutable<S>) => {
 		await this.watch.pub(state)
 		await tracker.change(this)
 	})
@@ -21,12 +21,12 @@ export class Branch<S extends Branchstate, ParentState extends Branchstate = any
 			private options: Options,
 		) {
 
-		const state = this.selector(this.parent.state)
-		this.#immutable = deep.freeze(this.options.clone(state))
+		const state = this.selector(this.parent.state as ParentState)
+		this.#immutable = deep.freeze(this.options.clone(state)) as Immutable<S>
 
 		this.dispose = this.parent.watch(async parentState => {
 			const oldState = this.#immutable
-			const newState = this.selector(parentState)
+			const newState = this.selector(parentState as ParentState)
 			const isChanged = !deep.equal(newState, oldState)
 			if (isChanged) {
 				this.#updateState(newState)
@@ -37,16 +37,16 @@ export class Branch<S extends Branchstate, ParentState extends Branchstate = any
 	}
 
 	#updateState(state: S) {
-		this.#immutable = deep.freeze(this.options.clone(state))
+		this.#immutable = deep.freeze(this.options.clone(state)) as Immutable<S>
 	}
 
-	get state(): S {
+	get state(): Immutable<S> {
 		tracker.see(this)
 		return this.#immutable
 	}
 
 	async mutate(mutator: Mutator<S>) {
-		await this.parent.mutate(parentState => mutator(this.selector(parentState)))
+		await this.parent.mutate(parentState => mutator(this.selector(parentState as any)))
 		return this.#immutable
 	}
 

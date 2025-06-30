@@ -23,7 +23,7 @@ export async function trunkSetup<S extends Treestate>(options: SetupOptions<S>) 
 
 	const save = debounce(saveDebounceTime, async() => persistence.store.set({
 		version,
-		state: trunk.state,
+		state: trunk.state as any,
 	}))
 
 	// persistence: initial load from store

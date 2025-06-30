@@ -6,7 +6,7 @@ import {trunkSetup} from "./utils/setup.js"
 import {Chronobranch} from "./chronobranch.js"
 import {tracker} from "../../tracker/tracker.js"
 import {processOptions} from "./utils/process-options.js"
-import {Chronicle, Mutator, Options, Selector, Treestate, Tree, Branchstate} from "./types.js"
+import {Chronicle, Mutator, Options, Selector, Treestate, Tree, Branchstate, Immutable} from "./types.js"
 
 export class Trunk<S extends Treestate> implements Tree<S> {
 	static setup = trunkSetup
@@ -17,16 +17,16 @@ export class Trunk<S extends Treestate> implements Tree<S> {
 	})
 
 	options: Options
-	watch = sub<[state: S]>()
+	watch = sub<[state: Immutable<S>]>()
 
 	#mutable: S
-	#immutable: S
+	#immutable: Immutable<S>
 	#mutationLock = 0
 
 	constructor(state: S, options: Partial<Options> = {}) {
 		this.options = processOptions(options)
 		this.#mutable = state
-		this.#immutable = deep.freeze(this.options.clone(state))
+		this.#immutable = deep.freeze(this.options.clone(state)) as Immutable<S>
 	}
 
 	get state() {
@@ -49,7 +49,7 @@ export class Trunk<S extends Treestate> implements Tree<S> {
 
 	async overwrite(state: S) {
 		this.#mutable = state
-		this.#immutable = deep.freeze(this.options.clone(state))
+		this.#immutable = deep.freeze(this.options.clone(state)) as Immutable<S>
 		await this.#dispatchMutation()
 	}
 

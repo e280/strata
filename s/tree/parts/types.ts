@@ -16,10 +16,15 @@ export type Versioned<S extends Treestate> = {
 	version: number
 }
 
+export type Immutable<T> =
+	T extends (...args: any[]) => any ? T :
+	T extends object ? { readonly [K in keyof T]: Immutable<T[K]> } :
+	T
+
 export type Tree<S extends Branchstate> = {
-	readonly state: S
-	watch(fn: (s: S) => void): () => void
-	mutate(mutator: Mutator<S>): Promise<S>
+	readonly state: Immutable<S>
+	watch(fn: (s: Immutable<S>) => void): () => void
+	mutate(mutator: Mutator<S>): Promise<Immutable<S>>
 	branch<Sub extends Branchstate>(selector: Selector<Sub, S>): Branch<Sub, S>
 }
 

@@ -1,9 +1,9 @@
 
 import {Branch} from "./branch.js"
-import {Chronicle, Mutator, Options, Selector, Tree, Branchstate} from "./types.js"
+import {Chronicle, Mutator, Options, Selector, Tree, Branchstate, Immutable} from "./types.js"
 
 export class Chronobranch<S extends Branchstate, ParentState extends Branchstate = any> implements Tree<S> {
-	#substrata: Branch<Chronicle<S>, ParentState>
+	#branch: Branch<Chronicle<S>, ParentState>
 
 	constructor(
 			public limit: number,
@@ -11,30 +11,30 @@ export class Chronobranch<S extends Branchstate, ParentState extends Branchstate
 			public selector: Selector<Chronicle<S>, ParentState>,
 			public options: Options,
 		) {
-		this.#substrata = parent.branch(selector)
+		this.#branch = parent.branch(selector)
 	}
 
 	get state() {
-		return this.#substrata.state.present
+		return this.#branch.state.present
 	}
 
 	get undoable() {
-		return this.#substrata.state.past.length
+		return this.#branch.state.past.length
 	}
 
 	get redoable() {
-		return this.#substrata.state.future.length
+		return this.#branch.state.future.length
 	}
 
-	watch(fn: (state: S) => void) {
-		return this.#substrata.watch(chronicle => fn(chronicle.present))
+	watch(fn: (state: Immutable<S>) => void) {
+		return this.#branch.watch(chronicle => fn(chronicle.present))
 	}
 
 	/** progress forwards in history */
 	async mutate(mutator: Mutator<S>) {
 		const limit = Math.max(0, this.limit)
-		const snapshot = this.options.clone(this.#substrata.state.present)
-		await this.#substrata.mutate(chronicle => {
+		const snapshot = this.options.clone(this.#branch.state.present) as S
+		await this.#branch.mutate(chronicle => {
 			mutator(chronicle.present)
 			chronicle.past.push(snapshot)
 			chronicle.past = chronicle.past.slice(-limit)
@@ -45,7 +45,7 @@ export class Chronobranch<S extends Branchstate, ParentState extends Branchstate
 
 	/** step backwards into the past, by n steps */
 	async undo(n = 1) {
-		await this.#substrata.mutate(chronicle => {
+		await this.#branch.mutate(chronicle => {
 			const snapshots = chronicle.past.slice(-n)
 			if (snapshots.length >= n) {
 				const oldPresent = chronicle.present
@@ -58,7 +58,7 @@ export class Chronobranch<S extends Branchstate, ParentState extends Branchstate
 
 	/** step forwards into the future, by n steps */
 	async redo(n = 1) {
-		await this.#substrata.mutate(chronicle => {
+		await this.#branch.mutate(chronicle => {
 			const snapshots = chronicle.future.slice(0, n)
 			if (snapshots.length >= n) {
 				const oldPresent = chronicle.present
@@ -71,7 +71,7 @@ export class Chronobranch<S extends Branchstate, ParentState extends Branchstate
 
 	/** wipe past and future snapshots */
 	async wipe() {
-		await this.#substrata.mutate(chronicle => {
+		await this.#branch.mutate(chronicle => {
 			chronicle.past = []
 			chronicle.future = []
 		})

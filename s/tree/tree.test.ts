@@ -11,7 +11,7 @@ export default Science.suite({
 
 		"state is immutable": Science.test(async() => {
 			const strata = new Trunk({count: 0})
-			expect(() => strata.state.count++).throws()
+			expect(() => (strata.state as any).count++).throws()
 		}),
 
 		"run a proper mutation": Science.test(async() => {
@@ -37,7 +37,7 @@ export default Science.suite({
 		"state after mutation is frozen": Science.test(async () => {
 			const strata = new Trunk({x: 1})
 			await strata.mutate(s => { s.x = 2 })
-			expect(() => strata.state.x = 3).throws()
+			expect(() => (strata.state as any).x = 3).throws()
 		}),
 
 		"watch is published": Science.test(async() => {
