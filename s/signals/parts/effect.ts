@@ -8,13 +8,13 @@ export function effect<C = void>(collector: () => C, responder: () => void = col
 
 export function initEffect<C = void>(collector: () => C, responder: () => void = collector) {
 	const {seen, result} = tracker.seen(collector)
-	const fn1 = debounce(0, responder)
+	const fn = debounce(0, responder)
 
 	const disposers: (() => void)[] = []
 	const dispose = () => disposers.forEach(d => d())
 
 	for (const saw of seen) {
-		const dispose = tracker.changed(saw, fn1)
+		const dispose = tracker.changed(saw, fn)
 		disposers.push(dispose)
 	}
 

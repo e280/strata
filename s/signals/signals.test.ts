@@ -64,13 +64,48 @@ export default Science.suite({
 		expect(doubled).is(6)
 	}),
 
-	// "effect is only called when signal actually changes": test(async() => {
-	// 	const count = signal(1)
-	// 	let runs = 0
-	// 	effect(() => {runs++})
-	// 	await count.set(2)
-	// 	expect(runs).is(1)
-	// }),
+	"effect is only called when signal actually changes": test(async() => {
+		const count = signal(1)
+		let runs = 0
+		effect(() => {
+			count.get()
+			runs++
+		})
+		expect(runs).is(1)
+		await count.set(999)
+		expect(runs).is(2)
+		await count.set(999)
+		expect(runs).is(2)
+	}),
+
+	"effects are debounced": test(async() => {
+		const count = signal(1)
+		let runs = 0
+		effect(() => {
+			count.get()
+			runs++
+		})
+		expect(runs).is(1)
+		count.value++
+		count.value++
+		await count.set(count.get() + 1)
+		expect(runs).is(2)
+	}),
+
+	"effects can be disposed": test(async() => {
+		const count = signal(1)
+		let doubled = 0
+
+		const dispose = effect(() => doubled = count.value * 2)
+		expect(doubled).is(2)
+
+		await count.set(3)
+		expect(doubled).is(6)
+
+		dispose()
+		await count.set(4)
+		expect(doubled).is(6) // old value
+	}),
 
 	"signal set promise waits for effects": test(async() => {
 		const count = signal(1)
