@@ -1,9 +1,10 @@
 
 import {Science, test, expect} from "@e280/science"
-import {tracker} from "./tracker.js"
+import {Tracker} from "./tracker.js"
 
 export default Science.suite({
 	"change waits for downstream effects to settle": test(async() => {
+		const tracker = new Tracker()
 		let order: string[] = []
 
 		const item = {}
@@ -20,6 +21,20 @@ export default Science.suite({
 		expect(order[0]).is("before")
 		expect(order[1]).is("effect")
 		expect(order[2]).is("after")
+	}),
+
+	"circularity forbidden": test(async() => {
+		const tracker = new Tracker()
+		const item = {}
+
+		// effect re-publishes the same change, creating a cycle
+		tracker.changed(item, async() => {
+			await tracker.change(item)
+		})
+
+		expect(async() => {
+			await tracker.change(item)
+		}).throwsAsync()
 	}),
 })
 

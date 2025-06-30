@@ -19,6 +19,7 @@ export class Tracker<Item extends TrackableItem = any> {
 	#seeables: Set<Item>[] = []
 	#changeables = new WeakMap<Item, Sub>()
 	#changeStack: Set<Promise<void>>[] = []
+	#busy = new Set<Item>()
 
 	/** indicate item was accessed */
 	see(item: Item) {
@@ -35,6 +36,8 @@ export class Tracker<Item extends TrackableItem = any> {
 
 	/** indicate item was changed */
 	async change(item: Item) {
+		if (this.#busy.has(item))
+			throw new Error("circularity forbidden")
 		const prom = this.#guaranteeChangeable(item).pub()
 		this.#changeStack.at(-1)?.add(prom)
 		return prom
@@ -42,10 +45,12 @@ export class Tracker<Item extends TrackableItem = any> {
 
 	/** respond to changes by calling fn */
 	changed(item: Item, fn: () => Promise<void>) {
-		return this.#guaranteeChangeable(item)(async () => {
+		return this.#guaranteeChangeable(item)(async() => {
 			const collected = new Set<Promise<void>>()
 			this.#changeStack.push(collected)
+			this.#busy.add(item)
 			collected.add(fn())
+			this.#busy.delete(item)
 			await Promise.all(collected)
 			this.#changeStack.pop()
 		})
