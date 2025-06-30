@@ -4,12 +4,11 @@
 <br/>
 
 # ⛏️ strata
-📦 `npm install @e280/strata`  
-🫩 probably my tenth state management library, lol  
-
-<br/>
 
 ### get in loser, we're managing state
+📦 `npm install @e280/strata`  
+🧙‍♂️ probably my tenth state management library, lol  
+
 🚦 **signals** — ephemeral view-level state  
 🌳 **tree** — persistent app-level state  
 🪄 **tracker** — reactivity integration hub  
@@ -23,46 +22,66 @@
 <br/>
 
 ## 🚦 signals — *ephemeral view-level state*
-- `@e280/strata/signals`
-  ```ts
-  import {signal, effect, computed} from "@e280/strata"
-  ```
-- **signals are little bundles of joy**
+```ts
+import {signal, effect, computed} from "@e280/strata"
+```
+
+### each signal holds a value
+- **create a signal**
   ```ts
   const count = signal(0)
-
-  console.log(count.get())
-    // 0
-
-  count.set(1)
-
-  console.log(count.value)
-    // 1
   ```
-  - components/views will auto rerender when relevant signals change  
-    (if your component/view library is cool an integrates with `tracker`)
-  - three ways to get it
-    ```ts
-    count() // 1
-    count.get() // 1
-    count.value // 1
-    ```
-  - three ways to set it
-    ```ts
-    await count(2)
-    await count.set(2)
-    count.value = 2
-    ```
-  - using `await` here allows you to wait for downstream effects to finish
-- **effects are run when the relevant signals change**
+- **read a signal**
+  ```ts
+  count() // 0
+  ```
+- **set a signal**
+  ```ts
+  count(1)
+  ```
+- **set a signal, and await effect propagation**
+  ```ts
+  await count(2)
+  ```
+- **signals are for auto rerendering your ui.**  
+  components/views will auto rerender when relevant signals change  
+  — well only if your ui lib is cool and integrates `tracker`.
+
+### pick your poison
+- **signals hipster fn syntax**
+  ```ts
+  count() // get
+  await count(2) // set
+  ```
+- **signals get/set syntax**
+  ```ts
+  count.get() // get
+  await count.set(2) // set
+  ```
+- **signals .value accessor syntax**
+  ```ts
+  count.value // get
+  count.value = 2 // set
+  ```
+  value pattern is nice for this vibe
+  ```ts
+  count.value++
+  count.value += 1
+  ```
+
+### effects
+- **effects run when the relevant signals change**
   ```ts
   effect(() => console.log(count()))
-    // 2
+    // 1
+    // the system detects 'count' is relevant
 
   count.value++
-    // 3
+    // 2
+    // when count is changed, the effect fn is run
   ```
-- **computed signals are super lazy**
+- **computed signals are super lazy**  
+  they only run if and when you get the value
   ```ts
   const tenly = computed(() => {
     console.log("recomputed!")
@@ -71,23 +90,23 @@
 
   console.log(tenly())
     // "recomputed!"
-    // 30
+    // 20
 
-  await count(4)
+  await count(3)
 
   console.log(tenly.value)
     // "recomputed!"
-    // 40
+    // 30
   ```
 
 <br/>
 
 ## 🌳 tree — *persistent app-level state*
-- `@e280/strata/tree`
 - single-source-of-truth state tree
 - immutable except for `mutate(fn)` calls
 - undo/redo history, cross-tab sync, localStorage persistence
 - no spooky-dookie proxy magic — just god's honest javascript
+- separate but compatible with signals
 
 #### `Trunk` is your app's state tree root
 - better stick to json-friendly serializable data
@@ -213,7 +232,9 @@
 <br/>
 
 ## 🪄 tracker — integrations
-- `@e280/strata/tracker`
+- ```ts
+  import {tracker} from "@e280/strata/tracker"
+  ```
 - all reactivity is orchestrated by the `tracker`
 - if you are integrating a new state object, or a new view layer that needs to react to state changes, just read [tracker.ts](./s/tracker/tracker.ts)
 
