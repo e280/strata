@@ -9,37 +9,40 @@ import {Branchstate, Immutable, Mutator, Options, Selector, Tree, Trunkstate} fr
 export class Trunk<S extends Trunkstate> implements Tree<S> {
 	options: Options
 
-	#signal: DerivedSignal<Immutable<S>>
+	#immutable: DerivedSignal<Immutable<S>>
 	#mutable: Signal<S>
 	#mutationLock = 0
 
 	constructor(state: S, options: Partial<Options> = {}) {
 		this.options = processOptions(options)
 		this.#mutable = signal(state)
-		this.#signal = signal.derive(() =>
+		this.#immutable = signal.derive(() =>
 			deep.freeze(this.options.clone(this.#mutable.get())) as Immutable<S>
 		)
 	}
 
 	get state() {
-		return this.#signal.get()
+		return this.#immutable.get()
 	}
 
 	get on() {
-		return this.#signal.on
+		return this.#immutable.on
 	}
 
 	async mutate(mutator: Mutator<S>) {
 		const oldState = this.options.clone(this.#mutable.get())
 		if (this.#mutationLock > 0)
 			throw new Error("nested mutations are forbidden")
-		this.#mutationLock++
-		try { mutator(this.#mutable()) }
+		try {
+			this.#mutationLock++
+			mutator(this.#mutable())
+			const newState = this.#mutable.get()
+			const isChanged = !deep.equal(newState, oldState)
+			if (isChanged)
+				await this.overwrite(newState)
+		}
 		finally { this.#mutationLock-- }
-		const newState = this.#mutable.get()
-		const isChanged = !deep.equal(newState, oldState)
-		if (isChanged) await this.overwrite(newState)
-		return this.#signal.get()
+		return this.#immutable.get()
 	}
 
 	async overwrite(state: S) {

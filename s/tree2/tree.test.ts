@@ -75,7 +75,7 @@ export default Science.suite({
 			expect(trunk.state.items.length).is(3)
 		}),
 
-		"prevent mutation loops": Science.test.skip(async() => {
+		"prevent mutation loops": Science.test(async() => {
 			const trunk = new Trunk({count: 0})
 			let mutationCount = 0
 			trunk.on.sub(async() => {

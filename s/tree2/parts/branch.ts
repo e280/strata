@@ -5,7 +5,7 @@ import {DerivedSignal} from "../../signals/parts/derive.js"
 import {Branchstate, Immutable, Mutator, Options, Selector, Tree} from "./types.js"
 
 export class Branch<S extends Branchstate, ParentState extends Branchstate = any> implements Tree<S> {
-	#signal: DerivedSignal<Immutable<S>>
+	#immutable: DerivedSignal<Immutable<S>>
 
 	constructor(
 			private parent: Tree<ParentState>,
@@ -13,25 +13,25 @@ export class Branch<S extends Branchstate, ParentState extends Branchstate = any
 			private options: Options,
 		) {
 
-		this.#signal = signal.derive(() => {
+		this.#immutable = signal.derive(() => {
 			const state = selector(parent.state as any)
 			return deep.freeze(options.clone(state)) as Immutable<S>
 		}, {compare: deep.equal})
 	}
 
 	get state() {
-		return this.#signal.get()
+		return this.#immutable.get()
 	}
 
 	get on() {
-		return this.#signal.on
+		return this.#immutable.on
 	}
 
 	async mutate(mutator: Mutator<S>) {
 		await this.parent.mutate(parentState =>
 			mutator(this.selector(parentState))
 		)
-		return this.#signal.get()
+		return this.#immutable.get()
 	}
 
 	branch<Sub extends Branchstate>(selector: Selector<Sub, S>): Branch<Sub, S> {

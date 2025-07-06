@@ -3,7 +3,8 @@ import {Sub} from "@e280/stz"
 
 import {lazy} from "./lazy.js"
 import {derive} from "./derive.js"
-import {SignalCore} from "./units.js"
+import {SignalOptions} from "./types.js"
+import {processSignalOptions, SignalCore} from "./units.js"
 
 export type Signal<V> = {
 	(): V
@@ -21,7 +22,7 @@ export type Signal<V> = {
 	dispose(): void
 } & SignalCore<V>
 
-export function signal<V>(value: V) {
+export function signal<V>(value: V, options: Partial<SignalOptions> = {}) {
 	function fn(): V
 	function fn(v: V): Promise<void>
 	function fn(v?: V): V | Promise<void> {
@@ -30,7 +31,8 @@ export function signal<V>(value: V) {
 			: (fn as any).get()
 	}
 
-	const core = new SignalCore(value)
+	const o = processSignalOptions(options)
+	const core = new SignalCore(value, o)
 	Object.setPrototypeOf(fn, SignalCore.prototype)
 	Object.assign(fn, core)
 

@@ -1,7 +1,16 @@
 
-import {defer, sub} from "@e280/stz"
+import {sub} from "@e280/stz"
+import {SignalOptions} from "./types.js"
 import {collectorEffect} from "./effect.js"
 import {tracker} from "../../tracker/tracker.js"
+
+const defaultSignalOptions: SignalOptions = {
+	compare: (a, b) => a === b
+}
+
+export function processSignalOptions(options: Partial<SignalOptions> = {}) {
+	return {...defaultSignalOptions, ...options}
+}
 
 export class ReadableSignal<V> {
 	constructor(public sneak: V) {}
@@ -28,25 +37,14 @@ export class SignalCore<V> extends ReactiveSignal<V> {
 	kind: "signal" = "signal"
 	_lock = false
 
-	constructor(sneak: V) {
+	constructor(sneak: V, public _options: SignalOptions) {
 		super(sneak)
 	}
 
 	async set(v: V) {
-		if (this._lock)
-			throw new Error("forbid circularity")
-
-		if (v !== this.sneak) {
-			let promise = Promise.resolve()
-			try {
-				this._lock = true
-				promise = this.publish(v)
-			}
-			finally {
-				this._lock = false
-			}
-			return promise
-		}
+		const isChanged = !this._options.compare(this.sneak, v)
+		if (isChanged)
+			await this.publish(v)
 	}
 
 	get value() {
@@ -58,11 +56,24 @@ export class SignalCore<V> extends ReactiveSignal<V> {
 	}
 
 	async publish(v = this.get()) {
-		this.sneak = v
-		await Promise.all([
-			tracker.change(this),
-			this.on.pub(v),
-		])
+		if (this._lock)
+			throw new Error("forbid circularity")
+
+		let promise = Promise.resolve()
+
+		try {
+			this._lock = true
+			this.sneak = v
+			promise = Promise.all([
+				tracker.change(this),
+				this.on.pub(v),
+			]) as any
+		}
+		finally {
+			this._lock = false
+		}
+
+		return promise
 	}
 }
 
@@ -72,7 +83,7 @@ export class LazyCore<V> extends ReadableSignal<V> {
 	_dirty = false
 	_effect: (() => void) | undefined
 
-	constructor(public _formula: () => V, public _options: DeriveOptions) {
+	constructor(public _formula: () => V, public _options: SignalOptions) {
 		super(undefined as any)
 	}
 
@@ -105,12 +116,8 @@ export class LazyCore<V> extends ReadableSignal<V> {
 	}
 }
 
-export type DeriveOptions = {
-	compare: (a: any, b: any) => boolean
-}
-
 export class DerivedCore<V> extends ReactiveSignal<V> {
-	static make<V>(that: DerivedCore<V>, formula: () => V, options: DeriveOptions) {
+	static make<V>(that: DerivedCore<V>, formula: () => V, options: SignalOptions) {
 		const {result, dispose} = collectorEffect(formula, async() => {
 			const value = formula()
 			const isChanged = !options.compare(that.sneak, value)

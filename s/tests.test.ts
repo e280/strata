@@ -1,17 +1,15 @@
 
 import {expect, Science, test} from "@e280/science"
 
-import tree from "./tree/tree.test.js"
+import tree2 from "./tree2/tree.test.js"
 import signals from "./signals/signals.test.js"
 import tracker from "./tracker/tracker.test.js"
 
-import {Trunk} from "./tree/parts/trunk.js"
+import {Trunk} from "./tree2/parts/trunk.js"
 import {effect} from "./signals/parts/effect.js"
 import {signal} from "./signals/parts/signal.js"
-import tree2 from "./tree2/tree.test.js"
 
 await Science.run({
-	tree,
 	tree2,
 	signals,
 	tracker,
@@ -49,7 +47,7 @@ await Science.run({
 			expect(order[2]).is("after")
 		}),
 
-		"branch can include signal value": test.skip(async() => {
+		"branch can include signal value": test(async() => {
 			const bingus = signal(101)
 			const trunk = new Trunk({count: 1})
 			const branch = trunk.branch(s => ({

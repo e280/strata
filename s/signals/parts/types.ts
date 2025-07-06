@@ -5,3 +5,7 @@ import {DerivedSignal} from "./derive.js"
 
 export type Signaloid<V> = Signal<V> | DerivedSignal<V> | LazySignal<V>
 
+export type SignalOptions = {
+	compare: (a: any, b: any) => boolean
+}
+
