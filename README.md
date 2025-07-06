@@ -109,7 +109,6 @@ import {signal, effect, computed} from "@e280/strata"
 - immutable except for `mutate(fn)` calls
 - localStorage persistence, cross-tab sync, undo/redo history
 - no spooky-dookie proxy magic — just god's honest javascript
-- compatible with signals, but different
 
 #### `Trunk` is your app's state tree root
 - better stick to json-friendly serializable data
@@ -156,15 +155,15 @@ import {signal, effect, computed} from "@e280/strata"
 #### watch for mutations
 - on the trunk, we can listen deeply for mutations within the whole tree
   ```ts
-  trunk.watch(s => console.log(s.count))
+  trunk.on(s => console.log(s.count))
   ```
 - whereas branch listeners don't care about changes outside their scope
   ```ts
-  snacks.watch(s => console.log(s.peanuts))
+  snacks.on(s => console.log(s.peanuts))
   ```
-- watch returns a fn to stop listening
+- on returns a fn to stop listening
   ```ts
-  const stop = trunk.watch(s => console.log(s.count))
+  const stop = trunk.on(s => console.log(s.count))
   stop() // stop listening
   ```
 
