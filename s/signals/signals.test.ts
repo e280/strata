@@ -170,6 +170,30 @@ export default Science.suite({
 		expect(mutations).is(3)
 	}),
 
+	"effect doesn't overreact to derived": test(async() => {
+		const a = signal(1)
+		const b = signal(10)
+		const product = signal.derive(() => a.value * b.value)
+
+		const derivedSpy = spy(() => {})
+		product.on(derivedSpy)
+
+		let mutations = 0
+		effect(() => {
+			a.get()
+			product.get()
+			mutations++
+		})
+		expect(product.value).is(10)
+		expect(mutations).is(1)
+		expect(derivedSpy.spy.calls.length).is(0)
+
+		await a.set(2)
+		expect(product.value).is(20)
+		expect(mutations).is(2)
+		expect(derivedSpy.spy.calls.length).is(1)
+	}),
+
 	"derived.on": test(async() => {
 		const a = signal(1)
 		const b = signal(10)
