@@ -51,6 +51,7 @@ import {signal, effect, computed} from "@e280/strata"
   count() // get
   await count(2) // set
   ```
+  > to achieve this hipster syntax i had to make the implementation so damn cursed, lol 💀
 - **signals get/set syntax**
   ```ts
   count.get() // get
@@ -78,24 +79,28 @@ import {signal, effect, computed} from "@e280/strata"
     // 2
     // when count is changed, the effect fn is run
   ```
-- **computed signals are super lazy**  
-  they only run if and when you get the value
+
+### `signal.derive` and `signal.lazy` are computed signals
+- **signal.derive**  
+  is for combining signals
   ```ts
-  const tenly = computed(() => {
-    console.log("recomputed!")
-    return count() * 10
-  })
+  const a = signal(1)
+  const b = signal(10)
+  const product = signal.derive(() => a() + b())
 
-  console.log(tenly())
-    // "recomputed!"
-    // 20
+  product() // 10
 
-  await count(3)
+  // change a dependency,
+  // and the derived signal is automatically updated
+  await a.set(2)
 
-  console.log(tenly.value)
-    // "recomputed!"
-    // 30
+  product() // 20
   ```
+- **signal.lazy**  
+  is for making special optimizations.  
+  it's like derive, except it cannot trigger effects,  
+  because it's so lazy it only computes the value on read, and only when necessary.  
+  > ⚠️ *i repeat: lazy signals cannot trigger effects!*
 
 <br/>
 
