@@ -1,6 +1,7 @@
 
 import {deep} from "@e280/stz"
 import {Branch} from "./branch.js"
+import {trunkSetup} from "./utils/setup.js"
 import {Chronobranch} from "./chronobranch.js"
 import {processOptions} from "./utils/process-options.js"
 import {DerivedSignal} from "../../signals/parts/derive.js"
@@ -8,6 +9,7 @@ import {signal, Signal} from "../../signals/parts/signal.js"
 import {Branchstate, Chronicle, Immutable, Mutator, Options, Selector, Tree, Trunkstate} from "./types.js"
 
 export class Trunk<S extends Trunkstate> implements Tree<S> {
+	static setup = trunkSetup
 	static chronicle = <S extends Branchstate>(state: S): Chronicle<S> => ({
 		present: state,
 		past: [],
