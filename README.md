@@ -152,7 +152,7 @@ import {signal, effect, computed} from "@e280/strata"
   ```
 - you can branch a branch
 
-#### watch for mutations
+#### `on` to watch for mutations
 - on the trunk, we can listen deeply for mutations within the whole tree
   ```ts
   trunk.on(s => console.log(s.count))
@@ -170,6 +170,7 @@ import {signal, effect, computed} from "@e280/strata"
 ### only discerning high-class aristocrats are permitted beyond this point
 
 #### `Trunk.setup` for localStorage persistence etc
+- it automatically handles persistence to localStorage and cross-tab synchronization
 - simple setup
   ```ts
   const {trunk} = await Trunk.setup({
