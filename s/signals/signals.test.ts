@@ -136,7 +136,7 @@ export default Science.suite({
 		expect(runs).is(2)
 	}),
 
-	"computed values": test(async() => {
+	"lazy values": test(async() => {
 		const a = signal(2)
 		const b = signal(3)
 		const sum = lazy(() => a.value + b.value)
@@ -171,7 +171,7 @@ export default Science.suite({
 		expect(mutations).is(3)
 	}),
 
-	"computed is lazy": test(async() => {
+	"lazy is lazy": test(async() => {
 		const a = signal(1)
 		let runs = 0
 
@@ -190,7 +190,7 @@ export default Science.suite({
 		expect(runs).is(2)
 	}),
 
-	"computed fn syntax": test(async() => {
+	"lazy fn syntax": test(async() => {
 		const a = signal(2)
 		const b = signal(3)
 		const sum = lazy(() => a.value + b.value)
