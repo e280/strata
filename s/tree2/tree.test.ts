@@ -175,142 +175,142 @@ export default Science.suite({
 		}),
 	}),
 
-	// "chronstrata": (() => {
-	// 	const setup = () => {
-	// 		const strata = new Trunk({
-	// 			chron: Trunk.chronicle({count: 0}),
-	// 		})
-	// 		const chron = strata.chronobranch(64, s => s.chron)
-	// 		return {strata, chron}
-	// 	}
-	//
-	// 	return Science.suite({
-	// 		"get state": Science.test(async() => {
-	// 			const {chron} = setup()
-	// 			expect(chron.state.count).is(0)
-	// 		}),
-	//
-	// 		"mutate": Science.test(async() => {
-	// 			const {chron} = setup()
-	// 			expect(chron.state.count).is(0)
-	// 			await chron.mutate(s => s.count++)
-	// 			expect(chron.state.count).is(1)
-	// 			await chron.mutate(s => s.count++)
-	// 			expect(chron.state.count).is(2)
-	// 		}),
-	//
-	// 		"undoable/redoable": Science.test(async() => {
-	// 			const {chron} = setup()
-	// 			expect(chron.undoable).is(0)
-	// 			expect(chron.redoable).is(0)
-	// 			expect(chron.state.count).is(0)
-	// 			await chron.mutate(s => s.count++)
-	// 			expect(chron.undoable).is(1)
-	// 			await chron.mutate(s => s.count++)
-	// 			expect(chron.undoable).is(2)
-	// 			await chron.undo()
-	// 			expect(chron.undoable).is(1)
-	// 			expect(chron.redoable).is(1)
-	// 			await chron.undo()
-	// 			expect(chron.undoable).is(0)
-	// 			expect(chron.redoable).is(2)
-	// 			await chron.redo()
-	// 			expect(chron.undoable).is(1)
-	// 			expect(chron.redoable).is(1)
-	// 		}),
-	//
-	// 		"undo": Science.test(async() => {
-	// 			const {chron} = setup()
-	// 			await chron.mutate(s => s.count++)
-	// 			await chron.undo()
-	// 			expect(chron.state.count).is(0)
-	// 		}),
-	//
-	// 		"redo": Science.test(async() => {
-	// 			const {chron} = setup()
-	// 			await chron.mutate(s => s.count++)
-	// 			await chron.undo()
-	// 			expect(chron.state.count).is(0)
-	// 			await chron.redo()
-	// 			expect(chron.state.count).is(1)
-	// 		}),
-	//
-	// 		"undo/redo well ordered": Science.test(async() => {
-	// 			const {chron} = setup()
-	// 			await chron.mutate(s => s.count++)
-	// 			await chron.mutate(s => s.count++)
-	// 			await chron.mutate(s => s.count++)
-	// 			expect(chron.state.count).is(3)
-	//
-	// 			await chron.undo()
-	// 			expect(chron.state.count).is(2)
-	//
-	// 			await chron.undo()
-	// 			expect(chron.state.count).is(1)
-	//
-	// 			await chron.redo()
-	// 			expect(chron.state.count).is(2)
-	//
-	// 			await chron.redo()
-	// 			expect(chron.state.count).is(3)
-	//
-	// 			await chron.undo()
-	// 			expect(chron.state.count).is(2)
-	//
-	// 			await chron.undo()
-	// 			expect(chron.state.count).is(1)
-	//
-	// 			await chron.undo()
-	// 			expect(chron.state.count).is(0)
-	// 		}),
-	//
-	// 		"undo nothing does nothing": Science.test(async() => {
-	// 			const {chron} = setup()
-	// 			await chron.undo()
-	// 			expect(chron.state.count).is(0)
-	// 		}),
-	//
-	// 		"redo nothing does nothing": Science.test(async() => {
-	// 			const {chron} = setup()
-	// 			await chron.redo()
-	// 			expect(chron.state.count).is(0)
-	// 		}),
-	//
-	// 		"undo 2x": Science.test(async() => {
-	// 			const {chron} = setup()
-	// 			await chron.mutate(s => s.count++)
-	// 			await chron.mutate(s => s.count++)
-	// 			expect(chron.state.count).is(2)
-	// 			await chron.undo(2)
-	// 			expect(chron.state.count).is(0)
-	// 		}),
-	//
-	// 		"redo 2x": Science.test(async() => {
-	// 			const {chron} = setup()
-	// 			await chron.mutate(s => s.count++)
-	// 			await chron.mutate(s => s.count++)
-	// 			expect(chron.state.count).is(2)
-	// 			await chron.undo(2)
-	// 			expect(chron.state.count).is(0)
-	// 			await chron.redo(2)
-	// 			expect(chron.state.count).is(2)
-	// 		}),
-	//
-	// 		"substrata mutations are tracked": Science.test(async() => {
-	// 			const strata = new Trunk({
-	// 				chron: Trunk.chronicle({
-	// 					group: {count: 0},
-	// 				}),
-	// 			})
-	// 			const chron = strata.chronobranch(64, s => s.chron)
-	// 			const group = chron.branch(s => s.group)
-	// 			expect(group.state.count).is(0)
-	// 			await group.mutate(g => g.count = 101)
-	// 			expect(group.state.count).is(101)
-	// 			await chron.undo()
-	// 			expect(group.state.count).is(0)
-	// 		}),
-	// 	})
-	// })(),
+	"chronobranch": (() => {
+		const setup = () => {
+			const trunk = new Trunk({
+				chron: Trunk.chronicle({count: 0}),
+			})
+			const chron = trunk.chronobranch(64, s => s.chron)
+			return {trunk, chron}
+		}
+
+		return Science.suite({
+			"get state": Science.test(async() => {
+				const {chron} = setup()
+				expect(chron.state.count).is(0)
+			}),
+
+			"mutate": Science.test(async() => {
+				const {chron} = setup()
+				expect(chron.state.count).is(0)
+				await chron.mutate(s => s.count++)
+				expect(chron.state.count).is(1)
+				await chron.mutate(s => s.count++)
+				expect(chron.state.count).is(2)
+			}),
+
+			"undoable/redoable": Science.test(async() => {
+				const {chron} = setup()
+				expect(chron.undoable).is(0)
+				expect(chron.redoable).is(0)
+				expect(chron.state.count).is(0)
+				await chron.mutate(s => s.count++)
+				expect(chron.undoable).is(1)
+				await chron.mutate(s => s.count++)
+				expect(chron.undoable).is(2)
+				await chron.undo()
+				expect(chron.undoable).is(1)
+				expect(chron.redoable).is(1)
+				await chron.undo()
+				expect(chron.undoable).is(0)
+				expect(chron.redoable).is(2)
+				await chron.redo()
+				expect(chron.undoable).is(1)
+				expect(chron.redoable).is(1)
+			}),
+
+			"undo": Science.test(async() => {
+				const {chron} = setup()
+				await chron.mutate(s => s.count++)
+				await chron.undo()
+				expect(chron.state.count).is(0)
+			}),
+
+			"redo": Science.test(async() => {
+				const {chron} = setup()
+				await chron.mutate(s => s.count++)
+				await chron.undo()
+				expect(chron.state.count).is(0)
+				await chron.redo()
+				expect(chron.state.count).is(1)
+			}),
+
+			"undo/redo well ordered": Science.test(async() => {
+				const {chron} = setup()
+				await chron.mutate(s => s.count++)
+				await chron.mutate(s => s.count++)
+				await chron.mutate(s => s.count++)
+				expect(chron.state.count).is(3)
+
+				await chron.undo()
+				expect(chron.state.count).is(2)
+
+				await chron.undo()
+				expect(chron.state.count).is(1)
+
+				await chron.redo()
+				expect(chron.state.count).is(2)
+
+				await chron.redo()
+				expect(chron.state.count).is(3)
+
+				await chron.undo()
+				expect(chron.state.count).is(2)
+
+				await chron.undo()
+				expect(chron.state.count).is(1)
+
+				await chron.undo()
+				expect(chron.state.count).is(0)
+			}),
+
+			"undo nothing does nothing": Science.test(async() => {
+				const {chron} = setup()
+				await chron.undo()
+				expect(chron.state.count).is(0)
+			}),
+
+			"redo nothing does nothing": Science.test(async() => {
+				const {chron} = setup()
+				await chron.redo()
+				expect(chron.state.count).is(0)
+			}),
+
+			"undo 2x": Science.test(async() => {
+				const {chron} = setup()
+				await chron.mutate(s => s.count++)
+				await chron.mutate(s => s.count++)
+				expect(chron.state.count).is(2)
+				await chron.undo(2)
+				expect(chron.state.count).is(0)
+			}),
+
+			"redo 2x": Science.test(async() => {
+				const {chron} = setup()
+				await chron.mutate(s => s.count++)
+				await chron.mutate(s => s.count++)
+				expect(chron.state.count).is(2)
+				await chron.undo(2)
+				expect(chron.state.count).is(0)
+				await chron.redo(2)
+				expect(chron.state.count).is(2)
+			}),
+
+			"substrata mutations are tracked": Science.test(async() => {
+				const strata = new Trunk({
+					chron: Trunk.chronicle({
+						group: {count: 0},
+					}),
+				})
+				const chron = strata.chronobranch(64, s => s.chron)
+				const group = chron.branch(s => s.group)
+				expect(group.state.count).is(0)
+				await group.mutate(g => g.count = 101)
+				expect(group.state.count).is(101)
+				await chron.undo()
+				expect(group.state.count).is(0)
+			}),
+		})
+	})(),
 })
 

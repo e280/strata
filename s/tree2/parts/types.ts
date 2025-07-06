@@ -1,7 +1,5 @@
 
-import {Sub} from "@e280/stz"
 import {Branch} from "./branch.js"
-import {DerivedSignal} from "../../signals/parts/derive.js"
 
 export type Options = {
 	clone: <X>(x: X) => X
@@ -32,7 +30,7 @@ export type Mutable<T> =
 
 export type Tree<S extends Branchstate> = {
 	get state(): Immutable<S>
-	get on(): Sub<[Immutable<S>]>
+	on(fn: (state: Immutable<S>) => void): () => void
 	mutate(mutator: Mutator<S>): Promise<Immutable<S>>
 	branch<Sub extends Branchstate>(selector: Selector<Sub, S>): Branch<Sub, S>
 }
