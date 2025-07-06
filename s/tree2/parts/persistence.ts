@@ -1,5 +1,5 @@
 
-import {Persistence} from "../types.js"
+import {Persistence} from "./types.js"
 
 export const localPersistence = <X>(
 		key: string,

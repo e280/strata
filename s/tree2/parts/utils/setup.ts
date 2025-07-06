@@ -2,7 +2,7 @@
 import {debounce} from "@e280/stz"
 
 import {Trunk} from "../trunk.js"
-import {localPersistence} from "./persistence.js"
+import {localPersistence} from "../persistence.js"
 import {SetupOptions, Trunkstate} from "../types.js"
 
 export async function trunkSetup<S extends Trunkstate>(options: SetupOptions<S>) {
