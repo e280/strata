@@ -1,13 +1,13 @@
 
 import {deep} from "@e280/stz"
 import {Branch} from "./branch.js"
+import {lazy, Lazy} from "../../signals/parts/lazy.js"
 import {processOptions} from "./utils/process-options.js"
 import {signal, Signal} from "../../signals/parts/signal.js"
-import {computed, Computed} from "../../signals/parts/computed.js"
 import {Branchstate, Immutable, Mutator, Options, Selector, Tree, Trunkstate} from "./types.js"
 
 export class Trunk<S extends Trunkstate> implements Tree<S> {
-	state: Computed<Immutable<S>>
+	state: Lazy<Immutable<S>>
 	options: Options
 
 	#mutable: Signal<S>
@@ -16,7 +16,7 @@ export class Trunk<S extends Trunkstate> implements Tree<S> {
 	constructor(state: S, options: Partial<Options> = {}) {
 		this.options = processOptions(options)
 		this.#mutable = signal(state)
-		this.state = computed(() =>
+		this.state = lazy(() =>
 			deep.freeze(this.options.clone(this.#mutable.get())) as Immutable<S>
 		)
 	}

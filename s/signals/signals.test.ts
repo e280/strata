@@ -1,10 +1,9 @@
 
 import {Science, test, expect} from "@e280/science"
 
+import {lazy} from "./parts/lazy.js"
 import {effect} from "./parts/effect.js"
 import {signal} from "./parts/signal.js"
-import {computed} from "./parts/computed.js"
-import { nap } from "@e280/stz"
 
 export default Science.suite({
 	"signal get/set value": test(async() => {
@@ -139,7 +138,7 @@ export default Science.suite({
 	"computed values": test(async() => {
 		const a = signal(2)
 		const b = signal(3)
-		const sum = computed(() => a.value + b.value)
+		const sum = lazy(() => a.value + b.value)
 		expect(sum.value).is(5)
 
 		await a.set(5)
@@ -152,7 +151,7 @@ export default Science.suite({
 	"effect reacts to computed changes": test(async() => {
 		const a = signal(2)
 		const b = signal(3)
-		const sum = computed(() => a.value + b.value)
+		const sum = lazy(() => a.value + b.value)
 
 		let mutations = 0
 		effect(() => {
@@ -172,7 +171,7 @@ export default Science.suite({
 		const a = signal(1)
 		let runs = 0
 
-		const comp = computed(() => {
+		const comp = lazy(() => {
 			runs++
 			return a.value * 10
 		})
@@ -190,7 +189,7 @@ export default Science.suite({
 	"computed fn syntax": test(async() => {
 		const a = signal(2)
 		const b = signal(3)
-		const sum = computed(() => a.value + b.value)
+		const sum = lazy(() => a.value + b.value)
 		expect(sum.value).is(5)
 
 		await a.set(5)

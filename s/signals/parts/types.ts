@@ -1,6 +1,7 @@
 
+import {Lazy} from "./lazy.js"
 import {Signal} from "./signal.js"
-import {Computed} from "./computed.js"
+import {Derive} from "./derive.js"
 
-export type Signalish<V> = Signal<V> | Computed<V>
+export type Signaloid<V> = Signal<V> | Derive<V> | Lazy<V>
 

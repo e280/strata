@@ -1,11 +1,24 @@
 
-import {sub} from "@e280/stz"
+import {Sub, sub} from "@e280/stz"
+
+// import {lazy} from "./lazy.js"
+// import {derive} from "./derive.js"
 import {tracker} from "../../tracker/tracker.js"
 
 export type Signal<V> = {
 	(): V
 	(v: V): Promise<void>
 	(v?: V): V | Promise<void>
+
+	kind: "signal"
+
+	sneak: V
+	value: V
+	on: Sub<[V]>
+	get(): V
+	set(v: V): Promise<void>
+	publish(v?: V): Promise<void>
+	dispose(): void
 } & SignalCore<V>
 
 export function signal<V>(value: V) {
@@ -24,7 +37,10 @@ export function signal<V>(value: V) {
 	return fn as Signal<V>
 }
 
-export class SignalBase<V> {
+// signal.lazy = lazy
+// signal.derive = derive
+
+export class ReadableSignal<V> {
 	constructor(public sneak: V) {}
 
 	get() {
@@ -37,13 +53,19 @@ export class SignalBase<V> {
 	}
 }
 
-export class SignalCore<V> extends SignalBase<V> {
+export class ReactiveSignal<V> extends ReadableSignal<V> {
 	on = sub<[V]>()
-	published: Promise<V>
+
+	dispose() {
+		this.on.clear()
+	}
+}
+
+export class SignalCore<V> extends ReactiveSignal<V> {
+	kind: "signal" = "signal"
 
 	constructor(sneak: V) {
 		super(sneak)
-		this.published = Promise.resolve(sneak)
 	}
 
 	async set(v: V) {
@@ -52,7 +74,7 @@ export class SignalCore<V> extends SignalBase<V> {
 	}
 
 	get value() {
-		return super.value
+		return this.get()
 	}
 
 	set value(v: V) {
@@ -63,12 +85,9 @@ export class SignalCore<V> extends SignalBase<V> {
 		this.sneak = v
 		await Promise.all([
 			tracker.change(this),
-			this.published = this.on.pub(v).then(() => v),
+			this.on.pub(v),
 		])
 	}
-
-	dispose() {
-		this.on.clear()
-	}
 }
+
 

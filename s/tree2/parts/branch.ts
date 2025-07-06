@@ -1,10 +1,10 @@
 
 import {deep} from "@e280/stz"
-import {computed, Computed} from "../../signals/parts/computed.js"
+import {lazy, Lazy} from "../../signals/parts/lazy.js"
 import {Branchstate, Immutable, Mutator, Options, Selector, Tree} from "./types.js"
 
 export class Branch<S extends Branchstate, ParentState extends Branchstate = any> implements Tree<S> {
-	state: Computed<Immutable<S>>
+	state: Lazy<Immutable<S>>
 
 	constructor(
 			private parent: Tree<ParentState>,
@@ -12,7 +12,7 @@ export class Branch<S extends Branchstate, ParentState extends Branchstate = any
 			private options: Options,
 		) {
 
-		this.state = computed(() => {
+		this.state = lazy(() => {
 			const state = selector(parent.state as any)
 			return deep.freeze(options.clone(state)) as Immutable<S>
 		})

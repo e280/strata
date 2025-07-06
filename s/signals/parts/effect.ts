@@ -2,11 +2,11 @@
 import {debounce} from "@e280/stz"
 import {tracker} from "../../tracker/tracker.js"
 
-export function effect<C = void>(collector: () => C, responder: () => void = collector) {
-	return initEffect<C>(collector, responder).dispose
+export function effect(collector: () => void, responder: () => void = collector) {
+	return collectorEffect(collector, responder).dispose
 }
 
-export function initEffect<C = void>(collector: () => C, responder: () => void = collector) {
+export function collectorEffect<C = void>(collector: () => C, responder: () => void = collector) {
 	const {seen, result} = tracker.seen(collector)
 	const fn = debounce(0, responder)
 
