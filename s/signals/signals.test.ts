@@ -1,5 +1,5 @@
 
-import {Science, test, expect} from "@e280/science"
+import {Science, test, expect, spy} from "@e280/science"
 
 import {lazy} from "./parts/lazy.js"
 import {effect} from "./parts/effect.js"
@@ -168,6 +168,22 @@ export default Science.suite({
 		await a.set(3)
 		expect(product.value).is(30)
 		expect(mutations).is(3)
+	}),
+
+	"derived.on": test(async() => {
+		const a = signal(1)
+		const b = signal(10)
+		const product = signal.derive(() => a.value * b.value)
+		expect(product.value).is(10)
+
+		const mole = spy((_v: number) => {})
+		product.on(mole)
+		expect(mole.spy.calls.length).is(0)
+
+		await a.set(2)
+		expect(product.value).is(20)
+		expect(mole.spy.calls.length).is(1)
+		expect(mole.spy.calls[0].args[0]).is(20)
 	}),
 
 	"lazy is lazy": test(async() => {
