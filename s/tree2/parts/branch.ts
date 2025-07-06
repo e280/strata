@@ -1,10 +1,10 @@
 
 import {deep} from "@e280/stz"
-import {lazy, Lazy} from "../../signals/parts/lazy.js"
+import {lazy, LazySignal} from "../../signals/parts/lazy.js"
 import {Branchstate, Immutable, Mutator, Options, Selector, Tree} from "./types.js"
 
 export class Branch<S extends Branchstate, ParentState extends Branchstate = any> implements Tree<S> {
-	state: Lazy<Immutable<S>>
+	state: LazySignal<Immutable<S>>
 
 	constructor(
 			private parent: Tree<ParentState>,

@@ -1,5 +1,5 @@
 
-import { Lazy } from "../../signals/parts/lazy.js"
+import { LazySignal } from "../../signals/parts/lazy.js"
 import {Branch} from "./branch.js"
 
 export type Options = {
@@ -30,7 +30,7 @@ export type Mutable<T> =
 	T
 
 export type Tree<S extends Branchstate> = {
-	readonly state: Lazy<Immutable<S>>
+	readonly state: LazySignal<Immutable<S>>
 	mutate(mutator: Mutator<S>): Promise<Immutable<S>>
 	branch<Sub extends Branchstate>(selector: Selector<Sub, S>): Branch<Sub, S>
 }

@@ -2,7 +2,7 @@
 import {Sub} from "@e280/stz"
 import {DerivedCore} from "./units.js"
 
-export type Derive<V> = {
+export type DerivedSignal<V> = {
 	(): V
 	kind: "derived"
 
@@ -22,6 +22,6 @@ export function derive<V>(formula: () => V) {
 	Object.setPrototypeOf(fn, DerivedCore.prototype)
 	Object.assign(fn, core)
 
-	return fn as Derive<V>
+	return fn as DerivedSignal<V>
 }
 

@@ -4,7 +4,6 @@ import {Science, test, expect} from "@e280/science"
 import {lazy} from "./parts/lazy.js"
 import {effect} from "./parts/effect.js"
 import {signal} from "./parts/signal.js"
-import { nap } from "@e280/stz"
 
 export default Science.suite({
 	"signal get/set value": test(async() => {

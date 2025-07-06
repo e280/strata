@@ -1,13 +1,13 @@
 
 import {deep} from "@e280/stz"
 import {Branch} from "./branch.js"
-import {lazy, Lazy} from "../../signals/parts/lazy.js"
+import {lazy, LazySignal} from "../../signals/parts/lazy.js"
 import {processOptions} from "./utils/process-options.js"
 import {signal, Signal} from "../../signals/parts/signal.js"
 import {Branchstate, Immutable, Mutator, Options, Selector, Tree, Trunkstate} from "./types.js"
 
 export class Trunk<S extends Trunkstate> implements Tree<S> {
-	state: Lazy<Immutable<S>>
+	state: LazySignal<Immutable<S>>
 	options: Options
 
 	#mutable: Signal<S>

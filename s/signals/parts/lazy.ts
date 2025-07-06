@@ -1,7 +1,7 @@
 
 import {LazyCore} from "./units.js"
 
-export type Lazy<V> = {
+export type LazySignal<V> = {
 	(): V
 	kind: "lazy"
 
@@ -21,6 +21,6 @@ export function lazy<V>(formula: () => V) {
 	Object.setPrototypeOf(fn, LazyCore.prototype)
 	Object.assign(fn, core)
 
-	return fn as Lazy<V>
+	return fn as LazySignal<V>
 }
 
