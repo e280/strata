@@ -1,9 +1,9 @@
 
-import {Sub, sub} from "@e280/stz"
+import {Sub} from "@e280/stz"
 
-// import {lazy} from "./lazy.js"
-// import {derive} from "./derive.js"
-import {tracker} from "../../tracker/tracker.js"
+import {lazy} from "./lazy.js"
+import {derive} from "./derive.js"
+import {SignalCore} from "./units.js"
 
 export type Signal<V> = {
 	(): V
@@ -37,57 +37,6 @@ export function signal<V>(value: V) {
 	return fn as Signal<V>
 }
 
-// signal.lazy = lazy
-// signal.derive = derive
-
-export class ReadableSignal<V> {
-	constructor(public sneak: V) {}
-
-	get() {
-		tracker.see(this)
-		return this.sneak
-	}
-
-	get value() {
-		return this.get()
-	}
-}
-
-export class ReactiveSignal<V> extends ReadableSignal<V> {
-	on = sub<[V]>()
-
-	dispose() {
-		this.on.clear()
-	}
-}
-
-export class SignalCore<V> extends ReactiveSignal<V> {
-	kind: "signal" = "signal"
-
-	constructor(sneak: V) {
-		super(sneak)
-	}
-
-	async set(v: V) {
-		if (v !== this.sneak)
-			await this.publish(v)
-	}
-
-	get value() {
-		return this.get()
-	}
-
-	set value(v: V) {
-		this.set(v)
-	}
-
-	async publish(v = this.get()) {
-		this.sneak = v
-		await Promise.all([
-			tracker.change(this),
-			this.on.pub(v),
-		])
-	}
-}
-
+signal.lazy = lazy
+signal.derive = derive
 
