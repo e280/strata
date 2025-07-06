@@ -4,6 +4,7 @@ import {Science, test, expect} from "@e280/science"
 import {effect} from "./parts/effect.js"
 import {signal} from "./parts/signal.js"
 import {computed} from "./parts/computed.js"
+import { nap } from "@e280/stz"
 
 export default Science.suite({
 	"signal get/set value": test(async() => {
@@ -146,6 +147,25 @@ export default Science.suite({
 
 		await b.set(7)
 		expect(sum.value).is(12)
+	}),
+
+	"effect reacts to computed changes": test(async() => {
+		const a = signal(2)
+		const b = signal(3)
+		const sum = computed(() => a.value + b.value)
+
+		let mutations = 0
+		effect(() => {
+			void sum.get()
+			mutations++
+		})
+		expect(mutations).is(1)
+
+		await a.set(3)
+		expect(mutations).is(2) // FAILS
+
+		await a.set(4)
+		expect(mutations).is(3)
 	}),
 
 	"computed is lazy": test(async() => {

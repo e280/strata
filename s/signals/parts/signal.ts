@@ -9,8 +9,6 @@ export type Signal<V> = {
 } & SignalCore<V>
 
 export function signal<V>(value: V) {
-	const core = new SignalCore(value)
-
 	function fn(): V
 	function fn(v: V): Promise<void>
 	function fn(v?: V): V | Promise<void> {
@@ -19,23 +17,33 @@ export function signal<V>(value: V) {
 			: (fn as any).get()
 	}
 
+	const core = new SignalCore(value)
 	Object.setPrototypeOf(fn, SignalCore.prototype)
 	Object.assign(fn, core)
 
 	return fn as Signal<V>
 }
 
-export class SignalCore<V> {
-	on = sub<[V]>()
-	published: Promise<V>
-
-	constructor(public sneak: V) {
-		this.published = Promise.resolve(sneak)
-	}
+export class SignalBase<V> {
+	constructor(public sneak: V) {}
 
 	get() {
 		tracker.see(this)
 		return this.sneak
+	}
+
+	get value() {
+		return this.get()
+	}
+}
+
+export class SignalCore<V> extends SignalBase<V> {
+	on = sub<[V]>()
+	published: Promise<V>
+
+	constructor(sneak: V) {
+		super(sneak)
+		this.published = Promise.resolve(sneak)
 	}
 
 	async set(v: V) {
@@ -44,7 +52,7 @@ export class SignalCore<V> {
 	}
 
 	get value() {
-		return this.get()
+		return super.value
 	}
 
 	set value(v: V) {

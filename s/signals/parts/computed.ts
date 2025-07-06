@@ -1,6 +1,7 @@
 
+import {tracker} from "@e280/stz"
 import {initEffect} from "./effect.js"
-import {SignalCore} from "./signal.js"
+import {SignalBase} from "./signal.js"
 
 export type Computed<V> = {(): V} & ComputedCore<V>
 
@@ -17,7 +18,7 @@ export function computed<V>(fn: () => V) {
 	return f as Computed<V>
 }
 
-export class ComputedCore<V> extends SignalCore<V> {
+export class ComputedCore<V> extends SignalBase<V> {
 	_dirty = false
 	_formula: () => V
 	_effect: (() => void) | undefined
@@ -35,7 +36,12 @@ export class ComputedCore<V> extends SignalCore<V> {
 		}
 		if (this._dirty) {
 			this._dirty = false
-			super.set(this._formula())
+
+			const v = this._formula()
+			if (v !== this.sneak) {
+				this.sneak = v
+				tracker.change(this)
+			}
 		}
 		return super.get()
 	}
@@ -47,7 +53,6 @@ export class ComputedCore<V> extends SignalCore<V> {
 	dispose() {
 		if (this._effect)
 			this._effect()
-		super.dispose()
 	}
 }
 

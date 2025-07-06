@@ -8,9 +8,11 @@ import tracker from "./tracker/tracker.test.js"
 import {Trunk} from "./tree/parts/trunk.js"
 import {effect} from "./signals/parts/effect.js"
 import {signal} from "./signals/parts/signal.js"
+import tree2 from "./tree2/tree.test.js"
 
 await Science.run({
 	tree,
+	tree2,
 	signals,
 	tracker,
 
