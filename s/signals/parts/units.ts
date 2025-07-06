@@ -1,5 +1,5 @@
 
-import {sub} from "@e280/stz"
+import {defer, sub} from "@e280/stz"
 import {collectorEffect} from "./effect.js"
 import {tracker} from "../../tracker/tracker.js"
 
@@ -26,14 +26,27 @@ export class ReactiveSignal<V> extends ReadableSignal<V> {
 
 export class SignalCore<V> extends ReactiveSignal<V> {
 	kind: "signal" = "signal"
+	_lock = false
 
 	constructor(sneak: V) {
 		super(sneak)
 	}
 
 	async set(v: V) {
-		if (v !== this.sneak)
-			await this.publish(v)
+		if (this._lock)
+			throw new Error("forbid circularity")
+
+		if (v !== this.sneak) {
+			let promise = Promise.resolve()
+			try {
+				this._lock = true
+				promise = this.publish(v)
+			}
+			finally {
+				this._lock = false
+			}
+			return promise
+		}
 	}
 
 	get value() {

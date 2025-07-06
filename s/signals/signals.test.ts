@@ -53,6 +53,19 @@ export default Science.suite({
 		expect(runs).is(1)
 	}),
 
+	"signal on circularity forbidden": test(async() => {
+		const count = signal(1)
+		let runs = 0
+		count.on(async() => {
+			await count.set(99)
+			runs++
+		})
+		expect(async() => {
+			await count.set(2)
+		}).throwsAsync()
+		expect(runs).is(0)
+	}),
+
 	"effect tracks signal changes": test(async() => {
 		const count = signal(1)
 		let doubled = 0
