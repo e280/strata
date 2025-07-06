@@ -210,6 +210,26 @@ export default Science.suite({
 		expect(mole.spy.calls[0].args[0]).is(20)
 	}),
 
+	"derived.on not called if result doesn't change": test(async() => {
+		const a = signal(1)
+		const b = signal(10)
+		const product = signal.derive(() => a.value * b.value)
+		expect(product.value).is(10)
+
+		const mole = spy((_v: number) => {})
+		product.on(mole)
+		expect(mole.spy.calls.length).is(0)
+
+		await a.set(2)
+		expect(product.value).is(20)
+		expect(mole.spy.calls.length).is(1)
+		expect(mole.spy.calls[0].args[0]).is(20)
+
+		await a.set(2)
+		expect(product.value).is(20)
+		expect(mole.spy.calls.length).is(1)
+	}),
+
 	"lazy is lazy": test(async() => {
 		const a = signal(1)
 		let runs = 0

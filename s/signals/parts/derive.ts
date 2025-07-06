@@ -1,6 +1,6 @@
 
 import {Sub} from "@e280/stz"
-import {DerivedCore} from "./units.js"
+import {DerivedCore, DeriveOptions} from "./units.js"
 
 export type DerivedSignal<V> = {
 	(): V
@@ -13,12 +13,14 @@ export type DerivedSignal<V> = {
 	dispose(): void
 }
 
-export function derive<V>(formula: () => V) {
+export function derive<V>(formula: () => V, options: Partial<DeriveOptions> = {}) {
+	const compare = options.compare ?? ((a, b) => a === b)
+
 	function fn(): V {
 		return (fn as any).value
 	}
 
-	const core = DerivedCore.make<V>(fn as any, formula)
+	const core = DerivedCore.make<V>(fn as any, formula, {compare})
 	Object.setPrototypeOf(fn, DerivedCore.prototype)
 	Object.assign(fn, core)
 

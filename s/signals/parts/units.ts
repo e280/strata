@@ -59,7 +59,7 @@ export class LazyCore<V> extends ReadableSignal<V> {
 	_dirty = false
 	_effect: (() => void) | undefined
 
-	constructor(public _formula: () => V) {
+	constructor(public _formula: () => V, public _options: DeriveOptions) {
 		super(undefined as any)
 	}
 
@@ -73,7 +73,8 @@ export class LazyCore<V> extends ReadableSignal<V> {
 			this._dirty = false
 
 			const v = this._formula()
-			if (v !== this.sneak) {
+			const isChanged = !this._options.compare(this.sneak, v)
+			if (isChanged) {
 				this.sneak = v
 				tracker.change(this)
 			}
@@ -91,15 +92,22 @@ export class LazyCore<V> extends ReadableSignal<V> {
 	}
 }
 
+export type DeriveOptions = {
+	compare: (a: any, b: any) => boolean
+}
+
 export class DerivedCore<V> extends ReactiveSignal<V> {
-	static make<V>(that: DerivedCore<V>, formula: () => V) {
+	static make<V>(that: DerivedCore<V>, formula: () => V, options: DeriveOptions) {
 		const {result, dispose} = collectorEffect(formula, async() => {
 			const value = formula()
-			that.sneak = value
-			await Promise.all([
-				tracker.change(that),
-				that.on.pub(value),
-			])
+			const isChanged = !options.compare(that.sneak, value)
+			if (isChanged) {
+				that.sneak = value
+				await Promise.all([
+					tracker.change(that),
+					that.on.pub(value),
+				])
+			}
 		})
 		return new this(result, dispose)
 	}

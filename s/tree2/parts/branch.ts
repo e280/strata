@@ -1,10 +1,11 @@
 
 import {deep} from "@e280/stz"
-import {lazy, LazySignal} from "../../signals/parts/lazy.js"
+import {signal} from "../../signals/parts/signal.js"
+import {DerivedSignal} from "../../signals/parts/derive.js"
 import {Branchstate, Immutable, Mutator, Options, Selector, Tree} from "./types.js"
 
 export class Branch<S extends Branchstate, ParentState extends Branchstate = any> implements Tree<S> {
-	state: LazySignal<Immutable<S>>
+	#signal: DerivedSignal<Immutable<S>>
 
 	constructor(
 			private parent: Tree<ParentState>,
@@ -12,17 +13,25 @@ export class Branch<S extends Branchstate, ParentState extends Branchstate = any
 			private options: Options,
 		) {
 
-		this.state = lazy(() => {
+		this.#signal = signal.derive(() => {
 			const state = selector(parent.state as any)
 			return deep.freeze(options.clone(state)) as Immutable<S>
-		})
+		}, {compare: deep.equal})
+	}
+
+	get state() {
+		return this.#signal.get()
+	}
+
+	get on() {
+		return this.#signal.on
 	}
 
 	async mutate(mutator: Mutator<S>) {
 		await this.parent.mutate(parentState =>
 			mutator(this.selector(parentState))
 		)
-		return this.state.get()
+		return this.#signal.get()
 	}
 
 	branch<Sub extends Branchstate>(selector: Selector<Sub, S>): Branch<Sub, S> {

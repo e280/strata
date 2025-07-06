@@ -1,24 +1,32 @@
 
 import {deep} from "@e280/stz"
 import {Branch} from "./branch.js"
-import {lazy, LazySignal} from "../../signals/parts/lazy.js"
 import {processOptions} from "./utils/process-options.js"
+import {DerivedSignal} from "../../signals/parts/derive.js"
 import {signal, Signal} from "../../signals/parts/signal.js"
 import {Branchstate, Immutable, Mutator, Options, Selector, Tree, Trunkstate} from "./types.js"
 
 export class Trunk<S extends Trunkstate> implements Tree<S> {
-	state: LazySignal<Immutable<S>>
 	options: Options
 
+	#signal: DerivedSignal<Immutable<S>>
 	#mutable: Signal<S>
 	#mutationLock = 0
 
 	constructor(state: S, options: Partial<Options> = {}) {
 		this.options = processOptions(options)
 		this.#mutable = signal(state)
-		this.state = lazy(() =>
+		this.#signal = signal.derive(() =>
 			deep.freeze(this.options.clone(this.#mutable.get())) as Immutable<S>
 		)
+	}
+
+	get state() {
+		return this.#signal.get()
+	}
+
+	get on() {
+		return this.#signal.on
 	}
 
 	async mutate(mutator: Mutator<S>) {
@@ -31,7 +39,7 @@ export class Trunk<S extends Trunkstate> implements Tree<S> {
 		const newState = this.#mutable.get()
 		const isChanged = !deep.equal(newState, oldState)
 		if (isChanged) await this.overwrite(newState)
-		return this.state.get()
+		return this.#signal.get()
 	}
 
 	async overwrite(state: S) {

@@ -1,6 +1,7 @@
 
-import { LazySignal } from "../../signals/parts/lazy.js"
+import {Sub} from "@e280/stz"
 import {Branch} from "./branch.js"
+import {DerivedSignal} from "../../signals/parts/derive.js"
 
 export type Options = {
 	clone: <X>(x: X) => X
@@ -30,7 +31,8 @@ export type Mutable<T> =
 	T
 
 export type Tree<S extends Branchstate> = {
-	readonly state: LazySignal<Immutable<S>>
+	get state(): Immutable<S>
+	get on(): Sub<[Immutable<S>]>
 	mutate(mutator: Mutator<S>): Promise<Immutable<S>>
 	branch<Sub extends Branchstate>(selector: Selector<Sub, S>): Branch<Sub, S>
 }

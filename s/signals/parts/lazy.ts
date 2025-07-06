@@ -1,5 +1,5 @@
 
-import {LazyCore} from "./units.js"
+import {DeriveOptions, LazyCore} from "./units.js"
 
 export type LazySignal<V> = {
 	(): V
@@ -11,13 +11,14 @@ export type LazySignal<V> = {
 	dispose(): void
 }
 
-export function lazy<V>(formula: () => V) {
+export function lazy<V>(formula: () => V, options: Partial<DeriveOptions> = {}) {
+	const compare = options.compare ?? ((a, b) => a === b)
 
 	function fn(): V {
 		return (fn as any).value
 	}
 
-	const core = new LazyCore<V>(formula)
+	const core = new LazyCore<V>(formula, {compare})
 	Object.setPrototypeOf(fn, LazyCore.prototype)
 	Object.assign(fn, core)
 
