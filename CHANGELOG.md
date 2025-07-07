@@ -8,6 +8,13 @@
 
 ## v0.0
 
+### v0.0.0-8
+- 🟥 tree (trunk/branch/chronobranch) reimplemented to use signals under the hood
+- 🟥 renamed `tree.watch` to `tree.on`
+
+### v0.0.0-7
+- 🟥 fix `Trunk.setup` return names
+
 ### v0.0.0-6
 - 🍏 added `signal`, `effect`, `computed`
 - 🍏 added `tracker`
