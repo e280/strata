@@ -86,7 +86,7 @@ import {signal, effect, computed} from "@e280/strata"
   ```ts
   const a = signal(1)
   const b = signal(10)
-  const product = signal.derive(() => a() + b())
+  const product = signal.derive(() => a() * b())
 
   product() // 10
 
@@ -174,7 +174,7 @@ import {signal, effect, computed} from "@e280/strata"
 - simple setup
   ```ts
   const {trunk} = await Trunk.setup({
-    version: 1, // 👈 bump whenever your change state schema!
+    version: 1, // 👈 bump whenever you change state schema!
     initialState: {count: 0},
   })
   ```

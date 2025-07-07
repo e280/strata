@@ -9,8 +9,12 @@
 ## v0.0
 
 ### v0.0.0-8
-- 🟥 tree (trunk/branch/chronobranch) reimplemented to use signals under the hood
-- 🟥 renamed `tree.watch` to `tree.on`
+- 🟥 signals rework
+  - `computed` replaced by `signal.lazy`
+  - new `signal.derive` is even betterer than old computed
+- 🟥 big tree rework (trunk/branch/chronobranch)
+  - reimplemented to use signals under the hood
+  - renamed `tree.watch` to `tree.on`
 
 ### v0.0.0-7
 - 🟥 fix `Trunk.setup` return names
