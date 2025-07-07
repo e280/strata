@@ -29,6 +29,9 @@
 		"_tsc": "tsc",
 		"_tscw": "tsc -w"
 	},
+	"dependencies": {
+		"@e280/stz": "^0.0.0-28"
+	},
 	"devDependencies": {
 		"@e280/science": "^0.0.5",
 		"@types/node": "^24.0.10",
@@ -46,8 +49,5 @@
 	},
 	"bugs": {
 		"url": "https://github.com/e280/strata/issues"
-	},
-	"dependencies": {
-		"@e280/stz": "^0.0.0-28"
 	}
 }
