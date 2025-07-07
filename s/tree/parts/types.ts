@@ -8,10 +8,10 @@ export type Options = {
 export type Selector<Sub, S> = (state: S) => Sub
 export type Mutator<S> = (state: S) => void
 
-export type Treestate = {}
+export type Trunkstate = {}
 export type Branchstate = {} | null | undefined
 
-export type Versioned<S extends Treestate> = {
+export type Versioned<S extends Trunkstate> = {
 	state: S
 	version: number
 }
@@ -29,13 +29,13 @@ export type Mutable<T> =
 	T
 
 export type Tree<S extends Branchstate> = {
-	readonly state: Immutable<S>
-	watch(fn: (s: Immutable<S>) => void): () => void
+	get state(): Immutable<S>
+	on(fn: (state: Immutable<S>) => void): () => void
 	mutate(mutator: Mutator<S>): Promise<Immutable<S>>
 	branch<Sub extends Branchstate>(selector: Selector<Sub, S>): Branch<Sub, S>
 }
 
-export type SetupOptions<S extends Treestate> = {
+export type SetupOptions<S extends Trunkstate> = {
 	version: number
 	initialState: S
 	saveDebounceTime?: number

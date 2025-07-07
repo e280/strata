@@ -1,14 +1,14 @@
 
-import {debounce, deep, sub} from "@e280/stz"
-
+import {deep} from "@e280/stz"
 import {Branch} from "./branch.js"
 import {trunkSetup} from "./utils/setup.js"
 import {Chronobranch} from "./chronobranch.js"
-import {tracker} from "../../tracker/tracker.js"
 import {processOptions} from "./utils/process-options.js"
-import {Chronicle, Mutator, Options, Selector, Treestate, Tree, Branchstate, Immutable} from "./types.js"
+import {DerivedSignal} from "../../signals/parts/derive.js"
+import {signal, Signal} from "../../signals/parts/signal.js"
+import {Branchstate, Chronicle, Immutable, Mutator, Options, Selector, Tree, Trunkstate} from "./types.js"
 
-export class Trunk<S extends Treestate> implements Tree<S> {
+export class Trunk<S extends Trunkstate> implements Tree<S> {
 	static setup = trunkSetup
 	static chronicle = <S extends Branchstate>(state: S): Chronicle<S> => ({
 		present: state,
@@ -17,40 +17,45 @@ export class Trunk<S extends Treestate> implements Tree<S> {
 	})
 
 	options: Options
-	watch = sub<[state: Immutable<S>]>()
 
-	#mutable: S
-	#immutable: Immutable<S>
+	#immutable: DerivedSignal<Immutable<S>>
+	#mutable: Signal<S>
 	#mutationLock = 0
 
 	constructor(state: S, options: Partial<Options> = {}) {
 		this.options = processOptions(options)
-		this.#mutable = state
-		this.#immutable = deep.freeze(this.options.clone(state)) as Immutable<S>
+		this.#mutable = signal(state)
+		this.#immutable = signal.derive(() =>
+			deep.freeze(this.options.clone(this.#mutable.get())) as Immutable<S>
+		)
 	}
 
 	get state() {
-		tracker.see(this)
-		return this.#immutable
+		return this.#immutable.get()
+	}
+
+	get on() {
+		return this.#immutable.on
 	}
 
 	async mutate(mutator: Mutator<S>) {
-		const oldState = this.options.clone(this.#mutable)
+		const oldState = this.options.clone(this.#mutable.get())
 		if (this.#mutationLock > 0)
 			throw new Error("nested mutations are forbidden")
-		this.#mutationLock++
-		try { mutator(this.#mutable) }
+		try {
+			this.#mutationLock++
+			mutator(this.#mutable())
+			const newState = this.#mutable.get()
+			const isChanged = !deep.equal(newState, oldState)
+			if (isChanged)
+				await this.overwrite(newState)
+		}
 		finally { this.#mutationLock-- }
-		const newState = this.#mutable
-		const isChanged = !deep.equal(newState, oldState)
-		if (isChanged) await this.overwrite(newState)
-		return this.#immutable
+		return this.#immutable.get()
 	}
 
 	async overwrite(state: S) {
-		this.#mutable = state
-		this.#immutable = deep.freeze(this.options.clone(state)) as Immutable<S>
-		await this.#dispatchMutation()
+		await this.#mutable.publish(state)
 	}
 
 	branch<Sub extends Branchstate>(selector: Selector<Sub, S>): Branch<Sub, S> {
@@ -63,12 +68,5 @@ export class Trunk<S extends Treestate> implements Tree<S> {
 		) {
 		return new Chronobranch(limit, this, selector, this.options)
 	}
-
-	#dispatchMutation = debounce(0, async() => {
-		this.#mutationLock++
-		try { await this.watch.pub(this.#immutable) }
-		finally { this.#mutationLock-- }
-		await tracker.change(this)
-	})
 }
 

@@ -1,19 +1,11 @@
 
-import {debounce, deep, sub} from "@e280/stz"
-
-import {Chronobranch} from "./chronobranch.js"
-import {tracker} from "../../tracker/tracker.js"
-import {Chronicle, Mutator, Options, Selector, Tree, Branchstate, Immutable} from "./types.js"
+import {deep} from "@e280/stz"
+import {signal} from "../../signals/parts/signal.js"
+import {DerivedSignal} from "../../signals/parts/derive.js"
+import {Branchstate, Immutable, Mutator, Options, Selector, Tree} from "./types.js"
 
 export class Branch<S extends Branchstate, ParentState extends Branchstate = any> implements Tree<S> {
-	dispose: () => void
-	watch = sub<[state: Immutable<S>]>()
-
-	#immutable: Immutable<S>
-	#dispatchMutation = debounce(0, async(state: Immutable<S>) => {
-		await this.watch.pub(state)
-		await tracker.change(this)
-	})
+	#immutable: DerivedSignal<Immutable<S>>
 
 	constructor(
 			private parent: Tree<ParentState>,
@@ -21,44 +13,29 @@ export class Branch<S extends Branchstate, ParentState extends Branchstate = any
 			private options: Options,
 		) {
 
-		const state = this.selector(this.parent.state as ParentState)
-		this.#immutable = deep.freeze(this.options.clone(state)) as Immutable<S>
-
-		this.dispose = this.parent.watch(async parentState => {
-			const oldState = this.#immutable
-			const newState = this.selector(parentState as ParentState)
-			const isChanged = !deep.equal(newState, oldState)
-			if (isChanged) {
-				this.#updateState(newState)
-				const immutable = this.state
-				await this.#dispatchMutation(immutable)
-			}
-		})
+		this.#immutable = signal.derive(() => {
+			const state = selector(parent.state as any)
+			return deep.freeze(options.clone(state)) as Immutable<S>
+		}, {compare: deep.equal})
 	}
 
-	#updateState(state: S) {
-		this.#immutable = deep.freeze(this.options.clone(state)) as Immutable<S>
+	get state() {
+		return this.#immutable.get()
 	}
 
-	get state(): Immutable<S> {
-		tracker.see(this)
-		return this.#immutable
+	get on() {
+		return this.#immutable.on
 	}
 
 	async mutate(mutator: Mutator<S>) {
-		await this.parent.mutate(parentState => mutator(this.selector(parentState as any)))
-		return this.#immutable
+		await this.parent.mutate(parentState =>
+			mutator(this.selector(parentState))
+		)
+		return this.#immutable.get()
 	}
 
 	branch<Sub extends Branchstate>(selector: Selector<Sub, S>): Branch<Sub, S> {
 		return new Branch(this, selector, this.options)
-	}
-
-	chronobranch<Sub extends Branchstate>(
-			limit: number,
-			selector: Selector<Chronicle<Sub>, S>,
-		) {
-		return new Chronobranch(limit, this, selector, this.options)
 	}
 }
 

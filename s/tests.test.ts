@@ -47,7 +47,7 @@ await Science.run({
 			expect(order[2]).is("after")
 		}),
 
-		"branch can include signal value": test.skip(async() => {
+		"branch can include signal value": test(async() => {
 			const bingus = signal(101)
 			const trunk = new Trunk({count: 1})
 			const branch = trunk.branch(s => ({

@@ -3,9 +3,9 @@ import {debounce} from "@e280/stz"
 
 import {Trunk} from "../trunk.js"
 import {localPersistence} from "../persistence.js"
-import {Treestate, SetupOptions} from "../types.js"
+import {SetupOptions, Trunkstate} from "../types.js"
 
-export async function trunkSetup<S extends Treestate>(options: SetupOptions<S>) {
+export async function trunkSetup<S extends Trunkstate>(options: SetupOptions<S>) {
 	const {
 		version,
 		initialState,
@@ -30,7 +30,7 @@ export async function trunkSetup<S extends Treestate>(options: SetupOptions<S>) 
 	await load()
 
 	// persistence: save to store
-	trunk.watch(save)
+	trunk.on(save)
 
 	// cross-tab sync
 	const dispose = persistence.onChange(load)

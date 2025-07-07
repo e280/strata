@@ -1,6 +1,6 @@
 
 import {Branch} from "./branch.js"
-import {Chronicle, Mutator, Options, Selector, Tree, Branchstate, Immutable} from "./types.js"
+import {Branchstate, Chronicle, Immutable, Mutator, Options, Selector, Tree} from "./types.js"
 
 export class Chronobranch<S extends Branchstate, ParentState extends Branchstate = any> implements Tree<S> {
 	#branch: Branch<Chronicle<S>, ParentState>
@@ -26,8 +26,8 @@ export class Chronobranch<S extends Branchstate, ParentState extends Branchstate
 		return this.#branch.state.future.length
 	}
 
-	watch(fn: (state: Immutable<S>) => void) {
-		return this.#branch.watch(chronicle => fn(chronicle.present))
+	on(fn: (state: Immutable<S>) => void) {
+		return this.#branch.on(chronicle => fn(chronicle.present))
 	}
 
 	/** progress forwards in history */

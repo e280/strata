@@ -1,9 +1,9 @@
 
-import {Science, test, expect} from "@e280/science"
+import {Science, test, expect, spy} from "@e280/science"
 
+import {lazy} from "./parts/lazy.js"
 import {effect} from "./parts/effect.js"
 import {signal} from "./parts/signal.js"
-import {computed} from "./parts/computed.js"
 
 export default Science.suite({
 	"signal get/set value": test(async() => {
@@ -51,6 +51,19 @@ export default Science.suite({
 		await count.set(2)
 		await count.set(2)
 		expect(runs).is(1)
+	}),
+
+	"signal on circularity forbidden": test(async() => {
+		const count = signal(1)
+		let runs = 0
+		count.on(async() => {
+			await count.set(99)
+			runs++
+		})
+		expect(async() => {
+			await count.set(2)
+		}).throwsAsync()
+		expect(runs).is(0)
 	}),
 
 	"effect tracks signal changes": test(async() => {
@@ -135,10 +148,10 @@ export default Science.suite({
 		expect(runs).is(2)
 	}),
 
-	"computed values": test(async() => {
+	"lazy values": test(async() => {
 		const a = signal(2)
 		const b = signal(3)
-		const sum = computed(() => a.value + b.value)
+		const sum = lazy(() => a.value + b.value)
 		expect(sum.value).is(5)
 
 		await a.set(5)
@@ -148,11 +161,93 @@ export default Science.suite({
 		expect(sum.value).is(12)
 	}),
 
-	"computed is lazy": test(async() => {
+	"effect reacts to derived changes": test(async() => {
+		const a = signal(1)
+		const b = signal(10)
+		const product = signal.derive(() => a.value * b.value)
+
+		let mutations = 0
+		effect(() => {
+			void product.get()
+			mutations++
+		})
+		expect(product.value).is(10)
+		expect(mutations).is(1)
+
+		await a.set(2)
+		expect(product.value).is(20)
+		expect(mutations).is(2)
+
+		await a.set(3)
+		expect(product.value).is(30)
+		expect(mutations).is(3)
+	}),
+
+	"effect doesn't overreact to derived": test(async() => {
+		const a = signal(1)
+		const b = signal(10)
+		const product = signal.derive(() => a.value * b.value)
+
+		const derivedSpy = spy(() => {})
+		product.on(derivedSpy)
+
+		let mutations = 0
+		effect(() => {
+			a.get()
+			product.get()
+			mutations++
+		})
+		expect(product.value).is(10)
+		expect(mutations).is(1)
+		expect(derivedSpy.spy.calls.length).is(0)
+
+		await a.set(2)
+		expect(product.value).is(20)
+		expect(mutations).is(2)
+		expect(derivedSpy.spy.calls.length).is(1)
+	}),
+
+	"derived.on": test(async() => {
+		const a = signal(1)
+		const b = signal(10)
+		const product = signal.derive(() => a.value * b.value)
+		expect(product.value).is(10)
+
+		const mole = spy((_v: number) => {})
+		product.on(mole)
+		expect(mole.spy.calls.length).is(0)
+
+		await a.set(2)
+		expect(product.value).is(20)
+		expect(mole.spy.calls.length).is(1)
+		expect(mole.spy.calls[0].args[0]).is(20)
+	}),
+
+	"derived.on not called if result doesn't change": test(async() => {
+		const a = signal(1)
+		const b = signal(10)
+		const product = signal.derive(() => a.value * b.value)
+		expect(product.value).is(10)
+
+		const mole = spy((_v: number) => {})
+		product.on(mole)
+		expect(mole.spy.calls.length).is(0)
+
+		await a.set(2)
+		expect(product.value).is(20)
+		expect(mole.spy.calls.length).is(1)
+		expect(mole.spy.calls[0].args[0]).is(20)
+
+		await a.set(2)
+		expect(product.value).is(20)
+		expect(mole.spy.calls.length).is(1)
+	}),
+
+	"lazy is lazy": test(async() => {
 		const a = signal(1)
 		let runs = 0
 
-		const comp = computed(() => {
+		const comp = lazy(() => {
 			runs++
 			return a.value * 10
 		})
@@ -167,10 +262,10 @@ export default Science.suite({
 		expect(runs).is(2)
 	}),
 
-	"computed fn syntax": test(async() => {
+	"lazy fn syntax": test(async() => {
 		const a = signal(2)
 		const b = signal(3)
-		const sum = computed(() => a.value + b.value)
+		const sum = lazy(() => a.value + b.value)
 		expect(sum.value).is(5)
 
 		await a.set(5)
