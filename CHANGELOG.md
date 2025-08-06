@@ -8,6 +8,10 @@
 
 ## v0.0
 
+### v0.0.0-9
+- 🍏 update dependencies
+- 🍏 remove wildcard export paths (more formal exports)
+
 ### v0.0.0-8
 - 🟥 signals rework
   - `computed` replaced by `signal.lazy`
