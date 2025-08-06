@@ -14,8 +14,7 @@
 		".": "./x/index.js",
 		"./signals": "./x/signals/index.js",
 		"./tracker": "./x/tracker/index.js",
-		"./tree": "./x/tree/index.js",
-		"./*": "./*"
+		"./tree": "./x/tree/index.js"
 	},
 	"scripts": {
 		"build": "run-s _clean _links _tsc",
