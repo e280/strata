@@ -8,6 +8,12 @@
 
 ## v0.0
 
+### v0.0.0-10
+- 🍏 tweak signal ergonomics:
+  - `mySignal.set(123)` now returns a promise for `123`
+  - `mySignal(123)` now returns a promise for `123`
+  - `mySignal.publish(123)` now returns a promise for `123`
+
 ### v0.0.0-9
 - 🍏 update dependencies
 - 🍏 remove wildcard export paths (more formal exports)

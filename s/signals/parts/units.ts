@@ -45,6 +45,7 @@ export class SignalCore<V> extends ReactiveSignal<V> {
 		const isChanged = !this._options.compare(this.sneak, v)
 		if (isChanged)
 			await this.publish(v)
+		return v
 	}
 
 	get value() {
@@ -73,7 +74,8 @@ export class SignalCore<V> extends ReactiveSignal<V> {
 			this._lock = false
 		}
 
-		return promise
+		await promise
+		return v
 	}
 }
 

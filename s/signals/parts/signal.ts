@@ -8,8 +8,8 @@ import {processSignalOptions, SignalCore} from "./units.js"
 
 export type Signal<V> = {
 	(): V
-	(v: V): Promise<void>
-	(v?: V): V | Promise<void>
+	(v: V): Promise<V>
+	(v?: V): V | Promise<V>
 
 	kind: "signal"
 
@@ -17,8 +17,8 @@ export type Signal<V> = {
 	value: V
 	on: Sub<[V]>
 	get(): V
-	set(v: V): Promise<void>
-	publish(v?: V): Promise<void>
+	set(v: V): Promise<V>
+	publish(v?: V): Promise<V>
 	dispose(): void
 } & SignalCore<V>
 

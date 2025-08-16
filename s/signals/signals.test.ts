@@ -28,6 +28,15 @@ export default Science.suite({
 		expect(count()).is(5)
 	}),
 
+	"signal set and publish returns value": test(async() => {
+		const count = signal(0)
+		expect(count.value).is(0)
+
+		expect(await count.set(1)).is(1)
+		expect(await count(2)).is(2)
+		expect(await count.publish(3)).is(3)
+	}),
+
 	"signal syntax interop": test(async() => {
 		const count = signal(0)
 
