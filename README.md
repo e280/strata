@@ -9,6 +9,7 @@
 📦 `npm install @e280/strata`  
 🧙‍♂️ probably my tenth state management library, lol  
 💁 it's all about rerendering ui when data changes  
+🧑‍💻 a project by https://e280.org/
 
 🚦 **signals** — ephemeral view-level state  
 🌳 **tree** — persistent app-level state  
@@ -22,12 +23,14 @@
 
 <br/>
 
-## 🚦 signals — *ephemeral view-level state*
+## 🚦 strata signals
+> *ephemeral view-level state*
+
 ```ts
 import {signal, effect, computed} from "@e280/strata"
 ```
 
-### each signal holds a value
+### 🚦 each signal holds a value
 - **create a signal**
   ```ts
   const count = signal(0)
@@ -45,19 +48,19 @@ import {signal, effect, computed} from "@e280/strata"
   await count(2)
   ```
 
-### pick your poison
-- **signals hipster fn syntax**
+### 🚦 pick your poison
+- **signal hipster fn syntax**
   ```ts
   count() // get
   await count(2) // set
   ```
   > to achieve this hipster syntax i had to make the implementation so damn cursed, lol 💀
-- **signals get/set syntax**
+- **signal get/set syntax**
   ```ts
   count.get() // get
   await count.set(2) // set
   ```
-- **signals .value accessor syntax**
+- **signal .value accessor syntax**
   ```ts
   count.value // get
   count.value = 2 // set
@@ -68,7 +71,7 @@ import {signal, effect, computed} from "@e280/strata"
   count.value += 1
   ```
 
-### effects
+### 🚦 effects
 - **effects run when the relevant signals change**
   ```ts
   effect(() => console.log(count()))
@@ -80,7 +83,7 @@ import {signal, effect, computed} from "@e280/strata"
     // when count is changed, the effect fn is run
   ```
 
-### `signal.derive` and `signal.lazy` are computed signals
+### 🚦 `signal.derive` and `signal.lazy` are computed signals
 - **signal.derive**  
   is for combining signals
   ```ts
@@ -100,21 +103,25 @@ import {signal, effect, computed} from "@e280/strata"
   is for making special optimizations.  
   it's like derive, except it cannot trigger effects,  
   because it's so lazy it only computes the value on read, and only when necessary.  
-  > ⚠️ *i repeat: lazy signals cannot trigger effects!*
+  > *i repeat: lazy signals cannot trigger effects!*
 
 <br/>
 
-## 🌳 tree — *persistent app-level state*
+## 🌳 strata trees
+> *persistent app-level state*
+
+```ts
+import {Trunk} from "@e280/strata"
+```
+
 - single-source-of-truth state tree
 - immutable except for `mutate(fn)` calls
 - localStorage persistence, cross-tab sync, undo/redo history
 - no spooky-dookie proxy magic — just god's honest javascript
 
-#### `Trunk` is your app's state tree root
+#### 🌳 `Trunk` is your app's state tree root
 - better stick to json-friendly serializable data
   ```ts
-  import {Trunk} from "@e280/strata"
-
   const trunk = new Trunk({
     count: 0,
     snacks: {
@@ -127,7 +134,7 @@ import {signal, effect, computed} from "@e280/strata"
   trunk.state.snacks.peanuts // 8
   ```
 
-#### formal mutations to change state
+#### 🌳 formal mutations to change state
 - ⛔ informal mutations are denied
   ```ts
   trunk.state.count++ // error is thrown
@@ -137,7 +144,7 @@ import {signal, effect, computed} from "@e280/strata"
   await trunk.mutate(s => s.count++)
   ```
 
-#### `Branch` is a view into a subtree
+#### 🌳 `Branch` is a view into a subtree
 - it's a lens, make lots of them, pass 'em around your app
   ```ts
   const snacks = trunk.branch(s => s.snacks)
@@ -152,7 +159,7 @@ import {signal, effect, computed} from "@e280/strata"
   ```
 - you can branch a branch
 
-#### `on` to watch for mutations
+#### 🌳 `on` to watch for mutations
 - on the trunk, we can listen deeply for mutations within the whole tree
   ```ts
   trunk.on(s => console.log(s.count))
@@ -167,9 +174,10 @@ import {signal, effect, computed} from "@e280/strata"
   stop() // stop listening
   ```
 
-### only discerning high-class aristocrats are permitted beyond this point
+### 🌳 fancy advanced usage
+> *only discerning high-class aristocrats are permitted beyond this point*
 
-#### `Trunk.setup` for localStorage persistence etc
+#### 🌳 `Trunk.setup` for localStorage persistence etc
 - it automatically handles persistence to localStorage and cross-tab synchronization
 - simple setup
   ```ts
@@ -196,7 +204,7 @@ import {signal, effect, computed} from "@e280/strata"
   })
   ```
 
-#### `Chronobranch` for undo/redo history
+#### 🌳 `Chronobranch` for undo/redo history
 - first, put a `Chronicle` into your state tree
   ```ts
   const trunk = new Trunk({
@@ -235,15 +243,77 @@ import {signal, effect, computed} from "@e280/strata"
 <br/>
 
 ## 🪄 tracker — integrations
-- ```ts
-  import {tracker} from "@e280/strata/tracker"
-  ```
-- all reactivity is orchestrated by the `tracker`
-- if you are integrating a new state object, or a new view layer that needs to react to state changes, just read [tracker.ts](./s/tracker/tracker.ts)
+> *reactivity integration hub*
+
+```ts
+import {tracker} from "@e280/strata/tracker"
+```
+
+the *items* that the tracker tracks can be any object, or symbol.. the tracker cares about the identity of the item, not the value (tracker holds them in a WeakMap to avoid creating a memory leak)..
+
+### 🪄 integrate your ui's reactivity
+- we need to imagine you have some prerequisites
+    - `myRenderFn` -- your fn that might access some state stuff
+    - `myRerenderFn` -- your fn that is called when some state stuff changes
+    - it's OK if these are the same fn, but they don't have to be
+- `tracker.seen` to check what is touched by a fn
+    ```ts
+    // 🪄 run myRenderFn and collect seen items
+    const {seen, result} = tracker.seen(myRenderFn)
+
+    // a set of items that were accessed during myRenderFn
+    seen
+
+    // the value returned by myRenderFn
+    result
+    ```
+- it's a good idea to debounce your rerender fn:
+    ```ts
+    import {debounce} from "@e280/stz"
+    const myDebouncedRerenderFn = debounce(0, myRerenderFn)
+    ```
+- `tracker.changed` to respond to changes
+    ```ts
+    const stoppers: (() => void)[] = []
+
+    // loop over every seen item
+    for (const item of seen) {
+
+      // 🪄 react to changes
+      const stop = tracker.changed(item, myDebouncedRerenderFn)
+
+      stoppers.push(stop)
+    }
+
+    const stopReactivity = () => stoppers.forEach(stop => stop())
+    ```
+
+### 🪄 integrate own novel state concepts
+- as an example, we'll invent the simplest possible signal
+    ```ts
+    export class SimpleSignal<Value> {
+      constructor(private value: Value) {}
+
+      get() {
+
+        // 🪄 tell the tracker this signal was accessed
+        tracker.see(this)
+
+        return this.value
+      }
+
+      async set(value: Value) {
+        this.value = value
+
+        // 🪄 tell the tracker this signal has changed
+        await tracker.change(this)
+      }
+    }
+    ```
 
 <br/>
 
-## a buildercore e280 project
+## 🧑‍💻 an e280 project
 free and open source by https://e280.org/  
 join us if you're cool and good at dev  
 
