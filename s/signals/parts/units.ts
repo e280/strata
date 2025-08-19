@@ -16,7 +16,7 @@ export class ReadableSignal<V> {
 	constructor(public sneak: V) {}
 
 	get() {
-		tracker.see(this)
+		tracker.notifyRead(this)
 		return this.sneak
 	}
 
@@ -66,7 +66,7 @@ export class SignalCore<V> extends ReactiveSignal<V> {
 			this._lock = true
 			this.sneak = v
 			promise = Promise.all([
-				tracker.change(this),
+				tracker.notifyWrite(this),
 				this.on.pub(v),
 			]) as any
 		}
@@ -102,7 +102,7 @@ export class LazyCore<V> extends ReadableSignal<V> {
 			const isChanged = !this._options.compare(this.sneak, v)
 			if (isChanged) {
 				this.sneak = v
-				tracker.change(this)
+				tracker.notifyWrite(this)
 			}
 		}
 		return super.get()
@@ -126,7 +126,7 @@ export class DerivedCore<V> extends ReactiveSignal<V> {
 			if (isChanged) {
 				that.sneak = value
 				await Promise.all([
-					tracker.change(that),
+					tracker.notifyWrite(that),
 					that.on.pub(value),
 				])
 			}

@@ -4,16 +4,7 @@ import {sub, Sub} from "@e280/stz"
 export type TrackableItem = object | symbol
 
 /**
- * tracking system for state management
- *  - it tracks when items are seen or changed
- *
- * for state item integration (like you're integrating a new kind of state object)
- *  - items can call `tracker.see(this)` when they are accessed
- *  - items can call `tracker.change(this)` when they are reassigned
- *
- * for reactivity integration (like you're integrating a new view library that reacts to state changes)
- *  - run `tracker.seen(renderFn)`, collecting a set of seen items
- *  - loop over each seen item, attach a changed handler `tracker.changed(item, handlerFn)`
+ * reactivity integration hub
  */
 export class Tracker<Item extends TrackableItem = any> {
 	#seeables: Set<Item>[] = []
@@ -22,20 +13,12 @@ export class Tracker<Item extends TrackableItem = any> {
 	#busy = new Set<Item>()
 
 	/** indicate item was accessed */
-	see(item: Item) {
+	notifyRead(item: Item) {
 		this.#seeables.at(-1)?.add(item)
 	}
 
-	/** collect which items were seen during fn */
-	seen<R>(fn: () => R) {
-		this.#seeables.push(new Set())
-		const result = fn()
-		const seen = this.#seeables.pop()!
-		return {seen, result}
-	}
-
 	/** indicate item was changed */
-	async change(item: Item) {
+	async notifyWrite(item: Item) {
 		if (this.#busy.has(item))
 			throw new Error("circularity forbidden")
 		const prom = this.#guaranteeChangeable(item).pub()
@@ -43,8 +26,16 @@ export class Tracker<Item extends TrackableItem = any> {
 		return prom
 	}
 
+	/** collect which items were seen during fn */
+	observe<R>(fn: () => R) {
+		this.#seeables.push(new Set())
+		const result = fn()
+		const seen = this.#seeables.pop()!
+		return {seen, result}
+	}
+
 	/** respond to changes by calling fn */
-	changed(item: Item, fn: () => Promise<void>) {
+	subscribe(item: Item, fn: () => Promise<void>) {
 		return this.#guaranteeChangeable(item)(async() => {
 			const collected = new Set<Promise<void>>()
 			this.#changeStack.push(collected)
@@ -66,8 +57,6 @@ export class Tracker<Item extends TrackableItem = any> {
 	}
 }
 
-const key = Symbol.for("e280.tracker.v2")
-
 /** standard global tracker for integrations */
-export const tracker: Tracker = (globalThis as any)[key] ??= new Tracker()
+export const tracker: Tracker = (globalThis as any)[Symbol.for("e280.tracker")] ??= new Tracker()
 

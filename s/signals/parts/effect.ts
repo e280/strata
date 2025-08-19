@@ -7,14 +7,14 @@ export function effect(collector: () => void, responder: () => void = collector)
 }
 
 export function collectorEffect<C = void>(collector: () => C, responder: () => void = collector) {
-	const {seen, result} = tracker.seen(collector)
+	const {seen, result} = tracker.observe(collector)
 	const fn = debounce(0, responder)
 
 	const disposers: (() => void)[] = []
 	const dispose = () => disposers.forEach(d => d())
 
 	for (const saw of seen) {
-		const dispose = tracker.changed(saw, fn)
+		const dispose = tracker.subscribe(saw, fn)
 		disposers.push(dispose)
 	}
 

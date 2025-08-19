@@ -256,10 +256,10 @@ the *items* that the tracker tracks can be any object, or symbol.. the tracker c
     - `myRenderFn` -- your fn that might access some state stuff
     - `myRerenderFn` -- your fn that is called when some state stuff changes
     - it's OK if these are the same fn, but they don't have to be
-- `tracker.seen` to check what is touched by a fn
+- `tracker.observe` to check what is touched by a fn
     ```ts
     // 🪄 run myRenderFn and collect seen items
-    const {seen, result} = tracker.seen(myRenderFn)
+    const {seen, result} = tracker.observe(myRenderFn)
 
     // a set of items that were accessed during myRenderFn
     seen
@@ -267,12 +267,12 @@ the *items* that the tracker tracks can be any object, or symbol.. the tracker c
     // the value returned by myRenderFn
     result
     ```
-- it's a good idea to debounce your rerender fn:
+- it's a good idea to debounce your rerender fn
     ```ts
     import {debounce} from "@e280/stz"
     const myDebouncedRerenderFn = debounce(0, myRerenderFn)
     ```
-- `tracker.changed` to respond to changes
+- `tracker.subscribe` to respond to changes
     ```ts
     const stoppers: (() => void)[] = []
 
@@ -280,7 +280,7 @@ the *items* that the tracker tracks can be any object, or symbol.. the tracker c
     for (const item of seen) {
 
       // 🪄 react to changes
-      const stop = tracker.changed(item, myDebouncedRerenderFn)
+      const stop = tracker.subscribe(item, myDebouncedRerenderFn)
 
       stoppers.push(stop)
     }
@@ -288,7 +288,7 @@ the *items* that the tracker tracks can be any object, or symbol.. the tracker c
     const stopReactivity = () => stoppers.forEach(stop => stop())
     ```
 
-### 🪄 integrate own novel state concepts
+### 🪄 integrate your own novel state concepts
 - as an example, we'll invent the simplest possible signal
     ```ts
     export class SimpleSignal<Value> {
@@ -297,7 +297,7 @@ the *items* that the tracker tracks can be any object, or symbol.. the tracker c
       get() {
 
         // 🪄 tell the tracker this signal was accessed
-        tracker.see(this)
+        tracker.notifyRead(this)
 
         return this.value
       }
@@ -306,7 +306,7 @@ the *items* that the tracker tracks can be any object, or symbol.. the tracker c
         this.value = value
 
         // 🪄 tell the tracker this signal has changed
-        await tracker.change(this)
+        await tracker.notifyWrite(this)
       }
     }
     ```

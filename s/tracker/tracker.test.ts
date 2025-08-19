@@ -8,13 +8,13 @@ export default Science.suite({
 		let order: string[] = []
 
 		const item = {}
-		tracker.changed(item, async () => {
+		tracker.subscribe(item, async () => {
 			await Promise.resolve()
 			order.push("effect")
 		})
 
 		order.push("before")
-		await tracker.change(item)
+		await tracker.notifyWrite(item)
 		order.push("after")
 
 		expect(order.length).is(3)
@@ -28,12 +28,12 @@ export default Science.suite({
 		const item = {}
 
 		// effect re-publishes the same change, creating a cycle
-		tracker.changed(item, async() => {
-			await tracker.change(item)
+		tracker.subscribe(item, async() => {
+			await tracker.notifyWrite(item)
 		})
 
 		expect(async() => {
-			await tracker.change(item)
+			await tracker.notifyWrite(item)
 		}).throwsAsync()
 	}),
 })

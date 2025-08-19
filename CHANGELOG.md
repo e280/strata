@@ -8,6 +8,16 @@
 
 ## v0.0
 
+### v0.0.0
+- 🟥 tracker method renames
+  - `see` -> `notifyRead`
+  - `change` -> `notifyWrite`
+  - `seen` -> `observe`
+  - `changed` -> `subscribe`
+  - the global tracker symbol has changed to `Symbol.for("e280.tracker")`
+    - ***all*** strata packages must upgrade to this new version together at once, otherwise version mismatches will cause errors
+    - hopefully this will be the last such change, this version of the tracker forever written in stone
+
 ### v0.0.0-10
 - 🍏 tweak signal ergonomics:
   - `mySignal.set(123)` now returns a promise for `123`
