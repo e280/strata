@@ -9,17 +9,12 @@
 📦 `npm install @e280/strata`  
 🧙‍♂️ probably my tenth state management library, lol  
 💁 it's all about rerendering ui when data changes  
+🦝 used by our view library [@e280/sly](https://github.com/e280/sly)  
 🧑‍💻 a project by https://e280.org/
 
 🚦 **signals** — ephemeral view-level state  
 🌳 **tree** — persistent app-level state  
 🪄 **tracker** — reactivity integration hub  
-
-<br/>
-
-> [!TIP]  
-> incredibly, signals and trees are interoperable.  
-> that means, effects and computeds are responsive to changes in tree state.  
 
 <br/>
 
@@ -54,7 +49,7 @@ import {signal, effect, computed} from "@e280/strata"
   count() // get
   await count(2) // set
   ```
-  > to achieve this hipster syntax i had to make the implementation so damn cursed, lol 💀
+  > *you'd better appreciate this damn hipster syntax, because it makes the implementation cursed, lol* 💀
 - **signal get/set syntax**
   ```ts
   count.get() // get
@@ -242,20 +237,24 @@ import {Trunk} from "@e280/strata"
 
 <br/>
 
-## 🪄 tracker — integrations
+## 🪄 strata tracker
 > *reactivity integration hub*
 
 ```ts
 import {tracker} from "@e280/strata/tracker"
 ```
 
-the *items* that the tracker tracks can be any object, or symbol.. the tracker cares about the identity of the item, not the value (tracker holds them in a WeakMap to avoid creating a memory leak)..
+if you're some kinda framework author, making a new ui thing, or a new state concept -- then you can use the `tracker` to jack into the strata reactivity system, and suddenly your stuff will be fully strata-compatible, reactin' and triggerin' with the best of 'em.
+
+the tracker is agnostic and independent, and doesn't know about strata specifics like signals or trees -- and it would be perfectly reasonable for you to use strata solely to integrate with the tracker, thus making your stuff reactivity-compatible with other libraries that use the tracker, like [sly](https://github.com/e280/sly).
+
+note, the *items* that the tracker tracks can be any object, or symbol.. the tracker cares about the identity of the item, not the value (tracker holds them in a WeakMap to avoid creating a memory leak)..
 
 ### 🪄 integrate your ui's reactivity
 - we need to imagine you have some prerequisites
     - `myRenderFn` -- your fn that might access some state stuff
     - `myRerenderFn` -- your fn that is called when some state stuff changes
-    - it's OK if these are the same fn, but they don't have to be
+    - it's okay if these are the same fn, but they don't have to be
 - `tracker.observe` to check what is touched by a fn
     ```ts
     // 🪄 run myRenderFn and collect seen items
