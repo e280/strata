@@ -22,7 +22,7 @@
 > *ephemeral view-level state*
 
 ```ts
-import {signal, effect, computed} from "@e280/strata"
+import {signal, effect} from "@e280/strata"
 ```
 
 ### 🚦 each signal holds a value
@@ -49,7 +49,7 @@ import {signal, effect, computed} from "@e280/strata"
   count() // get
   await count(2) // set
   ```
-  > *you'd better appreciate this damn hipster syntax, because it makes the implementation cursed, lol* 💀
+  > see the [discussion](https://github.com/e280/strata/discussions/1) about this controversial hipster-syntax
 - **signal get/set syntax**
   ```ts
   count.get() // get
