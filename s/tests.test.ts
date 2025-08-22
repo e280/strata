@@ -6,8 +6,8 @@ import signals from "./signals/signals.test.js"
 import tracker from "./tracker/tracker.test.js"
 
 import {Trunk} from "./tree/parts/trunk.js"
-import {effect} from "./signals/parts/effect.js"
-import {signal} from "./signals/parts/signal.js"
+import {effect} from "./signals/effect.js"
+import {signal} from "./signals/signal.js"
 
 await Science.run({
 	tree,

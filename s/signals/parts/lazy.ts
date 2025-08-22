@@ -1,5 +1,5 @@
 
-import {SignalOptions} from "./types.js"
+import {SignalOptions} from "../types.js"
 import {LazyCore, processSignalOptions} from "./units.js"
 
 export type LazySignal<V> = {

@@ -1,6 +1,6 @@
 
 import {deep} from "@e280/stz"
-import {signal} from "../../signals/parts/signal.js"
+import {signal} from "../../signals/signal.js"
 import {DerivedSignal} from "../../signals/parts/derive.js"
 import {Branchstate, Immutable, Mutator, Options, Selector, Tree} from "./types.js"
 

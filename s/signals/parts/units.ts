@@ -1,7 +1,7 @@
 
 import {sub} from "@e280/stz"
-import {SignalOptions} from "./types.js"
-import {collectorEffect} from "./effect.js"
+import {SignalOptions} from "../types.js"
+import {collectorEffect} from "../effect.js"
 import {tracker} from "../../tracker/tracker.js"
 
 const defaultSignalOptions: SignalOptions = {

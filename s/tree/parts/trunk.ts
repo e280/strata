@@ -5,7 +5,7 @@ import {trunkSetup} from "./utils/setup.js"
 import {Chronobranch} from "./chronobranch.js"
 import {processOptions} from "./utils/process-options.js"
 import {DerivedSignal} from "../../signals/parts/derive.js"
-import {signal, Signal} from "../../signals/parts/signal.js"
+import {signal, Signal} from "../../signals/signal.js"
 import {Branchstate, Chronicle, Immutable, Mutator, Options, Selector, Tree, Trunkstate} from "./types.js"
 
 export class Trunk<S extends Trunkstate> implements Tree<S> {

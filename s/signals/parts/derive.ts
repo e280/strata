@@ -1,6 +1,6 @@
 
 import {Sub} from "@e280/stz"
-import {SignalOptions} from "./types.js"
+import {SignalOptions} from "../types.js"
 import {DerivedCore, processSignalOptions} from "./units.js"
 
 export type DerivedSignal<V> = {

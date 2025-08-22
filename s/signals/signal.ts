@@ -1,10 +1,10 @@
 
 import {Sub} from "@e280/stz"
 
-import {lazy} from "./lazy.js"
-import {derive} from "./derive.js"
+import {lazy} from "./parts/lazy.js"
+import {derive} from "./parts/derive.js"
 import {SignalOptions} from "./types.js"
-import {processSignalOptions, SignalCore} from "./units.js"
+import {processSignalOptions, SignalCore} from "./parts/units.js"
 
 export type Signal<V> = {
 	(): V
