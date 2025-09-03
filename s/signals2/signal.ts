@@ -1,7 +1,7 @@
 
+import {SignalOptions} from "./types.js"
 import {Reactive} from "./parts/reactive.js"
 import {tracker} from "../tracker/tracker.js"
-import {SignalOptions} from "../signals/types.js"
 import {defaultCompare} from "./utils/default-compare.js"
 
 export class Signal<V> extends Reactive<V> {

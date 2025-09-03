@@ -1,8 +1,8 @@
 
+import {SignalOptions} from "./types.js"
+import {collectorEffect} from "./effect.js"
 import {Reactive} from "./parts/reactive.js"
 import {tracker} from "../tracker/tracker.js"
-import {SignalOptions} from "../signals/types.js"
-import {collectorEffect} from "../signals/effect.js"
 import {defaultCompare} from "./utils/default-compare.js"
 
 export class Derive<V> extends Reactive<V> {
