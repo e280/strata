@@ -1,11 +1,11 @@
 
 import {deep} from "@e280/stz"
-import {signal} from "../../signals/signal.js"
-import {DerivedSignal} from "../../signals/parts/derive.js"
+import {derive} from "../../signals/fns.js"
+import {Derive} from "../../signals/derive.js"
 import {Branchstate, Immutable, Mutator, Options, Selector, Tree} from "./types.js"
 
 export class Branch<S extends Branchstate, ParentState extends Branchstate = any> implements Tree<S> {
-	#immutable: DerivedSignal<Immutable<S>>
+	#immutable: Derive<Immutable<S>>
 
 	constructor(
 			private parent: Tree<ParentState>,
@@ -13,7 +13,7 @@ export class Branch<S extends Branchstate, ParentState extends Branchstate = any
 			private options: Options,
 		) {
 
-		this.#immutable = signal.derive(() => {
+		this.#immutable = derive(() => {
 			const state = selector(parent.state as any)
 			return deep.freeze(options.clone(state)) as Immutable<S>
 		}, {compare: deep.equal})

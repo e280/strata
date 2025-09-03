@@ -12,12 +12,12 @@
 
 ### v0.2.0
 - 🟥 signal rework
-  - 🟥 eliminate cursed hipster syntax
-  - 🟥 rename `Signaloid` to `Signaly`
-  - 🟥 rename `LazySignal` to `Lazy`
-  - 🟥 rename `DerivedSignal` to `Derive`
-  - 🟥 rename `derived` to `derive`
-  - 🟥 rename `signal.derived` to `signal.derive`
+  - 🟥 *eliminated cursed hipster syntax*
+  - 🟥 renamed `Signaloid` to `Signaly`
+  - 🟥 renamed `LazySignal` to `Lazy`
+  - 🟥 renamed `DerivedSignal` to `Derive`
+  - 🟥 renamed `derived` to `derive`
+  - 🟥 renamed `signal.derived` to `signal.derive`
 
 <br/>
 
