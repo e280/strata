@@ -15,9 +15,19 @@
   - 🟥 renamed `Signaloid` to `Signaly`
   - 🟥 renamed `LazySignal` to `Lazy` (now its a class)
   - 🟥 renamed `DerivedSignal` to `Derive` (now its a class)
-  - 🟥 **eliminated cursed hipster syntax**
-    - `count()` is now `count.get()`
-    - `count(2)` is now `count.set(2)`
+  - 🟥 reworked hipster fn syntax
+    - old bad
+      ```ts
+      count()
+      await count(2)
+      ```
+    - new good
+      ```ts
+      const cool = count.fn()
+      cool()
+      await cool(2)
+      ```
+    - see new `signal.fn(1)` as well to mint fresh ones
 
 <br/>
 
