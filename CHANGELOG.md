@@ -17,7 +17,7 @@
   - 🟥 renamed `DerivedSignal` to `Derive` (now its a class)
   - 🟥 **eliminated cursed hipster syntax**
     - `count()` is now `count.get()`
-    - `count(123)` is now `count.set()`
+    - `count(2)` is now `count.set(2)`
 
 <br/>
 
