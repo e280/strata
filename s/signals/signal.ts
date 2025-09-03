@@ -3,13 +3,14 @@ import {SignalOptions} from "./types.js"
 import {Reactive} from "./parts/reactive.js"
 import {tracker} from "../tracker/tracker.js"
 import {defaultCompare} from "./utils/default-compare.js"
+import { hipster } from "./utils/hipster.js"
 
 export class Signal<V> extends Reactive<V> {
 	#lock = false
 	#compare: (a: any, b: any) => boolean
 
-	constructor(sneak: V, options?: Partial<SignalOptions>) {
-		super(sneak)
+	constructor(value: V, options?: Partial<SignalOptions>) {
+		super(value)
 		this.#compare = options?.compare ?? defaultCompare
 	}
 
@@ -37,7 +38,7 @@ export class Signal<V> extends Reactive<V> {
 			promise = Promise.all([
 				tracker.notifyWrite(this),
 				this.on.pub(v),
-			]) as any
+			]).then(() => {})
 		}
 		finally {
 			this.#lock = false
@@ -45,6 +46,10 @@ export class Signal<V> extends Reactive<V> {
 
 		await promise
 		return v
+	}
+
+	fn() {
+		return hipster(this)
 	}
 }
 

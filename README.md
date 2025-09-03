@@ -54,11 +54,31 @@ import {signal, effect} from "@e280/strata"
   count.value // get
   count.value = 2 // set
   ```
-  value pattern is nice for this vibe
+  value pattern is nice for these vibes
   ```ts
   count.value++
   count.value += 1
   ```
+- **signal hipster fn syntax**
+  - turn a signal into a hipster fn
+    ```ts
+    const count = signal.fn(1)
+    ```
+  - now you can directly invoke it
+    ```ts
+    count() // get
+    await count(2) // set
+    ```
+  - it has all the stuff that a signal has
+    ```ts
+    count.get()
+    await count.publish(5)
+    count.on(x => console.log(x))
+    ```
+  - mint a fresh new signal fn
+    ```ts
+    const count = signal.fn(1)
+    ```
 
 ### 🚦 effects
 - **effects run when the relevant signals change**
