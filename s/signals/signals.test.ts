@@ -1,9 +1,7 @@
 
 import {Science, test, expect, spy} from "@e280/science"
-
-import {lazy} from "./parts/lazy.js"
 import {effect} from "./effect.js"
-import {signal} from "./signal.js"
+import {derive, lazy, signal} from "./fns.js"
 
 export default Science.suite({
 	"signal get/set value": test(async() => {
@@ -17,31 +15,17 @@ export default Science.suite({
 		expect(count.value).is(5)
 	}),
 
-	"signal fn syntax": test(async() => {
-		const count = signal(0)
-		expect(count()).is(0)
-
-		count(count() + 1)
-		expect(count()).is(1)
-
-		count(5)
-		expect(count()).is(5)
-	}),
-
 	"signal set and publish returns value": test(async() => {
 		const count = signal(0)
 		expect(count.value).is(0)
-
 		expect(await count.set(1)).is(1)
-		expect(await count(2)).is(2)
-		expect(await count.publish(3)).is(3)
+		expect(await count.publish(2)).is(2)
 	}),
 
 	"signal syntax interop": test(async() => {
 		const count = signal(0)
-
 		count.value = 1
-		expect(count()).is(1)
+		expect(count.get()).is(1)
 	}),
 
 	"signal on is not debounced": test(async() => {
@@ -173,7 +157,7 @@ export default Science.suite({
 	"effect reacts to derived changes": test(async() => {
 		const a = signal(1)
 		const b = signal(10)
-		const product = signal.derive(() => a.value * b.value)
+		const product = derive(() => a.value * b.value)
 
 		let mutations = 0
 		effect(() => {
@@ -271,7 +255,7 @@ export default Science.suite({
 		expect(runs).is(2)
 	}),
 
-	"lazy fn syntax": test(async() => {
+	"lazy syntax": test(async() => {
 		const a = signal(2)
 		const b = signal(3)
 		const sum = lazy(() => a.value + b.value)
@@ -279,7 +263,7 @@ export default Science.suite({
 
 		await a.set(5)
 		expect(sum.value).is(8)
-		expect(sum()).is(8)
+		expect(sum.get()).is(8)
 	}),
 })
 

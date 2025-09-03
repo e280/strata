@@ -1,9 +1,9 @@
 
+import {Lazy} from "./lazy.js"
 import {Signal} from "./signal.js"
-import {LazySignal} from "./parts/lazy.js"
-import {DerivedSignal} from "./parts/derive.js"
+import {Derive} from "./derive.js"
 
-export type Signaloid<V> = Signal<V> | DerivedSignal<V> | LazySignal<V>
+export type Signaly<V> = Signal<V> | Derive<V> | Lazy<V>
 
 export type SignalOptions = {
 	compare: (a: any, b: any) => boolean

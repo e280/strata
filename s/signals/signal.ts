@@ -1,44 +1,50 @@
 
-import {Sub} from "@e280/stz"
-
-import {lazy} from "./parts/lazy.js"
-import {derive} from "./parts/derive.js"
 import {SignalOptions} from "./types.js"
-import {processSignalOptions, SignalCore} from "./parts/units.js"
+import {Reactive} from "./parts/reactive.js"
+import {tracker} from "../tracker/tracker.js"
+import {defaultCompare} from "./utils/default-compare.js"
 
-export type Signal<V> = {
-	(): V
-	(v: V): Promise<V>
-	(v?: V): V | Promise<V>
+export class Signal<V> extends Reactive<V> {
+	#lock = false
+	#compare: (a: any, b: any) => boolean
 
-	kind: "signal"
-
-	sneak: V
-	value: V
-	on: Sub<[V]>
-	get(): V
-	set(v: V): Promise<V>
-	publish(v?: V): Promise<V>
-	dispose(): void
-} & SignalCore<V>
-
-export function signal<V>(value: V, options: Partial<SignalOptions> = {}) {
-	function fn(): V
-	function fn(v: V): Promise<void>
-	function fn(v?: V): V | Promise<void> {
-		return v !== undefined
-			? (fn as any).set(v)
-			: (fn as any).get()
+	constructor(sneak: V, options?: Partial<SignalOptions>) {
+		super(sneak)
+		this.#compare = options?.compare ?? defaultCompare
 	}
 
-	const o = processSignalOptions(options)
-	const core = new SignalCore(value, o)
-	Object.setPrototypeOf(fn, SignalCore.prototype)
-	Object.assign(fn, core)
+	async set(v: V) {
+		const isChanged = !this.#compare(this.sneak, v)
+		if (isChanged) await this.publish(v)
+		return v
+	}
 
-	return fn as Signal<V>
+	get value() {
+		return this.get()
+	}
+
+	set value(v: V) {
+		this.set(v)
+	}
+
+	async publish(v = this.get()) {
+		if (this.#lock) throw new Error("forbid circularity")
+		let promise = Promise.resolve()
+
+		try {
+			this.#lock = true
+			this.sneak = v
+			promise = Promise.all([
+				tracker.notifyWrite(this),
+				this.on.pub(v),
+			]) as any
+		}
+		finally {
+			this.#lock = false
+		}
+
+		await promise
+		return v
+	}
 }
-
-signal.lazy = lazy
-signal.derive = derive
 

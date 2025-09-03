@@ -6,6 +6,23 @@
 
 <br/>
 
+
+
+## v0.2
+
+### v0.2.0
+- 🟥 signal rework
+  - 🟥 renamed `Signaloid` to `Signaly`
+  - 🟥 renamed `LazySignal` to `Lazy` (now its a class)
+  - 🟥 renamed `DerivedSignal` to `Derive` (now its a class)
+  - 🟥 **eliminated cursed hipster syntax**
+    - `count()` is now `count.get()`
+    - `count(123)` is now `count.set()`
+
+<br/>
+
+
+
 ## v0.1
 
 ### v0.1.0

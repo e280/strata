@@ -1,11 +1,12 @@
 
 import {deep} from "@e280/stz"
 import {Branch} from "./branch.js"
+import {signal} from "../../signals/fns.js"
 import {trunkSetup} from "./utils/setup.js"
+import {Derive} from "../../signals/derive.js"
+import {Signal} from "../../signals/signal.js"
 import {Chronobranch} from "./chronobranch.js"
 import {processOptions} from "./utils/process-options.js"
-import {DerivedSignal} from "../../signals/parts/derive.js"
-import {signal, Signal} from "../../signals/signal.js"
 import {Branchstate, Chronicle, Immutable, Mutator, Options, Selector, Tree, Trunkstate} from "./types.js"
 
 export class Trunk<S extends Trunkstate> implements Tree<S> {
@@ -18,7 +19,7 @@ export class Trunk<S extends Trunkstate> implements Tree<S> {
 
 	options: Options
 
-	#immutable: DerivedSignal<Immutable<S>>
+	#immutable: Derive<Immutable<S>>
 	#mutable: Signal<S>
 	#mutationLock = 0
 
@@ -44,8 +45,9 @@ export class Trunk<S extends Trunkstate> implements Tree<S> {
 			throw new Error("nested mutations are forbidden")
 		try {
 			this.#mutationLock++
-			mutator(this.#mutable())
-			const newState = this.#mutable.get()
+			const value = this.#mutable.get()
+			mutator(value)
+			const newState = value
 			const isChanged = !deep.equal(newState, oldState)
 			if (isChanged)
 				await this.overwrite(newState)
