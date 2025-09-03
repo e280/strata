@@ -8,7 +8,7 @@ export class Signal<V> extends Reactive<V> {
 	#lock = false
 	#compare: (a: any, b: any) => boolean
 
-	constructor(sneak: V, options?: SignalOptions) {
+	constructor(sneak: V, options?: Partial<SignalOptions>) {
 		super(sneak)
 		this.#compare = options?.compare ?? defaultCompare
 	}

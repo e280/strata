@@ -15,7 +15,9 @@
   - 🟥 eliminate cursed hipster syntax
   - 🟥 rename `Signaloid` to `Signaly`
   - 🟥 rename `LazySignal` to `Lazy`
-  - 🟥 rename `DerivedSignal` to `Derived`
+  - 🟥 rename `DerivedSignal` to `Derive`
+  - 🟥 rename `derived` to `derive`
+  - 🟥 rename `signal.derived` to `signal.derive`
 
 <br/>
 

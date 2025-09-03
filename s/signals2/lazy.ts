@@ -11,7 +11,7 @@ export class Lazy<V> extends Readable<V> {
 	#dirty = false
 	#effect: (() => void) | undefined
 
-	constructor(formula: () => V, options?: SignalOptions) {
+	constructor(formula: () => V, options?: Partial<SignalOptions>) {
 		super(undefined as any)
 		this.#formula = formula
 		this.#compare = options?.compare ?? defaultCompare
@@ -19,7 +19,10 @@ export class Lazy<V> extends Readable<V> {
 
 	get() {
 		if (!this.#effect) {
-			const {result, dispose} = collectorEffect(this.#formula, () => this.#dirty = true)
+			const {result, dispose} = collectorEffect(
+				this.#formula,
+				() => this.#dirty = true,
+			)
 			this.#effect = dispose
 			this.sneak = result
 		}

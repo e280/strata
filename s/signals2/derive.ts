@@ -8,7 +8,7 @@ import {defaultCompare} from "./utils/default-compare.js"
 export class Derive<V> extends Reactive<V> {
 	#dispose: () => void
 
-	constructor(formula: () => V, options?: SignalOptions) {
+	constructor(formula: () => V, options?: Partial<SignalOptions>) {
 		const compare = options?.compare ?? defaultCompare
 		const {result, dispose} = collectorEffect(formula, async() => {
 			const value = formula()
