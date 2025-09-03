@@ -12,12 +12,12 @@
 
 ### v0.2.0
 - 🟥 signal rework
-  - 🟥 *eliminated cursed hipster syntax*
   - 🟥 renamed `Signaloid` to `Signaly`
-  - 🟥 renamed `LazySignal` to `Lazy`
-  - 🟥 renamed `DerivedSignal` to `Derive`
-  - 🟥 renamed `derived` to `derive`
-  - 🟥 renamed `signal.derived` to `signal.derive`
+  - 🟥 renamed `LazySignal` to `Lazy` (now its a class)
+  - 🟥 renamed `DerivedSignal` to `Derive` (now its a class)
+  - 🟥 **eliminated cursed hipster syntax**
+    - `count()` is now `count.get()`
+    - `count(123)` is now `count.set()`
 
 <br/>
 
