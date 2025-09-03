@@ -11,10 +11,14 @@ export function hipster<V>(sig: Signal<V>) {
 			: sig.set(arguments[0])
 	}
 
-	f.on = sig.on
+	f.signal = sig
+
+	f.get = sig.get.bind(sig)
 	f.set = sig.set.bind(sig)
-	f.publish = sig.publish.bind(sig)
+	f.on = sig.on
 	f.dispose = sig.dispose.bind(sig)
+	f.publish = sig.publish.bind(sig)
+	f.fn = sig.fn.bind(sig)
 
 	Object.setPrototypeOf(f, {
 		set: sig.set.bind(sig),

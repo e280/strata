@@ -2,7 +2,7 @@
 import {Lazy} from "./lazy.js"
 import {Signal} from "./signal.js"
 import {Derive} from "./derive.js"
-import {SignalFn, SignalOptions} from "./types.js"
+import {SignalOptions} from "./types.js"
 
 export function lazy<V>(
 		formula: () => V,

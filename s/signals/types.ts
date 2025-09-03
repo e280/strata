@@ -13,5 +13,7 @@ export type SignalFn<V> = {
 	(): V
 	(v: V): Promise<V>
 	(v?: V): V | Promise<V>
+
+	signal: Signal<V>
 } & Signal<V>
 
