@@ -3,6 +3,7 @@ import {SignalOptions} from "./types.js"
 import {Reactive} from "./parts/reactive.js"
 import {tracker} from "../tracker/tracker.js"
 import {defaultCompare} from "./utils/default-compare.js"
+import { hipster } from "./utils/hipster.js"
 
 export class Signal<V> extends Reactive<V> {
 	#lock = false
@@ -45,6 +46,10 @@ export class Signal<V> extends Reactive<V> {
 
 		await promise
 		return v
+	}
+
+	fn() {
+		return hipster(this)
 	}
 }
 
