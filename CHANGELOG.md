@@ -6,6 +6,21 @@
 
 <br/>
 
+
+
+## v0.2
+
+### v0.2.0
+- 🟥 signal rework
+  - 🟥 eliminate cursed hipster syntax
+  - 🟥 rename `Signaloid` to `Signaly`
+  - 🟥 rename `LazySignal` to `Lazy`
+  - 🟥 rename `DerivedSignal` to `Derived`
+
+<br/>
+
+
+
 ## v0.1
 
 ### v0.1.0

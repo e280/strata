@@ -3,6 +3,7 @@ import {expect, Science, test} from "@e280/science"
 
 import tree from "./tree/tree.test.js"
 import signals from "./signals/signals.test.js"
+import signals2 from "./signals2/signals.test.js"
 import tracker from "./tracker/tracker.test.js"
 
 import {Trunk} from "./tree/parts/trunk.js"
@@ -12,6 +13,7 @@ import {signal} from "./signals/signal.js"
 await Science.run({
 	tree,
 	signals,
+	signals2,
 	tracker,
 
 	interop: Science.suite({
