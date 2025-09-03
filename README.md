@@ -32,24 +32,18 @@ import {signal, effect} from "@e280/strata"
   ```
 - **read a signal**
   ```ts
-  count() // 0
+  count.get() // 0
   ```
 - **set a signal**
   ```ts
-  count(1)
+  count.set(1)
   ```
 - **set a signal, and await effect propagation**
   ```ts
-  await count(2)
+  await count.set(2)
   ```
 
 ### 🚦 pick your poison
-- **signal hipster fn syntax**
-  ```ts
-  count() // get
-  await count(2) // set
-  ```
-  > see the [discussion](https://github.com/e280/strata/discussions/1) about this controversial hipster-syntax
 - **signal get/set syntax**
   ```ts
   count.get() // get
@@ -69,7 +63,7 @@ import {signal, effect} from "@e280/strata"
 ### 🚦 effects
 - **effects run when the relevant signals change**
   ```ts
-  effect(() => console.log(count()))
+  effect(() => console.log(count.get()))
     // 1
     // the system detects 'count' is relevant
 
@@ -84,15 +78,15 @@ import {signal, effect} from "@e280/strata"
   ```ts
   const a = signal(1)
   const b = signal(10)
-  const product = signal.derive(() => a() * b())
+  const product = signal.derive(() => a.get() * b.get())
 
-  product() // 10
+  product.get() // 10
 
   // change a dependency,
   // and the derived signal is automatically updated
   await a.set(2)
 
-  product() // 20
+  product.get() // 20
   ```
 - **signal.lazy**  
   is for making special optimizations.  
