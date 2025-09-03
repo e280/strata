@@ -8,8 +8,8 @@ export class Signal<V> extends Reactive<V> {
 	#lock = false
 	#compare: (a: any, b: any) => boolean
 
-	constructor(sneak: V, options?: Partial<SignalOptions>) {
-		super(sneak)
+	constructor(value: V, options?: Partial<SignalOptions>) {
+		super(value)
 		this.#compare = options?.compare ?? defaultCompare
 	}
 
@@ -37,7 +37,7 @@ export class Signal<V> extends Reactive<V> {
 			promise = Promise.all([
 				tracker.notifyWrite(this),
 				this.on.pub(v),
-			]) as any
+			]).then(() => {})
 		}
 		finally {
 			this.#lock = false

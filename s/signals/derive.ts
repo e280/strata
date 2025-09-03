@@ -25,10 +25,6 @@ export class Derive<V> extends Reactive<V> {
 		this.#dispose = dispose
 	}
 
-	get value() {
-		return this.get()
-	}
-
 	dispose() {
 		super.dispose()
 		this.#dispose()
