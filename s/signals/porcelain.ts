@@ -27,5 +27,7 @@ export function signal<V>(
 
 signal.lazy = lazy
 signal.derive = derive
-signal.fn = <V>(value: V) => signal(value).fn()
+signal.fn = <V>(value: V, options?: Partial<SignalOptions>) => (
+	new Signal(value, options).fn()
+)
 
