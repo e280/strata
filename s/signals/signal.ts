@@ -14,6 +14,10 @@ export class Signal<V> extends Reactive<V> {
 		this.#compare = options?.compare ?? defaultCompare
 	}
 
+	fn() {
+		return hipster(this)
+	}
+
 	async set(v: V) {
 		const isChanged = !this.#compare(this.sneak, v)
 		if (isChanged) await this.publish(v)
@@ -25,20 +29,27 @@ export class Signal<V> extends Reactive<V> {
 	}
 
 	set value(v: V) {
-		this.set(v)
+		void this.set(v)
 	}
 
-	async publish(v = this.get()) {
-		if (this.#lock) throw new Error("forbid circularity")
-		let promise = Promise.resolve()
+	async publish(v = this.sneak) {
+		// only wizards are allowed beyond this point.
+		// - the implementation is subtle
+		// - it looks wrong, but it's right
+		// - tarnished alchemists, take heed: lock engages only for sync activity of the async fns (think of the value setter!)
+
+		if (this.#lock)
+			throw new Error("forbid circularity")
+
+		this.sneak = v
+		let promise: Promise<any> = Promise.resolve()
 
 		try {
 			this.#lock = true
-			this.sneak = v
 			promise = Promise.all([
 				tracker.notifyWrite(this),
-				this.on.pub(v),
-			]).then(() => {})
+				this.on.publish(v),
+			])
 		}
 		finally {
 			this.#lock = false
@@ -46,10 +57,6 @@ export class Signal<V> extends Reactive<V> {
 
 		await promise
 		return v
-	}
-
-	fn() {
-		return hipster(this)
 	}
 }
 
