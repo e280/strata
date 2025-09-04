@@ -1,7 +1,7 @@
 
 import {Science, test, expect, spy} from "@e280/science"
 import {effect} from "../effect.js"
-import {derive, signal} from "../fns.js"
+import {derive, signal} from "../porcelain.js"
 
 export default Science.suite({
 	"effect reacts to derived changes": test(async() => {

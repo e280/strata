@@ -1,7 +1,7 @@
 
 import {deep} from "@e280/stz"
 import {Branch} from "./branch.js"
-import {signal} from "../../signals/fns.js"
+import {signal} from "../../signals/porcelain.js"
 import {trunkSetup} from "./utils/setup.js"
 import {Derive} from "../../signals/derive.js"
 import {Signal} from "../../signals/signal.js"

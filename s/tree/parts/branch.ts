@@ -1,6 +1,6 @@
 
 import {deep} from "@e280/stz"
-import {derive} from "../../signals/fns.js"
+import {derive} from "../../signals/porcelain.js"
 import {Derive} from "../../signals/derive.js"
 import {Branchstate, Immutable, Mutator, Options, Selector, Tree} from "./types.js"
 
