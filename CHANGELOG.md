@@ -11,23 +11,25 @@
 ## v0.2
 
 ### v0.2.0
-- 🟥 signal rework
+- 🍏 introduce and encourage new `$signal` naming convention
+- 🟥 signal rework. new implementation. mostly backwards-compatible.
   - 🟥 renamed `Signaloid` to `Signaly`
   - 🟥 renamed `LazySignal` to `Lazy` (now its a class)
   - 🟥 renamed `DerivedSignal` to `Derive` (now its a class)
   - 🟥 reworked hipster fn syntax
-    - old bad
+    - old bad (all signals used to be hipster fns)
       ```ts
       count()
       await count(2)
       ```
-    - new good
+    - new good (now the hipster fn syntax is opt-in, not default)
       ```ts
       const cool = count.fn()
       cool()
       await cool(2)
       ```
     - see new `signal.fn(1)` as well to mint fresh ones
+    - derive and lazy also now have hipster `.fn` variants
 
 
 
