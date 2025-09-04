@@ -4,9 +4,9 @@
 - 🔶 deprecation or possible breaking change
 - 🍏 harmless addition, fix, or enhancement
 
+
+
 <br/>
-
-
 
 ## v0.2
 
@@ -29,9 +29,9 @@
       ```
     - see new `signal.fn(1)` as well to mint fresh ones
 
+
+
 <br/>
-
-
 
 ## v0.1
 
