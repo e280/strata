@@ -28,91 +28,101 @@ import {signal, effect} from "@e280/strata"
 ### 🚦 each signal holds a value
 - **create a signal**
   ```ts
-  const count = signal(0)
+  const $count = signal(0)
   ```
+  - maybe you like the `$` prefix convention for signals
 - **read a signal**
   ```ts
-  count.get() // 0
+  $count.get() // 0
   ```
 - **set a signal**
   ```ts
-  count.set(1)
+  $count.set(1)
   ```
-- **set a signal, and await effect propagation**
+- **set a signal, and await all downstream effects**
   ```ts
-  await count.set(2)
+  await $count.set(2)
   ```
 
 ### 🚦 pick your poison
 - **signal get/set syntax**
   ```ts
-  count.get() // get
-  await count.set(2) // set
+  $count.get() // get
+  await $count.set(2) // set
   ```
 - **signal .value accessor syntax**
   ```ts
-  count.value // get
-  count.value = 2 // set
+  $count.value // get
+  $count.value = 2 // set
   ```
   value pattern is nice for these vibes
   ```ts
-  count.value++
-  count.value += 1
+  $count.value++
+  $count.value += 1
   ```
 - **signal hipster fn syntax**
-  - turn a signal into a hipster fn
+  - mint a fresh new signal fn
     ```ts
-    const count = signal.fn(1)
+    const $count = signal.fn(1)
+    ```
+  - or turn any existing signal into a hipster fn
+    ```ts
+    const $count = signal.fn(1)
     ```
   - now you can directly invoke it
     ```ts
-    count() // get
-    await count(2) // set
+    $count() // get
+    await $count(2) // set
     ```
   - it has all the stuff that a signal has
     ```ts
-    count.get()
-    await count.publish(5)
-    count.on(x => console.log(x))
-    ```
-  - mint a fresh new signal fn
-    ```ts
-    const count = signal.fn(1)
+    $count.get()
+    await $count.publish(5)
+    $count.on(x => console.log(x))
     ```
 
 ### 🚦 effects
 - **effects run when the relevant signals change**
   ```ts
-  effect(() => console.log(count.get()))
+  effect(() => console.log($count.get()))
     // 1
-    // the system detects 'count' is relevant
+    // the system detects '$count' is relevant
 
-  count.value++
+  $count.value++
     // 2
-    // when count is changed, the effect fn is run
+    // when $count is changed, the effect fn is run
   ```
 
 ### 🚦 `signal.derive` and `signal.lazy` are computed signals
 - **signal.derive**  
   is for combining signals
   ```ts
-  const a = signal(1)
-  const b = signal(10)
-  const product = signal.derive(() => a.get() * b.get())
+  const $a = signal(1)
+  const $b = signal(10)
+  const $product = signal.derive(() => $a.get() * $b.get())
 
-  product.get() // 10
+  $product.get() // 10
 
   // change a dependency,
   // and the derived signal is automatically updated
-  await a.set(2)
+  await $a.set(2)
 
-  product.get() // 20
+  $product.get() // 20
   ```
 - **signal.lazy**  
   is for making special optimizations.  
   it's like derive, except it cannot trigger effects,  
   because it's so lazy it only computes the value on read, and only when necessary.  
   > *i repeat: lazy signals cannot trigger effects!*
+- **hipster syntax**  
+  derive and lazy have hipster syntax just like signals.  
+  ```ts
+  const $a = signal.fn(1)
+  const $b = signal.fn(10)
+  const $product = signal.derive.fn(() => $a() * $b())
+
+  $product() // 10
+  ```
 
 <br/>
 
