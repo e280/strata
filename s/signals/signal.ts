@@ -1,8 +1,7 @@
 
-import {SignalOptions} from "./types.js"
-import {hipster} from "./parts/hipster.js"
 import {Reactive} from "./parts/reactive.js"
 import {tracker} from "../tracker/tracker.js"
+import {SignalFn, SignalOptions} from "./types.js"
 import {defaultCompare} from "./utils/default-compare.js"
 
 export class Signal<V> extends Reactive<V> {
@@ -12,10 +11,6 @@ export class Signal<V> extends Reactive<V> {
 	constructor(value: V, options?: Partial<SignalOptions>) {
 		super(value)
 		this.#compare = options?.compare ?? defaultCompare
-	}
-
-	fn() {
-		return hipster(this)
 	}
 
 	async set(v: V) {
@@ -57,6 +52,38 @@ export class Signal<V> extends Reactive<V> {
 
 		await promise
 		return v
+	}
+
+	fn() {
+		const that = this as Signal<V>
+
+		function f(): V
+		function f(v: V): Promise<V>
+		function f(_v?: V): V | Promise<V> {
+			return (arguments.length === 0)
+				? that.get()
+				: that.set(arguments[0])
+		}
+
+		f.signal = that
+		f.get = that.get.bind(that)
+		f.set = that.set.bind(that)
+		f.on = that.on
+		f.dispose = that.dispose.bind(that)
+		f.publish = that.publish.bind(that)
+		f.fn = that.fn.bind(that)
+
+		Object.defineProperty(f, "value", {
+			get: () => that.value,
+			set: (v) => that.value = v,
+		})
+
+		Object.defineProperty(f, "sneak", {
+			get: () => that.sneak,
+			set: (v) => that.sneak = v,
+		})
+
+		return f as SignalFn<V>
 	}
 }
 

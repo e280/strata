@@ -9,6 +9,8 @@ export type SignalOptions = {
 	compare: (a: any, b: any) => boolean
 }
 
+// hipster syntax types
+
 export type SignalFn<V> = {
 	(): V
 	(v: V): Promise<V>
@@ -16,4 +18,14 @@ export type SignalFn<V> = {
 
 	signal: Signal<V>
 } & Signal<V>
+
+export type LazyFn<V> = {
+	(): V
+	lazy: Lazy<V>
+} & Lazy<V>
+
+export type DeriveFn<V> = {
+	(): V
+	derive: Derive<V>
+} & Derive<V>
 

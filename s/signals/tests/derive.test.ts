@@ -4,6 +4,16 @@ import {effect} from "../effect.js"
 import {derive, signal} from "../porcelain.js"
 
 export default Science.suite({
+	"basic": test(async() => {
+		const a = signal(1)
+		const b = signal(10)
+		const product = derive(() => a.get() * b.get())
+		expect(product.get()).is(10)
+
+		await a.set(2)
+		expect(product.get()).is(20)
+	}),
+
 	"effect reacts to derived changes": test(async() => {
 		const a = signal(1)
 		const b = signal(10)
@@ -84,6 +94,18 @@ export default Science.suite({
 		await a.set(2)
 		expect(product.value).is(20)
 		expect(mole.spy.calls.length).is(1)
+	}),
+
+	"hipster fns": Science.suite({
+		"basic": test(async() => {
+			const a = signal.fn(1)
+			const b = signal.fn(10)
+			const product = derive.fn(() => a() * b())
+			expect(product()).is(10)
+
+			await a(2)
+			expect(product()).is(20)
+		}),
 	}),
 })
 

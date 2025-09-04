@@ -45,5 +45,20 @@ export default Science.suite({
 		expect(sum.value).is(8)
 		expect(sum.get()).is(8)
 	}),
+
+	"hipster fns": Science.suite({
+		"lazy values": test(async() => {
+			const a = signal.fn(2)
+			const b = signal.fn(3)
+			const sum = lazy.fn(() => a() + b())
+			expect(sum()).is(5)
+
+			await a(5)
+			expect(sum()).is(8)
+
+			await b(7)
+			expect(sum()).is(12)
+		}),
+	}),
 })
 

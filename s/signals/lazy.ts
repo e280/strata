@@ -1,8 +1,8 @@
 
-import {SignalOptions} from "./types.js"
 import {collectorEffect} from "./effect.js"
 import {Readable} from "./parts/readable.js"
 import {tracker} from "../tracker/tracker.js"
+import {LazyFn, SignalOptions} from "./types.js"
 import {defaultCompare} from "./utils/default-compare.js"
 
 export class Lazy<V> extends Readable<V> {
@@ -42,6 +42,29 @@ export class Lazy<V> extends Readable<V> {
 	dispose() {
 		if (this.#effect)
 			this.#effect()
+	}
+
+	fn() {
+		const that = this as Lazy<V>
+
+		function f(): V {
+			return that.get()
+		}
+
+		f.lazy = that
+		f.get = that.get.bind(that)
+		f.dispose = that.dispose.bind(that)
+		f.fn = that.fn.bind(that)
+
+		Object.defineProperty(f, "value", {
+			get: () => that.value,
+		})
+
+		Object.defineProperty(f, "sneak", {
+			get: () => that.sneak,
+		})
+
+		return f as LazyFn<V>
 	}
 }
 
