@@ -41,11 +41,11 @@ export class Signal<V> extends Reactive<V> {
 		if (this.#lock)
 			throw new Error("forbid circularity")
 
-		this.sneak = v
 		let promise: Promise<any> = Promise.resolve()
 
 		try {
 			this.#lock = true
+			this.sneak = v
 			promise = Promise.all([
 				tracker.notifyWrite(this),
 				this.on.publish(v),

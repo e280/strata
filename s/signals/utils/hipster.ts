@@ -20,11 +20,6 @@ export function hipster<V>(sig: Signal<V>) {
 	f.publish = sig.publish.bind(sig)
 	f.fn = sig.fn.bind(sig)
 
-	Object.setPrototypeOf(f, {
-		set: sig.set.bind(sig),
-		publish: sig.publish.bind(sig),
-	})
-
 	Object.defineProperty(f, "value", {
 		get: () => sig.value,
 		set: (v) => sig.value = v,
