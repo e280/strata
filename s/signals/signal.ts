@@ -1,9 +1,9 @@
 
 import {SignalOptions} from "./types.js"
+import {hipster} from "./utils/hipster.js"
 import {Reactive} from "./parts/reactive.js"
 import {tracker} from "../tracker/tracker.js"
 import {defaultCompare} from "./utils/default-compare.js"
-import { hipster } from "./utils/hipster.js"
 
 export class Signal<V> extends Reactive<V> {
 	#lock = false
