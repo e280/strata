@@ -105,8 +105,8 @@ import {signal, effect} from "@e280/strata"
   > *i repeat: lazy signals cannot trigger effects!*
 
 ### 🚦 core primitive classes
-- the hipster syntax has a slight performance cost
-- you can instead use the core primitive classes
+- **the hipster syntax has a slight performance cost**
+- **you can instead use the core primitive classes**
   ```ts
   const $count = new Signal(1)
   ```
@@ -122,25 +122,22 @@ import {signal, effect} from "@e280/strata"
   $count()
   $count(2)
   ```
-- same thing for derive/lazy
+- **same thing for derive/lazy**
   ```ts
   const $product = new Derive(() => $a() * $b())
   ```
   ```ts
   const $product = new Lazy(() => $a() * $b())
   ```
-- all core primitives (signal/derive/lazy) have a convert-to-hipster-fn method:
-  ```ts
-  const $count = new Signal(1)
-  const $countFn = $count.fn()
-  $countFn()
-  ```
-- and all hipster fns (signal/derive/lazy) have a `.core` property to get the primitive
-  ```ts
-  const $countFn = signal(0)
-  const $count = $count.core
-  $count.get()
-  ```
+- **conversions**
+  - all core primitives (signal/derive/lazy) have a convert-to-hipster-fn method
+    ```ts
+    new Signal(1).fn() // SignalFn<number>, hipster-fn
+    ```
+  - and all hipster fns (signal/derive/lazy) have a `.core` property to get the primitive
+    ```ts
+    signal(0).core // Signal<number>, primitive instance
+    ```
 
 ### 🚦 types
 - **`Signaly<V>`** — can be `Signal<V>` or `Derive<V>` or `Lazy<V>`
