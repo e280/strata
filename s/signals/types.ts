@@ -10,8 +10,6 @@ export type SignalOptions = {
 	compare: (a: any, b: any) => boolean
 }
 
-// hipster syntax types
-
 export type SignalFn<V> = {
 	(): V
 	(v: V): Promise<V>
