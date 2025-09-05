@@ -4,6 +4,7 @@ import {Signal} from "./signal.js"
 import {Derive} from "./derive.js"
 
 export type Signaly<V> = Signal<V> | Derive<V> | Lazy<V>
+export type SignalyFn<V> = SignalFn<V> | DeriveFn<V> | LazyFn<V>
 
 export type SignalOptions = {
 	compare: (a: any, b: any) => boolean

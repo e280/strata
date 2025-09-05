@@ -73,7 +73,7 @@ import {signal, effect} from "@e280/strata"
 ### 🚦 effects
 - **effects run when the relevant signals change**
   ```ts
-  effect(() => console.log($count.get()))
+  effect(() => console.log($count()))
     // 1
     // the system detects '$count' is relevant
 
@@ -133,7 +133,7 @@ import {signal, effect} from "@e280/strata"
   ```ts
   const $count = new Signal(1)
   const $countFn = $count.fn()
-  $count()
+  $countFn()
   ```
 - and all hipster fns (signal/derive/lazy) have a `.core` property to get the primitive
   ```ts
@@ -141,6 +141,12 @@ import {signal, effect} from "@e280/strata"
   const $count = $count.core
   $count.get()
   ```
+
+### 🚦 types
+- **`Signaly<V>`** — can be `Signal<V>` or `Derive<V>` or `Lazy<V>`
+  - these are types for the core primitive classes
+- **`SignalyFn<V>`** — can be `SignalFn<V>` or `DeriveFn<V>` or `LazyFn<V>`
+  - these `*Fn` types are for the hipster-syntax enabled variants
 
 
 

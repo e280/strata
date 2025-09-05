@@ -13,10 +13,11 @@
 ### v0.2.0
 - 🍏 introduce and encourage new `$signal` naming convention in readme
 - 🟥 signal rework. new implementation. mostly backwards-compatible.
-  - 🟥 renamed type `Signaloid` to `Signaly`
+  - 🟥 renamed type `Signaloid` to `SignalyFn`
   - 🟥 renamed type `Signal` to `SignalFn`
   - 🟥 renamed type `LazySignal` to `LazyFn`
   - 🟥 renamed type `DerivedSignal` to `DeriveFn`
+  - 🍏 add type `Signaly` for (any signal-like core classes)
   - 🍏 new primitive classes (without hipster syntax)
     - `new Signal(0)`
     - `new Lazy(formulaFn)`
