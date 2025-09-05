@@ -1,7 +1,9 @@
 
 ![](https://i.imgur.com/h7FohWa.jpeg)
 
-<br/>
+
+
+<br/><br/>
 
 # ⛏️ strata
 
@@ -9,14 +11,16 @@
 📦 `npm install @e280/strata`  
 🧙‍♂️ probably my tenth state management library, lol  
 💁 it's all about rerendering ui when data changes  
-🦝 used by our view library [@e280/sly](https://github.com/e280/sly)  
+🦝 powers reactivity in our view library [@e280/sly](https://github.com/e280/sly)  
 🧑‍💻 a project by https://e280.org/
 
 🚦 **signals** — ephemeral view-level state  
 🌳 **tree** — persistent app-level state  
 🪄 **tracker** — reactivity integration hub  
 
-<br/>
+
+
+<br/><br/>
 
 ## 🚦 strata signals
 > *ephemeral view-level state*
@@ -138,7 +142,9 @@ import {signal, effect} from "@e280/strata"
   $count.get()
   ```
 
-<br/>
+
+
+<br/><br/>
 
 ## 🌳 strata trees
 > *persistent app-level state*
@@ -273,7 +279,9 @@ import {Trunk} from "@e280/strata"
 - chronobranch can have its own branches — all their mutations advance history
 - plz pinky-swear right now, that you won't create a chronobranch under a branch under another chronobranch 💀
 
-<br/>
+
+
+<br/><br/>
 
 ## 🪄 strata tracker
 > *reactivity integration hub*
@@ -348,9 +356,11 @@ note, the *items* that the tracker tracks can be any object, or symbol.. the tra
     }
     ```
 
-<br/>
 
-## 🧑‍💻 an e280 project
+
+<br/><br/>
+
+## 🧑‍💻 strata is by e280
 free and open source by https://e280.org/  
 join us if you're cool and good at dev  
 
