@@ -37,7 +37,7 @@ export class Derive<V> extends Reactive<V> {
 			return that.get()
 		}
 
-		f.derive = that
+		f.core = that
 		f.get = that.get.bind(that)
 		f.on = that.on
 		f.dispose = that.dispose.bind(that)

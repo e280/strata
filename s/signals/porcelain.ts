@@ -8,36 +8,23 @@ export function lazy<V>(
 		formula: () => V,
 		options?: Partial<SignalOptions>,
 	) {
-	return new Lazy<V>(formula, options)
+	return new Lazy<V>(formula, options).fn()
 }
-
-lazy.fn = <V>(
-	formula: () => V,
-	options?: Partial<SignalOptions>,
-) => lazy(formula, options).fn()
 
 export function derive<V>(
 		formula: () => V,
 		options?: Partial<SignalOptions>,
 	) {
-	return new Derive<V>(formula, options)
+	return new Derive<V>(formula, options).fn()
 }
-
-derive.fn = <V>(
-	formula: () => V,
-	options?: Partial<SignalOptions>,
-) => derive(formula, options).fn()
 
 export function signal<V>(
 		value: V,
 		options?: Partial<SignalOptions>,
 	) {
-	return new Signal<V>(value, options)
+	return new Signal<V>(value, options).fn()
 }
 
 signal.lazy = lazy
 signal.derive = derive
-signal.fn = <V>(value: V, options?: Partial<SignalOptions>) => (
-	new Signal(value, options).fn()
-)
 

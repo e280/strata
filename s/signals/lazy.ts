@@ -51,7 +51,7 @@ export class Lazy<V> extends Readable<V> {
 			return that.get()
 		}
 
-		f.lazy = that
+		f.core = that
 		f.get = that.get.bind(that)
 		f.dispose = that.dispose.bind(that)
 		f.fn = that.fn.bind(that)

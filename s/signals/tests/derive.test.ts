@@ -98,9 +98,9 @@ export default Science.suite({
 
 	"hipster fns": Science.suite({
 		"basic": test(async() => {
-			const a = signal.fn(1)
-			const b = signal.fn(10)
-			const product = derive.fn(() => a() * b())
+			const a = signal(1)
+			const b = signal(10)
+			const product = derive(() => a() * b())
 			expect(product()).is(10)
 
 			await a(2)

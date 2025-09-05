@@ -33,18 +33,23 @@ import {signal, effect} from "@e280/strata"
   - maybe you like the `$` prefix convention for signals
 - **read a signal**
   ```ts
-  $count.get() // 0
+  $count() // 0
   ```
 - **set a signal**
   ```ts
-  $count.set(1)
+  $count(1)
   ```
 - **set a signal, and await all downstream effects**
   ```ts
-  await $count.set(2)
+  await $count(2)
   ```
 
 ### 🚦 pick your poison
+- **signal hipster syntax**
+  ```ts
+  $count() // get
+  await $count(2) // set
+  ```
 - **signal get/set syntax**
   ```ts
   $count.get() // get
@@ -60,26 +65,6 @@ import {signal, effect} from "@e280/strata"
   $count.value++
   $count.value += 1
   ```
-- **signal hipster fn syntax**
-  - mint a fresh new signal fn
-    ```ts
-    const $count = signal.fn(1)
-    ```
-  - or turn any existing signal into a hipster fn
-    ```ts
-    const $count = signal.fn(1)
-    ```
-  - now you can directly invoke it
-    ```ts
-    $count() // get
-    await $count(2) // set
-    ```
-  - it has all the stuff that a signal has
-    ```ts
-    $count.get()
-    await $count.publish(5)
-    $count.on(x => console.log(x))
-    ```
 
 ### 🚦 effects
 - **effects run when the relevant signals change**
@@ -99,29 +84,58 @@ import {signal, effect} from "@e280/strata"
   ```ts
   const $a = signal(1)
   const $b = signal(10)
-  const $product = signal.derive(() => $a.get() * $b.get())
+  const $product = signal.derive(() => $a() * $b())
 
-  $product.get() // 10
+  $product() // 10
 
   // change a dependency,
   // and the derived signal is automatically updated
-  await $a.set(2)
+  await $a(2)
 
-  $product.get() // 20
+  $product() // 20
   ```
 - **signal.lazy**  
   is for making special optimizations.  
   it's like derive, except it cannot trigger effects,  
   because it's so lazy it only computes the value on read, and only when necessary.  
   > *i repeat: lazy signals cannot trigger effects!*
-- **hipster syntax**  
-  derive and lazy have hipster syntax just like signals.  
-  ```ts
-  const $a = signal.fn(1)
-  const $b = signal.fn(10)
-  const $product = signal.derive.fn(() => $a() * $b())
 
-  $product() // 10
+### 🚦 core primitive classes
+- the hipster syntax has a slight performance cost
+- you can instead use the core primitive classes
+  ```ts
+  const $count = new Signal(1)
+  ```
+  core signals work mostly the same
+  ```ts
+  // ✅ legal
+  $count.get()
+  $count.set(2)
+  ```
+  except you cannot directly invoke them
+  ```ts
+  // ⛔ illegal on core primitives
+  $count()
+  $count(2)
+  ```
+- same thing for derive/lazy
+  ```ts
+  const $product = new Derive(() => $a() * $b())
+  ```
+  ```ts
+  const $product = new Lazy(() => $a() * $b())
+  ```
+- all core primitives (signal/derive/lazy) have a convert-to-hipster-fn method:
+  ```ts
+  const $count = new Signal(1)
+  const $countFn = $count.fn()
+  $count()
+  ```
+- and all hipster fns (signal/derive/lazy) have a `.core` property to get the primitive
+  ```ts
+  const $countFn = signal(0)
+  const $count = $count.core
+  $count.get()
   ```
 
 <br/>

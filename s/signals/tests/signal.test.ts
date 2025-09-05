@@ -60,9 +60,9 @@ export default Science.suite({
 		}),
 	}),
 
-	"hipster fns": Science.suite({
+	"hipster syntax": Science.suite({
 		"get and set": test(async() => {
-			const count = signal.fn(0)
+			const count = signal(0)
 			expect(count()).is(0)
 
 			count(count() + 1)
@@ -70,7 +70,7 @@ export default Science.suite({
 		}),
 
 		"old get and set still work": test(async() => {
-			const count = signal.fn(0)
+			const count = signal(0)
 			expect(count.get()).is(0)
 
 			count.set(count.get() + 1)
@@ -78,7 +78,7 @@ export default Science.suite({
 		}),
 
 		"interop": test(async() => {
-			const count = signal.fn(0)
+			const count = signal(0)
 
 			count(1)
 			expect(count()).is(1)
@@ -97,7 +97,7 @@ export default Science.suite({
 		}),
 
 		".on 'this' interrogation": test(async() => {
-			const count = signal.fn(0)
+			const count = signal(0)
 			expect(count()).is(0)
 
 			let reported = count()

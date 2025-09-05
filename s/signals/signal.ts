@@ -65,7 +65,7 @@ export class Signal<V> extends Reactive<V> {
 				: that.set(arguments[0])
 		}
 
-		f.signal = that
+		f.core = that
 		f.get = that.get.bind(that)
 		f.set = that.set.bind(that)
 		f.on = that.on

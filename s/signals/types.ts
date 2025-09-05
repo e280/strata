@@ -16,16 +16,16 @@ export type SignalFn<V> = {
 	(v: V): Promise<V>
 	(v?: V): V | Promise<V>
 
-	signal: Signal<V>
+	core: Signal<V>
 } & Signal<V>
 
 export type LazyFn<V> = {
 	(): V
-	lazy: Lazy<V>
+	core: Lazy<V>
 } & Lazy<V>
 
 export type DeriveFn<V> = {
 	(): V
-	derive: Derive<V>
+	core: Derive<V>
 } & Derive<V>
 
