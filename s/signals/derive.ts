@@ -30,6 +30,10 @@ export class Derive<V> extends Reactive<V> {
 		this.#dispose()
 	}
 
+	get core() {
+		return this
+	}
+
 	fn() {
 		const that = this as Derive<V>
 

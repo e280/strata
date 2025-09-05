@@ -44,6 +44,10 @@ export class Lazy<V> extends Readable<V> {
 			this.#effect()
 	}
 
+	get core() {
+		return this
+	}
+
 	fn() {
 		const that = this as Lazy<V>
 

@@ -54,6 +54,10 @@ export class Signal<V> extends Reactive<V> {
 		return v
 	}
 
+	get core() {
+		return this
+	}
+
 	fn() {
 		const that = this as Signal<V>
 
