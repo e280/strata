@@ -16,14 +16,14 @@
   - 🟥 renamed type `Signaloid` to `SignalyFn`
   - 🟥 renamed type `Signal` to `SignalFn`
   - 🟥 renamed type `LazySignal` to `LazyFn`
-  - 🟥 renamed type `DerivedSignal` to `DeriveFn`
+  - 🟥 renamed type `DeriveSignal` to `DerivedFn`
   - 🍏 add type `Signaly` for (any signal-like core classes)
   - 🍏 new primitive classes (without hipster syntax)
     - `new Signal(0)`
     - `new Lazy(formulaFn)`
-    - `new Derive(formulaFn)`
+    - `new Derived(formulaFn)`
     - these classes have a new `.fn()` method that returns a hipster fn
-    - "porcelain" fns now return hipster-fn variants, `signal(0)`, `lazy(formulaFn)`, `derive(formulaFn)`
+    - "porcelain" fns now return hipster-fn variants, `signal(0)`, `lazy(formulaFn)`, `derived(formulaFn)`
 
 
 

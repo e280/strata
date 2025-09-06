@@ -3,7 +3,7 @@ import {deep} from "@e280/stz"
 import {Branch} from "./branch.js"
 import {signal} from "../../signals/porcelain.js"
 import {trunkSetup} from "./utils/setup.js"
-import {Derive} from "../../signals/derive.js"
+import {Derived} from "../../signals/derived.js"
 import {Signal} from "../../signals/signal.js"
 import {Chronobranch} from "./chronobranch.js"
 import {processOptions} from "./utils/process-options.js"
@@ -19,14 +19,14 @@ export class Trunk<S extends Trunkstate> implements Tree<S> {
 
 	options: Options
 
-	#immutable: Derive<Immutable<S>>
+	#immutable: Derived<Immutable<S>>
 	#mutable: Signal<S>
 	#mutationLock = 0
 
 	constructor(state: S, options: Partial<Options> = {}) {
 		this.options = processOptions(options)
 		this.#mutable = signal(state)
-		this.#immutable = signal.derive(() =>
+		this.#immutable = signal.derived(() =>
 			deep.freeze(this.options.clone(this.#mutable.get())) as Immutable<S>
 		)
 	}

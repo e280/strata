@@ -1,7 +1,7 @@
 
 import {Lazy} from "./lazy.js"
 import {Signal} from "./signal.js"
-import {Derive} from "./derive.js"
+import {Derived} from "./derived.js"
 import {SignalOptions} from "./types.js"
 
 export function lazy<V>(
@@ -11,11 +11,11 @@ export function lazy<V>(
 	return new Lazy<V>(formula, options).fn()
 }
 
-export function derive<V>(
+export function derived<V>(
 		formula: () => V,
 		options?: Partial<SignalOptions>,
 	) {
-	return new Derive<V>(formula, options).fn()
+	return new Derived<V>(formula, options).fn()
 }
 
 export function signal<V>(
@@ -26,5 +26,5 @@ export function signal<V>(
 }
 
 signal.lazy = lazy
-signal.derive = derive
+signal.derived = derived
 

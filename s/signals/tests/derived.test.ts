@@ -1,13 +1,13 @@
 
 import {Science, test, expect, spy} from "@e280/science"
 import {effect} from "../effect.js"
-import {derive, signal} from "../porcelain.js"
+import {derived, signal} from "../porcelain.js"
 
 export default Science.suite({
 	"basic": test(async() => {
 		const a = signal(1)
 		const b = signal(10)
-		const product = derive(() => a.get() * b.get())
+		const product = derived(() => a.get() * b.get())
 		expect(product.get()).is(10)
 
 		await a.set(2)
@@ -17,7 +17,7 @@ export default Science.suite({
 	"effect reacts to derived changes": test(async() => {
 		const a = signal(1)
 		const b = signal(10)
-		const product = derive(() => a.value * b.value)
+		const product = derived(() => a.value * b.value)
 
 		let mutations = 0
 		effect(() => {
@@ -39,7 +39,7 @@ export default Science.suite({
 	"effect doesn't overreact to derived": test(async() => {
 		const a = signal(1)
 		const b = signal(10)
-		const product = signal.derive(() => a.value * b.value)
+		const product = signal.derived(() => a.value * b.value)
 
 		const derivedSpy = spy(() => {})
 		product.on(derivedSpy)
@@ -63,7 +63,7 @@ export default Science.suite({
 	"derived.on": test(async() => {
 		const a = signal(1)
 		const b = signal(10)
-		const product = signal.derive(() => a.value * b.value)
+		const product = signal.derived(() => a.value * b.value)
 		expect(product.value).is(10)
 
 		const mole = spy((_v: number) => {})
@@ -79,7 +79,7 @@ export default Science.suite({
 	"derived.on not called if result doesn't change": test(async() => {
 		const a = signal(1)
 		const b = signal(10)
-		const product = signal.derive(() => a.value * b.value)
+		const product = signal.derived(() => a.value * b.value)
 		expect(product.value).is(10)
 
 		const mole = spy((_v: number) => {})
@@ -100,7 +100,7 @@ export default Science.suite({
 		"basic": test(async() => {
 			const a = signal(1)
 			const b = signal(10)
-			const product = derive(() => a() * b())
+			const product = derived(() => a() * b())
 			expect(product()).is(10)
 
 			await a(2)

@@ -1,10 +1,10 @@
 
 import {Lazy} from "./lazy.js"
 import {Signal} from "./signal.js"
-import {Derive} from "./derive.js"
+import {Derived} from "./derived.js"
 
-export type Signaly<V> = Signal<V> | Derive<V> | Lazy<V>
-export type SignalyFn<V> = SignalFn<V> | DeriveFn<V> | LazyFn<V>
+export type Signaly<V> = Signal<V> | Derived<V> | Lazy<V>
+export type SignalyFn<V> = SignalFn<V> | DerivedFn<V> | LazyFn<V>
 
 export type SignalOptions = {
 	compare: (a: any, b: any) => boolean
@@ -23,8 +23,8 @@ export type LazyFn<V> = {
 	core: Lazy<V>
 } & Lazy<V>
 
-export type DeriveFn<V> = {
+export type DerivedFn<V> = {
 	(): V
-	core: Derive<V>
-} & Derive<V>
+	core: Derived<V>
+} & Derived<V>
 

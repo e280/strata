@@ -82,13 +82,13 @@ import {signal, effect} from "@e280/strata"
     // when $count is changed, the effect fn is run
   ```
 
-### 🚦 `signal.derive` and `signal.lazy` are computed signals
-- **signal.derive**  
+### 🚦 `signal.derived` and `signal.lazy` are computed signals
+- **signal.derived**  
   is for combining signals
   ```ts
   const $a = signal(1)
   const $b = signal(10)
-  const $product = signal.derive(() => $a() * $b())
+  const $product = signal.derived(() => $a() * $b())
 
   $product() // 10
 
@@ -100,7 +100,7 @@ import {signal, effect} from "@e280/strata"
   ```
 - **signal.lazy**  
   is for making special optimizations.  
-  it's like derive, except it cannot trigger effects,  
+  it's like derived, except it cannot trigger effects,  
   because it's so lazy it only computes the value on read, and only when necessary.  
   > *i repeat: lazy signals cannot trigger effects!*
 
@@ -122,27 +122,27 @@ import {signal, effect} from "@e280/strata"
   $count()
   $count(2)
   ```
-- **same thing for derive/lazy**
+- **same thing for derived/lazy**
   ```ts
-  const $product = new Derive(() => $a() * $b())
+  const $product = new Derived(() => $a() * $b())
   ```
   ```ts
   const $product = new Lazy(() => $a() * $b())
   ```
 - **conversions**
-  - all core primitives (signal/derive/lazy) have a convert-to-hipster-fn method
+  - all core primitives (signal/derived/lazy) have a convert-to-hipster-fn method
     ```ts
     new Signal(1).fn() // SignalFn<number>, hipster-fn
     ```
-  - and all hipster fns (signal/derive/lazy) have a `.core` property to get the primitive
+  - and all hipster fns (signal/derived/lazy) have a `.core` property to get the primitive
     ```ts
     signal(0).core // Signal<number>, primitive instance
     ```
 
 ### 🚦 types
-- **`Signaly<V>`** — can be `Signal<V>` or `Derive<V>` or `Lazy<V>`
+- **`Signaly<V>`** — can be `Signal<V>` or `Derived<V>` or `Lazy<V>`
   - these are types for the core primitive classes
-- **`SignalyFn<V>`** — can be `SignalFn<V>` or `DeriveFn<V>` or `LazyFn<V>`
+- **`SignalyFn<V>`** — can be `SignalFn<V>` or `DerivedFn<V>` or `LazyFn<V>`
   - these `*Fn` types are for the hipster-syntax enabled variants
 
 

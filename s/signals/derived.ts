@@ -2,10 +2,10 @@
 import {collectorEffect} from "./effect.js"
 import {Reactive} from "./parts/reactive.js"
 import {tracker} from "../tracker/tracker.js"
-import {DeriveFn, SignalOptions} from "./types.js"
+import {DerivedFn, SignalOptions} from "./types.js"
 import {defaultCompare} from "./utils/default-compare.js"
 
-export class Derive<V> extends Reactive<V> {
+export class Derived<V> extends Reactive<V> {
 	#dispose: () => void
 
 	constructor(formula: () => V, options?: Partial<SignalOptions>) {
@@ -35,7 +35,7 @@ export class Derive<V> extends Reactive<V> {
 	}
 
 	fn() {
-		const that = this as Derive<V>
+		const that = this as Derived<V>
 
 		function f(): V {
 			return that.get()
@@ -55,7 +55,7 @@ export class Derive<V> extends Reactive<V> {
 			get: () => that.sneak,
 		})
 
-		return f as DeriveFn<V>
+		return f as DerivedFn<V>
 	}
 }
 
