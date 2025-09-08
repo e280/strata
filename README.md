@@ -30,41 +30,42 @@ import {signal, effect} from "@e280/strata"
 ```
 
 ### 🚦 each signal holds a value
-- **create a signal**
+- **make signal**
   ```ts
   const $count = signal(0)
   ```
-  - maybe you like the `$` prefix convention for signals
-- **read a signal**
+  > *maybe you like the `$` prefix convention for signals?*
+- **read signal**
   ```ts
   $count() // 0
   ```
-- **set a signal**
+- **write signal**
   ```ts
   $count(1)
   ```
-- **set a signal, and await all downstream effects**
+- **write signal *(and await all downstream effects)***
   ```ts
   await $count(2)
   ```
+  > *this is supposed to impress you*
 
 ### 🚦 pick your poison
-- **signal hipster syntax**
+- **signal hipster-fn syntax**
   ```ts
-  $count() // get
-  await $count(2) // set
+  $count()        // read
+  await $count(2) // write
   ```
 - **signal get/set syntax**
   ```ts
-  $count.get() // get
-  await $count.set(2) // set
+  $count.get()        // read
+  await $count.set(2) // write
   ```
 - **signal .value accessor syntax**
   ```ts
-  $count.value // get
-  $count.value = 2 // set
+  $count.value     // read
+  $count.value = 2 // write
   ```
-  value pattern is nice for these vibes
+  value pattern is super nice for these vibes
   ```ts
   $count.value++
   $count.value += 1
@@ -84,7 +85,7 @@ import {signal, effect} from "@e280/strata"
 
 ### 🚦 `signal.derived` and `signal.lazy` are computed signals
 - **signal.derived**  
-  is for combining signals
+  is for combining signals, like a formula
   ```ts
   const $a = signal(1)
   const $b = signal(10)
@@ -101,11 +102,11 @@ import {signal, effect} from "@e280/strata"
 - **signal.lazy**  
   is for making special optimizations.  
   it's like derived, except it cannot trigger effects,  
-  because it's so lazy it only computes the value on read, and only when necessary.  
+  because it's so damned lazy, it only computes the value on read, and only when necessary.  
   > *i repeat: lazy signals cannot trigger effects!*
 
 ### 🚦 core primitive classes
-- **the hipster syntax has a slight performance cost**
+- **the hipster-fn syntax has a slight performance cost**
 - **you can instead use the core primitive classes**
   ```ts
   const $count = new Signal(1)
@@ -143,7 +144,7 @@ import {signal, effect} from "@e280/strata"
 - **`Signaly<V>`** — can be `Signal<V>` or `Derived<V>` or `Lazy<V>`
   - these are types for the core primitive classes
 - **`SignalyFn<V>`** — can be `SignalFn<V>` or `DerivedFn<V>` or `LazyFn<V>`
-  - these `*Fn` types are for the hipster-syntax enabled variants
+  - these `*Fn` types are for the hipster-fn-syntax enabled variants
 
 
 
