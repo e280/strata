@@ -25,6 +25,10 @@ export class Derived<V> extends Reactive<V> {
 		this.#dispose = dispose
 	}
 
+	toString() {
+		return `(derived "${String(this.get())}")`
+	}
+
 	dispose() {
 		super.dispose()
 		this.#dispose()

@@ -17,6 +17,10 @@ export class Lazy<V> extends Readable<V> {
 		this.#compare = options?.compare ?? defaultCompare
 	}
 
+	toString() {
+		return `($lazy "${String(this.get())}")`
+	}
+
 	get() {
 		if (!this.#effect) {
 			const {result, dispose} = collectorEffect(

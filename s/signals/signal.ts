@@ -13,6 +13,10 @@ export class Signal<V> extends Reactive<V> {
 		this.#compare = options?.compare ?? defaultCompare
 	}
 
+	toString() {
+		return `($signal "${String(this.get())}")`
+	}
+
 	async set(v: V) {
 		const isChanged = !this.#compare(this.sneak, v)
 		if (isChanged) await this.publish(v)
