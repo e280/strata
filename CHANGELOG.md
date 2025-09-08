@@ -18,6 +18,7 @@
   - 🟥 renamed type `LazySignal` to `LazyFn`
   - 🟥 renamed type `DeriveSignal` to `DerivedFn`
   - 🍏 add type `Signaly` for (any signal-like core classes)
+  - 🍏 add nice `.toString()` handlers, helpful for templating mistakes
   - 🍏 new primitive classes (without hipster syntax)
     - `new Signal(0)`
     - `new Lazy(formulaFn)`
