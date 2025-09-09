@@ -1,6 +1,6 @@
 
 import {debounce} from "@e280/stz"
-import {tracker} from "../tracker/tracker.js"
+import {tracker} from "../../tracker/tracker.js"
 
 export function effect(
 		collector: () => void,

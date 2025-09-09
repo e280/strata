@@ -1,7 +1,7 @@
 
-import {Lazy} from "./lazy.js"
-import {Signal} from "./signal.js"
-import {Derived} from "./derived.js"
+import {Lazy} from "./core/lazy.js"
+import {Signal} from "./core/signal.js"
+import {Derived} from "./core/derived.js"
 
 export type Signaly<V> = Signal<V> | Derived<V> | Lazy<V>
 export type SignalyFn<V> = SignalFn<V> | DerivedFn<V> | LazyFn<V>

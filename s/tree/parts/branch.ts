@@ -1,7 +1,7 @@
 
 import {deep} from "@e280/stz"
 import {derived} from "../../signals/porcelain.js"
-import {Derived} from "../../signals/derived.js"
+import {Derived} from "../../signals/core/derived.js"
 import {Branchstate, Immutable, Mutator, Options, Selector, Tree} from "./types.js"
 
 export class Branch<S extends Branchstate, ParentState extends Branchstate = any> implements Tree<S> {

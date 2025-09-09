@@ -3,7 +3,7 @@ import {nap} from "@e280/stz"
 import {Science, expect} from "@e280/science"
 
 import {Trunk} from "./parts/trunk.js"
-import {effect} from "../signals/effect.js"
+import {effect} from "../signals/core/effect.js"
 
 export default Science.suite({
 	"trunk": Science.suite({

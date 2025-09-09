@@ -1,9 +1,9 @@
 
 import {collectorEffect} from "./effect.js"
 import {Reactive} from "./parts/reactive.js"
-import {tracker} from "../tracker/tracker.js"
-import {DerivedFn, SignalOptions} from "./types.js"
-import {defaultCompare} from "./utils/default-compare.js"
+import {tracker} from "../../tracker/tracker.js"
+import {DerivedFn, SignalOptions} from "../types.js"
+import {defaultCompare} from "../utils/default-compare.js"
 
 export class Derived<V> extends Reactive<V> {
 	#dispose: () => void

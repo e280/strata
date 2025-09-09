@@ -1,6 +1,6 @@
 
 import {Science, test, expect, spy} from "@e280/science"
-import {effect} from "../effect.js"
+import {effect} from "../core/effect.js"
 import {derived, signal} from "../porcelain.js"
 
 export default Science.suite({
