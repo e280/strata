@@ -2,7 +2,7 @@
 import {MapG} from "@e280/stz"
 import {tracker} from "../../tracker/tracker.js"
 
-export class RzMap<K, V> extends MapG<K, V> {
+export class RMap<K, V> extends MapG<K, V> {
 	get size() {
 		tracker.notifyRead(this)
 		return super.size

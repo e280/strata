@@ -11,7 +11,7 @@
 ## v0.2
 
 ### v0.2.0
-- 🍏 add `RzSet` and `RzMap` reactive set/map
+- 🍏 add `RSet` and `RMap` reactive set/map
 - 🍏 introduce and encourage new `$signal` naming convention in readme
 - 🟥 signal rework. new implementation. mostly backwards-compatible.
   - 🟥 renamed type `Signaloid` to `SignalyFn`
