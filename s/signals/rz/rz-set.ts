@@ -2,46 +2,42 @@
 import {SetG} from "@e280/stz"
 import {tracker} from "../../tracker/tracker.js"
 
-export class RzSet<T> {
-	#set: SetG<T>
-
-	constructor(items?: T[]) {
-		this.#set = new SetG(items)
-	}
-
+export class RzSet<T> extends SetG<T> {
 	get size() {
 		tracker.notifyRead(this)
-		return this.#set.size
+		return super.size
 	}
 
 	;[Symbol.iterator]() {
 		tracker.notifyRead(this)
-		return this.#set[Symbol.iterator]()
+		return super[Symbol.iterator]()
 	}
 
 	values() {
 		tracker.notifyRead(this)
-		return this.#set.values()
+		return super.values()
 	}
 
-	has(...items: T[]) {
+	has(item: T) {
 		tracker.notifyRead(this)
-		return this.#set.hasAll(...items)
+		return super.has(item)
 	}
 
-	async add(...items: T[]) {
-		this.#set.adds(...items)
-		await tracker.notifyWrite(this)
+	add(item: T) {
+		super.add(item)
+		tracker.notifyWrite(this)
+		return this
 	}
 
-	async delete(...items: T[]) {
-		this.#set.deletes(...items)
-		await tracker.notifyWrite(this)
+	delete(item: T) {
+		const r = super.delete(item)
+		tracker.notifyWrite(this)
+		return r
 	}
 
-	async clear() {
-		this.#set.clear()
-		await tracker.notifyWrite(this)
+	clear() {
+		super.clear()
+		tracker.notifyWrite(this)
 	}
 }
 

@@ -2,72 +2,62 @@
 import {MapG} from "@e280/stz"
 import {tracker} from "../../tracker/tracker.js"
 
-export class RzMap<K, V> {
-	#map: MapG<K, V>
-
-	constructor(entries?: [K, V][]) {
-		this.#map = new MapG(entries)
-	}
-
+export class RzMap<K, V> extends MapG<K, V> {
 	get size() {
 		tracker.notifyRead(this)
-		return this.#map.size
+		return super.size
 	}
 
 	;[Symbol.iterator]() {
 		tracker.notifyRead(this)
-		return this.#map[Symbol.iterator]()
+		return super[Symbol.iterator]()
 	}
 
 	keys() {
 		tracker.notifyRead(this)
-		return this.#map.keys()
+		return super.keys()
 	}
 
 	values() {
 		tracker.notifyRead(this)
-		return this.#map.values()
+		return super.values()
 	}
 
 	entries() {
 		tracker.notifyRead(this)
-		return this.#map.entries()
+		return super.entries()
+	}
+
+	forEach(callbackFn: (value: V, key: K, map: Map<K, V>) => void) {
+		tracker.notifyRead(this)
+		return super.forEach(callbackFn)
 	}
 
 	has(key: K) {
 		tracker.notifyRead(this)
-		return this.#map.has(key)
+		return super.has(key)
 	}
 
-	get(key: K): V | undefined {
+	get(key: K) {
 		tracker.notifyRead(this)
-		return this.#map.get(key)
+		return super.get(key)
 	}
 
-	require(key: K): V {
-		tracker.notifyRead(this)
-		return this.#map.require(key)
-	}
-
-	guarantee(key: K, makeFn: () => V): V {
-		tracker.notifyRead(this)
+	set(key: K, value: V) {
+		const r = super.set(key, value)
 		tracker.notifyWrite(this)
-		return this.#map.guarantee(key, makeFn)
+		return r
 	}
 
-	async set(key: K, value: V) {
-		this.#map.set(key, value)
-		await tracker.notifyWrite(this)
+	delete(key: K) {
+		const r = super.delete(key)
+		tracker.notifyWrite(this)
+		return r
 	}
 
-	async delete(key: K) {
-		this.#map.delete(key)
-		await tracker.notifyWrite(this)
-	}
-
-	async clear() {
-		this.#map.clear()
-		await tracker.notifyWrite(this)
+	clear() {
+		super.clear()
+		tracker.notifyWrite(this)
 	}
 }
 
