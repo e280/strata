@@ -31,7 +31,7 @@ export class Signal<V> extends Reactive<V> {
 		void this.set(v)
 	}
 
-	async publish(v = this.sneak) {
+	async publish(v: V) {
 		// only wizards are allowed beyond this point.
 		// - the implementation is subtle
 		// - it looks wrong, but it's right
