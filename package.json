@@ -29,7 +29,7 @@
 		"_tscw": "tsc -w"
 	},
 	"dependencies": {
-		"@e280/stz": "^0.2.2"
+		"@e280/stz": "^0.2.3"
 	},
 	"devDependencies": {
 		"@e280/science": "^0.1.2",
