@@ -18,7 +18,8 @@
   - 🟥 renamed type `Signal` to `SignalFn`
   - 🟥 renamed type `LazySignal` to `LazyFn`
   - 🟥 renamed type `DeriveSignal` to `DerivedFn`
-  - 🟥 publish value param no longer has default, value is required (because undefined could be a valid value)
+  - 🟥 signal publish no longer takes a value (it publishes the sneak value)
+  - 🟥 signal set now accepts second param forcePublish to enforce a publish during the set
   - 🍏 add type `Signaly` for (any signal-like core classes)
   - 🍏 add nice `.toString()` handlers, helpful for templating mistakes
   - 🍏 new primitive classes (without hipster syntax)

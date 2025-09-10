@@ -14,11 +14,11 @@ export default Science.suite({
 		expect(count.value).is(5)
 	}),
 
-	"set and publish returns value": test(async() => {
+	"set with forcePublish returns value": test(async() => {
 		const count = signal(0)
 		expect(count.value).is(0)
 		expect(await count.set(1)).is(1)
-		expect(await count.publish(2)).is(2)
+		expect(await count.set(2, true)).is(2)
 	}),
 
 	"syntax interop": test(async() => {

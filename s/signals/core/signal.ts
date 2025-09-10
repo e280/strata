@@ -17,9 +17,13 @@ export class Signal<V> extends Reactive<V> {
 		return `($signal "${String(this.get())}")`
 	}
 
-	async set(v: V) {
-		const isChanged = !this.#compare(this.sneak, v)
-		if (isChanged) await this.publish(v)
+	async set(v: V, forcePublish = false) {
+		const previous = this.sneak
+		this.sneak = v
+
+		if (forcePublish || !this.#compare(previous, v))
+			await this.publish()
+
 		return v
 	}
 
@@ -31,7 +35,7 @@ export class Signal<V> extends Reactive<V> {
 		void this.set(v)
 	}
 
-	async publish(v: V) {
+	async publish() {
 		// only wizards are allowed beyond this point.
 		// - the implementation is subtle
 		// - it looks wrong, but it's right
@@ -40,14 +44,14 @@ export class Signal<V> extends Reactive<V> {
 		if (this.#lock)
 			throw new Error("forbid circularity")
 
+		const value = this.sneak
 		let promise: Promise<any> = Promise.resolve()
 
 		try {
 			this.#lock = true
-			this.sneak = v
 			promise = Promise.all([
 				tracker.notifyWrite(this),
-				this.on.publish(v),
+				this.on.publish(value),
 			])
 		}
 		finally {
@@ -55,7 +59,7 @@ export class Signal<V> extends Reactive<V> {
 		}
 
 		await promise
-		return v
+		return value
 	}
 
 	get core() {

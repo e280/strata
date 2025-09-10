@@ -57,7 +57,7 @@ export class Trunk<S extends Trunkstate> implements Tree<S> {
 	}
 
 	async overwrite(state: S) {
-		await this.#mutable.publish(state)
+		await this.#mutable.set(state, true)
 	}
 
 	branch<Sub extends Branchstate>(selector: Selector<Sub, S>): Branch<Sub, S> {
