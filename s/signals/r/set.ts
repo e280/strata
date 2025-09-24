@@ -38,6 +38,7 @@ export class RSet<T> extends SetG<T> {
 	clear() {
 		super.clear()
 		tracker.notifyWrite(this)
+		return this
 	}
 }
 
