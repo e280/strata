@@ -1,6 +1,6 @@
 {
 	"name": "@e280/strata",
-	"version": "0.2.0-13",
+	"version": "0.2.0-14",
 	"description": "state management",
 	"license": "MIT",
 	"author": "Chase Moskal <chasemoskal@gmail.com>",
