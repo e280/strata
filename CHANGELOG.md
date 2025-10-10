@@ -10,6 +10,9 @@
 
 ## v0.2
 
+### v0.2.1
+- 🍏 update dependencies
+
 ### v0.2.0
 - 🍏 add `RSet` and `RMap` reactive set/map
 - 🍏 introduce and encourage new `$signal` naming convention in readme
