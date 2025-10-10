@@ -1,8 +1,8 @@
 
-import {SetG} from "@e280/stz"
+import {GSet} from "@e280/stz"
 import {tracker} from "../../tracker/tracker.js"
 
-export class RSet<T> extends SetG<T> {
+export class RSet<T> extends GSet<T> {
 	get size() {
 		tracker.notifyRead(this)
 		return super.size
