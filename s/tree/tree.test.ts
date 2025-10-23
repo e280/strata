@@ -310,6 +310,12 @@ export default Science.suite({
 				await chron.undo()
 				expect(group.state.count).is(0)
 			}),
+
+			"mutate after mutate without await": Science.test(async() => {
+				const {chron} = setup()
+				chron.mutate(s => s.count++)
+				chron.mutate(s => s.count++)
+			})
 		})
 	})(),
 })
