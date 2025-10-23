@@ -89,6 +89,16 @@ export default Science.suite({
 			}).throwsAsync()
 			expect(mutationCount).is(1)
 		}),
+
+		"mutate after mutate without await": Science.test(async() => {
+			const trunk = new Trunk({count: 0})
+			const p1 = trunk.mutate(s => s.count++)
+			expect(trunk.state.count).is(1)
+			const p2 = trunk.mutate(s => s.count++)
+			expect(trunk.state.count).is(2)
+			await p1
+			await p2
+		}),
 	}),
 
 	"branch": Science.suite({
@@ -310,12 +320,6 @@ export default Science.suite({
 				await chron.undo()
 				expect(group.state.count).is(0)
 			}),
-
-			"mutate after mutate without await": Science.test(async() => {
-				const {chron} = setup()
-				chron.mutate(s => s.count++)
-				chron.mutate(s => s.count++)
-			})
 		})
 	})(),
 })
