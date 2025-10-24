@@ -14,13 +14,15 @@
 🦝 powers reactivity in our view library [@e280/sly](https://github.com/e280/sly)  
 🧑‍💻 a project by https://e280.org/
 
-🚦 **signals** — ephemeral view-level state  
-🌳 **tree** — persistent app-level state  
-🪄 **tracker** — reactivity integration hub  
+🚦 [**signals**](#signals) — ephemeral view-level state  
+🌳 [**tree**](#tree) — persistent app-level state  
+🪄 [**tracker**](#tracker) — reactivity integration hub  
 
 
 
 <br/><br/>
+
+<a id="signals"></a>
 
 ## 🚦 strata signals
 > *ephemeral view-level state*
@@ -150,7 +152,9 @@ import {signal, effect} from "@e280/strata"
 
 <br/><br/>
 
-## 🌳 strata trees
+<a id="tree"></a>
+
+## 🌳 strata tree
 > *persistent app-level state*
 
 ```ts
@@ -286,6 +290,8 @@ import {Trunk} from "@e280/strata"
 
 
 <br/><br/>
+
+<a id="tracker"></a>
 
 ## 🪄 strata tracker
 > *reactivity integration hub*
