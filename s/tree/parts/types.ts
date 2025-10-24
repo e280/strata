@@ -1,9 +1,12 @@
 
 import {Branch} from "./branch.js"
 
-export type Options = {
+export type TreeOptions = {
 	clone: <X>(x: X) => X
 }
+
+/** @deprecated renamed to `TreeOptions` */
+export type Options = TreeOptions
 
 export type Selector<Sub, S> = (state: S) => Sub
 export type Mutator<S> = (state: S) => void

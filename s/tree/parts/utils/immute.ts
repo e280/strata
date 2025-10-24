@@ -1,13 +1,13 @@
 
 import {deep, microbounce, sub} from "@e280/stz"
-import {Immutable, Options} from "../types.js"
+import {Immutable, TreeOptions} from "../types.js"
 import {tracker} from "../../../tracker/tracker.js"
 
 export class Immute<S> {
 	#mutable: S
 	#immutable: Immutable<S>
 
-	constructor(mutable: S, private options: Options) {
+	constructor(mutable: S, private options: TreeOptions) {
 		this.#mutable = mutable
 		this.#immutable = this.#petrify(mutable)
 	}

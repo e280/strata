@@ -1,6 +1,6 @@
 
 import {Branch} from "./branch.js"
-import {Branchstate, Chronicle, Immutable, Mutator, Options, Selector, Tree} from "./types.js"
+import {Branchstate, Chronicle, Immutable, Mutator, TreeOptions, Selector, Tree} from "./types.js"
 
 export class Chronobranch<S extends Branchstate, ParentState extends Branchstate = any> implements Tree<S> {
 	#branch: Branch<Chronicle<S>, ParentState>
@@ -9,7 +9,7 @@ export class Chronobranch<S extends Branchstate, ParentState extends Branchstate
 			public limit: number,
 			public parent: Tree<ParentState>,
 			public selector: Selector<Chronicle<S>, ParentState>,
-			public options: Options,
+			public options: TreeOptions,
 		) {
 		this.#branch = parent.branch(selector)
 	}

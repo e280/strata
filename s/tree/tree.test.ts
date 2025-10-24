@@ -93,7 +93,7 @@ export default Science.suite({
 		// 	expect(mutationCount).is(1)
 		// }),
 
-		"sequential synchronous mutations": Science.test(async() => {
+		"sync coherence": Science.test(async() => {
 			const trunk = new Trunk({count: 0})
 			const p1 = trunk.mutate(s => s.count++)
 			expect(trunk.state.count).is(1)

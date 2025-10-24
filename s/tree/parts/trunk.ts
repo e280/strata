@@ -5,7 +5,7 @@ import {Immute} from "./utils/immute.js"
 import {trunkSetup} from "./utils/setup.js"
 import {Chronobranch} from "./chronobranch.js"
 import {processOptions} from "./utils/process-options.js"
-import {Branchstate, Chronicle, Mutator, Options, Selector, Tree, Trunkstate} from "./types.js"
+import {Branchstate, Chronicle, Mutator, TreeOptions, Selector, Tree, Trunkstate} from "./types.js"
 
 export class Trunk<S extends Trunkstate> implements Tree<S> {
 	static setup = trunkSetup
@@ -15,11 +15,11 @@ export class Trunk<S extends Trunkstate> implements Tree<S> {
 		future: [],
 	})
 
-	options: Options
+	options: TreeOptions
 	#mutationLock = 0
 	#immute: Immute<S>
 
-	constructor(state: S, options: Partial<Options> = {}) {
+	constructor(state: S, options: Partial<TreeOptions> = {}) {
 		this.options = processOptions(options)
 		this.#immute = new Immute(state, this.options)
 	}

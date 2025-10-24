@@ -1,6 +1,6 @@
 
 import {deep} from "@e280/stz"
-import {Branchstate, Immutable, Mutator, Options, Selector, Tree} from "./types.js"
+import {Branchstate, Immutable, Mutator, TreeOptions, Selector, Tree} from "./types.js"
 
 export class Branch<S extends Branchstate, ParentState extends Branchstate = any> implements Tree<S> {
 	#previous: Immutable<S>
@@ -8,7 +8,7 @@ export class Branch<S extends Branchstate, ParentState extends Branchstate = any
 	constructor(
 			private parent: Tree<ParentState>,
 			private selector: Selector<S, ParentState>,
-			private options: Options,
+			private options: TreeOptions,
 		) {
 		this.#previous = this.state
 	}
