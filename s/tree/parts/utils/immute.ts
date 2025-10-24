@@ -19,7 +19,6 @@ export class Immute<S> {
 	}
 
 	on = sub<[Immutable<S>]>()
-	#debouncePublish = microbounce(async() => this.on.publish(this.#immutable))
 
 	get() {
 		tracker.notifyRead(this)
@@ -30,7 +29,7 @@ export class Immute<S> {
 		this.#mutable = mutable
 		this.#immutable = deep.freeze(this.options.clone(this.get())) as Immutable<S>
 		await Promise.all([
-			this.#debouncePublish(),
+			this.on.publish(this.#immutable),
 			tracker.notifyWrite(this),
 		])
 	}
