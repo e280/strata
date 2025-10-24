@@ -172,6 +172,20 @@ export default Science.suite({
 			expect(counted).is(0)
 		}),
 
+		"effects ignore outside mutations": Science.test(async() => {
+			const trunk = new Trunk({a: {x: 0}, b: {x: 0}})
+			const a = trunk.branch(s => s.a)
+			const b = trunk.branch(s => s.b)
+			let counted = 0
+			effect(() => {
+				void b.state.x
+				counted++
+			})
+			expect(counted).is(1)
+			await a.mutate(a => a.x++)
+			expect(counted).is(1)
+		}),
+
 		"forbid submutation in mutation": Science.test(async() => {
 			const trunk = new Trunk({a: {b: 0}})
 			const a = trunk.branch(s => s.a)
