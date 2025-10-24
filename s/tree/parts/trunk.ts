@@ -1,12 +1,11 @@
 
-import {deep, microbounce} from "@e280/stz"
+import {deep} from "@e280/stz"
 import {Branch} from "./branch.js"
+import {Immute} from "./utils/immute.js"
 import {trunkSetup} from "./utils/setup.js"
 import {Chronobranch} from "./chronobranch.js"
-import {SignalFn} from "../../signals/types.js"
-import {signal} from "../../signals/porcelain.js"
 import {processOptions} from "./utils/process-options.js"
-import {Branchstate, Chronicle, Immutable, Mutator, Options, Selector, Tree, Trunkstate} from "./types.js"
+import {Branchstate, Chronicle, Mutator, Options, Selector, Tree, Trunkstate} from "./types.js"
 
 export class Trunk<S extends Trunkstate> implements Tree<S> {
 	static setup = trunkSetup
@@ -17,41 +16,31 @@ export class Trunk<S extends Trunkstate> implements Tree<S> {
 	})
 
 	options: Options
-
-	#mutable: S
-	#immutable: SignalFn<Immutable<S>>
 	#mutationLock = 0
+	#immute: Immute<S>
 
 	constructor(state: S, options: Partial<Options> = {}) {
 		this.options = processOptions(options)
-		this.#mutable = state
-		this.#immutable = signal(this.#makeImmutableClone())
+		this.#immute = new Immute(state, this.options)
 	}
 
 	get state() {
-		return this.#immutable.get()
+		return this.#immute.immutable
 	}
 
 	get on() {
-		return this.#immutable.on
+		return this.#immute.on
 	}
-
-	#makeImmutableClone() {
-		return deep.freeze(this.options.clone(this.#mutable)) as Immutable<S>
-	}
-
-	#debouncedPublish = microbounce(async() => this.#immutable.publish())
 
 	async mutate(mutator: Mutator<S>) {
-		const oldState = this.options.clone(this.#mutable)
+		const oldState = this.#immute.get()
 		if (this.#mutationLock > 0)
 			throw new Error("nested mutations are forbidden")
 		let promise = Promise.resolve()
 		try {
 			this.#mutationLock++
-			const value = this.#mutable
-			mutator(value)
-			const newState = value
+			const newState = this.options.clone(oldState)
+			mutator(newState)
 			const isChanged = !deep.equal(newState, oldState)
 			if (isChanged)
 				promise = this.overwrite(newState)
@@ -62,9 +51,7 @@ export class Trunk<S extends Trunkstate> implements Tree<S> {
 	}
 
 	async overwrite(state: S) {
-		this.#mutable = state
-		this.#immutable.sneak = this.#makeImmutableClone()
-		await this.#debouncedPublish()
+		await this.#immute.set(state)
 	}
 
 	branch<Sub extends Branchstate>(selector: Selector<Sub, S>): Branch<Sub, S> {
