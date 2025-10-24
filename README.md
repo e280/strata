@@ -318,8 +318,8 @@ note, the *items* that the tracker tracks can be any object, or symbol.. the tra
     ```
 - it's a good idea to debounce your rerender fn
     ```ts
-    import {debounce} from "@e280/stz"
-    const myDebouncedRerenderFn = debounce(0, myRerenderFn)
+    import {microbounce} from "@e280/stz"
+    const myDebouncedRerenderFn = microbounce(myRerenderFn)
     ```
 - `tracker.subscribe` to respond to changes
     ```ts

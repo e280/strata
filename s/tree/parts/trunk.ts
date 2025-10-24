@@ -1,5 +1,5 @@
 
-import {debounce, deep} from "@e280/stz"
+import {deep, microbounce} from "@e280/stz"
 import {Branch} from "./branch.js"
 import {trunkSetup} from "./utils/setup.js"
 import {Chronobranch} from "./chronobranch.js"
@@ -40,7 +40,7 @@ export class Trunk<S extends Trunkstate> implements Tree<S> {
 		return deep.freeze(this.options.clone(this.#mutable)) as Immutable<S>
 	}
 
-	#debouncedPublish = debounce(0, async() => this.#immutable.publish())
+	#debouncedPublish = microbounce(async() => this.#immutable.publish())
 
 	async mutate(mutator: Mutator<S>) {
 		const oldState = this.options.clone(this.#mutable)

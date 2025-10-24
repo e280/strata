@@ -1,5 +1,5 @@
 
-import {debounce} from "@e280/stz"
+import {microbounce} from "@e280/stz"
 import {tracker} from "../../tracker/tracker.js"
 
 export function effect(
@@ -16,7 +16,7 @@ export function collectorEffect<C = void>(
 	) {
 
 	const {seen, result} = tracker.observe(collector)
-	const fn = debounce(0, responder)
+	const fn = microbounce(responder)
 
 	const disposers: (() => void)[] = []
 	const dispose = () => disposers.forEach(d => d())
