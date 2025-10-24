@@ -1,37 +1,38 @@
 
 import {deep} from "@e280/stz"
-import {derived} from "../../signals/porcelain.js"
-import {Derived} from "../../signals/core/derived.js"
 import {Branchstate, Immutable, Mutator, Options, Selector, Tree} from "./types.js"
 
 export class Branch<S extends Branchstate, ParentState extends Branchstate = any> implements Tree<S> {
-	#immutable: Derived<Immutable<S>>
+	#previous: Immutable<S>
 
 	constructor(
 			private parent: Tree<ParentState>,
 			private selector: Selector<S, ParentState>,
 			private options: Options,
 		) {
-
-		this.#immutable = derived(() => {
-			const state = selector(parent.state as any)
-			return deep.freeze(options.clone(state)) as Immutable<S>
-		}, {compare: deep.equal})
+		this.#previous = this.state
 	}
 
 	get state() {
-		return this.#immutable.get()
+		return this.selector(this.parent.state as ParentState) as Immutable<S>
 	}
 
-	get on() {
-		return this.#immutable.on
+	on = (fn: (state: Immutable<S>) => void) => {
+		return this.parent.on(parentState => {
+			const oldState = this.#previous
+			const newState = this.selector(parentState as ParentState) as Immutable<S>
+			if (!deep.equal(newState, oldState)) {
+				this.#previous = newState
+				fn(newState)
+			}
+		})
 	}
 
 	async mutate(mutator: Mutator<S>) {
 		await this.parent.mutate(parentState =>
 			mutator(this.selector(parentState))
 		)
-		return this.#immutable.get()
+		return this.state
 	}
 
 	branch<Sub extends Branchstate>(selector: Selector<Sub, S>): Branch<Sub, S> {

@@ -166,7 +166,7 @@ export default Science.suite({
 			const a = trunk.branch(s => s.a)
 			const b = trunk.branch(s => s.b)
 			let counted = 0
-			b.on.sub(() => {counted++})
+			b.on(() => {counted++})
 			expect(counted).is(0)
 			await a.mutate(a => a.x = 1)
 			expect(counted).is(0)
