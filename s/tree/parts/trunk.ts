@@ -18,8 +18,8 @@ export class Trunk<S extends Trunkstate> implements Tree<S> {
 
 	options: Options
 
-	#immutable: SignalFn<Immutable<S>>
 	#mutable: S
+	#immutable: SignalFn<Immutable<S>>
 	#mutationLock = 0
 
 	constructor(state: S, options: Partial<Options> = {}) {
@@ -58,7 +58,7 @@ export class Trunk<S extends Trunkstate> implements Tree<S> {
 		}
 		finally { this.#mutationLock-- }
 		await promise
-		return this.#immutable.get()
+		return this.state
 	}
 
 	async overwrite(state: S) {

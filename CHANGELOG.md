@@ -10,6 +10,9 @@
 
 ## v0.2
 
+### v0.2.2
+- 🔶 rework tree behavior, mutations now take immediate effect -- but as a consequence, mutation loop detection is no longer provided -- you used to get an error if you trigger a mutation from an effect that was triggered by a mutation, but now, no error is thrown, you are on your own
+
 ### v0.2.1
 - 🍏 update dependencies
 

@@ -111,9 +111,18 @@ export default Science.suite({
 			expect(branch.state.rofls).is(0)
 		}),
 
+		"sync coherence": Science.test(async() => {
+			const trunk = new Trunk({count: 0, sub: {rofls: 0}})
+			const branch = trunk.branch(s => s.sub)
+			expect(branch.state.rofls).is(0)
+			const p = branch.mutate(s => s.rofls++)
+			expect(branch.state.rofls).is(1)
+			await p
+		}),
+
 		"nullable selector": Science.test(async () => {
 			const trunk = new Trunk({
-				a: {b: 0}  as (null | {b: number}),
+				a: {b: 0} as (null | {b: number}),
 			})
 			const a = trunk.branch(s => s.a)
 			expect(trunk.state.a?.b).is(0)
