@@ -60,9 +60,11 @@ export default Science.suite({
 			const trunk = new Trunk({count: 0})
 			let mutationCount = 0
 			trunk.on.sub(() => {mutationCount++})
-			const promise = trunk.mutate(state => state.count++)
-			expect(mutationCount).is(0)
-			await promise
+			await Promise.all([
+				trunk.mutate(state => state.count++),
+				trunk.mutate(state => state.count++),
+				trunk.mutate(state => state.count++),
+			])
 			expect(mutationCount).is(1)
 		}),
 
@@ -75,22 +77,23 @@ export default Science.suite({
 			expect(trunk.state.items.length).is(3)
 		}),
 
-		"prevent mutation loops": Science.test(async() => {
-			const trunk = new Trunk({count: 0})
-			let mutationCount = 0
-			trunk.on.sub(async() => {
-				mutationCount++
-				if (mutationCount > 100)
-					return
-				await trunk.mutate(s => s.count++)
-			})
-			await expect(async() => {
-				await trunk.mutate(state => state.count++)
-			}).throwsAsync()
-			expect(mutationCount).is(1)
-		}),
+		// // conceptually incompatible with sequential synchronous mutations
+		// "prevent mutation loops": Science.test(async() => {
+		// 	const trunk = new Trunk({count: 0})
+		// 	let mutationCount = 0
+		// 	trunk.on.sub(async() => {
+		// 		mutationCount++
+		// 		if (mutationCount > 100)
+		// 			return
+		// 		await trunk.mutate(s => s.count++)
+		// 	})
+		// 	await expect(async() => {
+		// 		await trunk.mutate(state => state.count++)
+		// 	}).throwsAsync()
+		// 	expect(mutationCount).is(1)
+		// }),
 
-		"mutate after mutate without await": Science.test(async() => {
+		"sequential synchronous mutations": Science.test(async() => {
 			const trunk = new Trunk({count: 0})
 			const p1 = trunk.mutate(s => s.count++)
 			expect(trunk.state.count).is(1)

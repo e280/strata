@@ -1,11 +1,10 @@
 
-import {deep} from "@e280/stz"
+import {debounce, deep} from "@e280/stz"
 import {Branch} from "./branch.js"
-import {signal} from "../../signals/porcelain.js"
 import {trunkSetup} from "./utils/setup.js"
-import {Derived} from "../../signals/core/derived.js"
-import {Signal} from "../../signals/core/signal.js"
 import {Chronobranch} from "./chronobranch.js"
+import {SignalFn} from "../../signals/types.js"
+import {signal} from "../../signals/porcelain.js"
 import {processOptions} from "./utils/process-options.js"
 import {Branchstate, Chronicle, Immutable, Mutator, Options, Selector, Tree, Trunkstate} from "./types.js"
 
@@ -19,16 +18,14 @@ export class Trunk<S extends Trunkstate> implements Tree<S> {
 
 	options: Options
 
-	#immutable: Derived<Immutable<S>>
-	#mutable: Signal<S>
+	#immutable: SignalFn<Immutable<S>>
+	#mutable: S
 	#mutationLock = 0
 
 	constructor(state: S, options: Partial<Options> = {}) {
 		this.options = processOptions(options)
-		this.#mutable = signal(state)
-		this.#immutable = signal.derived(() =>
-			deep.freeze(this.options.clone(this.#mutable.get())) as Immutable<S>
-		)
+		this.#mutable = state
+		this.#immutable = signal(this.#makeImmutableClone())
 	}
 
 	get state() {
@@ -39,25 +36,35 @@ export class Trunk<S extends Trunkstate> implements Tree<S> {
 		return this.#immutable.on
 	}
 
+	#makeImmutableClone() {
+		return deep.freeze(this.options.clone(this.#mutable)) as Immutable<S>
+	}
+
+	#debouncedPublish = debounce(0, async() => this.#immutable.publish())
+
 	async mutate(mutator: Mutator<S>) {
-		const oldState = this.options.clone(this.#mutable.get())
+		const oldState = this.options.clone(this.#mutable)
 		if (this.#mutationLock > 0)
 			throw new Error("nested mutations are forbidden")
+		let promise = Promise.resolve()
 		try {
 			this.#mutationLock++
-			const value = this.#mutable.get()
+			const value = this.#mutable
 			mutator(value)
 			const newState = value
 			const isChanged = !deep.equal(newState, oldState)
 			if (isChanged)
-				await this.overwrite(newState)
+				promise = this.overwrite(newState)
 		}
 		finally { this.#mutationLock-- }
+		await promise
 		return this.#immutable.get()
 	}
 
 	async overwrite(state: S) {
-		await this.#mutable.set(state, true)
+		this.#mutable = state
+		this.#immutable.sneak = this.#makeImmutableClone()
+		await this.#debouncedPublish()
 	}
 
 	branch<Sub extends Branchstate>(selector: Selector<Sub, S>): Branch<Sub, S> {
