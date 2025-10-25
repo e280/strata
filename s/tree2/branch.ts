@@ -1,5 +1,5 @@
 
-import {deep, microbounce, sub} from "@e280/stz"
+import {deep, disposer, microbounce, sub} from "@e280/stz"
 
 import {_data, _onChange} from "./symbols.js"
 import {tracker} from "../tracker/tracker.js"
@@ -10,6 +10,7 @@ export class Branch<D extends BranchData, ParentData extends BranchData> impleme
 	;[_onChange] = sub()
 	#state: Immutable<D>
 
+	dispose = disposer()
 	on = sub<[state: Immutable<D>]>()
 	#debouncedPublish = microbounce(() => this.on.publish(this.state))
 
@@ -20,7 +21,7 @@ export class Branch<D extends BranchData, ParentData extends BranchData> impleme
 		) {
 		this[_data] = selector(parent[_data])
 		this.#state = this.#petrify(this[_data])
-		parent[_onChange](() => this.refresh())
+		this.dispose.schedule(parent[_onChange](() => this.refresh()))
 	}
 
 	#petrify<X>(x: X) {
