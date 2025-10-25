@@ -1,8 +1,8 @@
 
 import {deep, microbounce, sub} from "@e280/stz"
 
-import {_data, _onChange} from "./symbols.js"
 import {Branch} from "./branch.js"
+import {_data, _onChange} from "./symbols.js"
 import {processOptions} from "./process-options.js"
 import {Mutator, TreeLike, TreeOptions, TreeData, Selector, BranchData, Immutable} from "./types.js"
 
