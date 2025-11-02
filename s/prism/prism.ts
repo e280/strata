@@ -27,6 +27,7 @@ export class Prism<State> {
 				await this.set(this.#state)
 				return result
 			},
+			registerLens: lens => this.#lenses.add(lens),
 		})
 		this.#lenses.add(lens)
 		return lens

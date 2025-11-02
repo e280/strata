@@ -1,7 +1,10 @@
 
+import {Lens} from "./lens.js"
+
 export type Optic<State> = {
 	getState: () => State
 	mutate: <R>(fn: (state: State) => R) => Promise<R>
+	registerLens: (lens: Lens<any>) => void
 }
 
 export type Immutable<T> =

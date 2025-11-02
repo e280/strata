@@ -3,8 +3,9 @@ import {suite, test, expect} from "@e280/science"
 
 import {Prism} from "./prism.js"
 import {effect} from "../signals/core/effect.js"
+import { nap } from "@e280/stz"
 
-export default suite.only({
+export default suite({
 	"prism": suite({
 		"get and set state": test(async() => {
 			const prism = new Prism({count: 1})
@@ -110,7 +111,7 @@ export default suite.only({
 			expect(lensB.state.count).is(1)
 		}),
 
-		"deep mutations": test(async() => {
+		"deep mutations": test.only(async() => {
 			const prism = new Prism({a: {b: {count: 1}}})
 			const lensA = prism.lens(s => s.a)
 			const lensB = lensA.lens(s => s.b)
@@ -118,223 +119,186 @@ export default suite.only({
 			expect(prism.get().a.b.count).is(2)
 			expect(lensA.state.b.count).is(2)
 			expect(lensB.state.count).is(2)
+			await lensA.mutate(s => s.b = {count: 3})
+			expect(prism.get().a.b.count).is(3)
+			expect(lensA.state.b.count).is(3)
+			expect(lensB.state.count).is(3)
+		}),
+
+		"outside mutations ignored": test.only(async() => {
+			const prism = new Prism({a: {count: 1}, b: {count: 101}})
+			const lensA = prism.lens(s => s.a)
+			const lensB = prism.lens(s => s.b)
+			let happeningsA = 0
+			let happeningsB = 0
+			const stopA = lensA.on(() => void happeningsA++)
+			const stopB = lensB.on(() => void happeningsA++)
+			await lensA.mutate(s => s.count++)
+			expect(happeningsA).is(1)
+			expect(happeningsB).is(0)
+			stopA()
+			stopB()
+		}),
+
+		"outside mutations ignored for effects": test.only(async() => {
+			const prism = new Prism({a: {count: 1}, b: {count: 101}})
+			const lensA = prism.lens(s => s.a)
+			const lensB = prism.lens(s => s.b)
+			let happeningsA = 0
+			let happeningsB = 0
+			const stopA = effect(() => {
+				void lensA.state.count
+				happeningsA++
+			})
+			const stopB = effect(() => {
+				void lensB.state.count
+				happeningsB++
+			})
+			await lensA.mutate(s => s.count++)
+			expect(happeningsA).is(2)
+			expect(happeningsB).is(1)
+			stopA()
+			stopB()
 		}),
 	}),
 
-	// "branch": Science.suite({
-	// 	"composition": Science.test(async () => {
-	// 		const trunk = new Tree({a: {b: {c: 0}}})
-	// 		const a = trunk.branch(s => s.a)
-	// 		const b = a.branch(s => s.b)
-	// 		expect(trunk.state.a.b.c).is(0)
-	// 		expect(b.state.c).is(0)
-	// 	}),
-	//
-	// 	"deep mutations": Science.test(async () => {
-	// 		const trunk = new Tree({a: {b: {c: 0}}})
-	// 		const a = trunk.branch(s => s.a)
-	// 		const b = a.branch(s => s.b)
-	// 		await b.mutate(b => { b.c = 101 })
-	// 		expect(trunk.state.a.b.c).is(101)
-	// 		expect(a.state.b.c).is(101)
-	// 		expect(b.state.c).is(101)
-	// 		await a.mutate(a => { a.b = {c: 102} })
-	// 		expect(trunk.state.a.b.c).is(102)
-	// 		expect(a.state.b.c).is(102)
-	// 		expect(b.state.c).is(102)
-	// 		await trunk.mutate(s => { s.a = {b: {c: 103}} })
-	// 		expect(trunk.state.a.b.c).is(103)
-	// 		expect(a.state.b.c).is(103)
-	// 		expect(b.state.c).is(103)
-	// 	}),
-	//
-	// 	"branch.on ignores outside mutations": Science.test(async() => {
-	// 		const trunk = new Tree({a: {x: 0}, b: {x: 0}})
-	// 		const a = trunk.branch(s => s.a)
-	// 		const b = trunk.branch(s => s.b)
-	// 		let counted = 0
-	// 		b.on(() => {counted++})
-	// 		expect(counted).is(0)
-	// 		await a.mutate(a => a.x = 1)
-	// 		expect(counted).is(0)
-	// 	}),
-	//
-	// 	"effects ignore outside mutations": Science.test(async() => {
-	// 		const trunk = new Tree({a: {x: 0}, b: {x: 0}})
-	// 		const a = trunk.branch(s => s.a)
-	// 		const b = trunk.branch(s => s.b)
-	// 		let counted = 0
-	// 		effect(() => {
-	// 			void b.state.x
-	// 			counted++
+	// "chronobranch": (() => {
+	// 	const setup = () => {
+	// 		const trunk = new Tree({
+	// 			chron: Tree.chronicle({count: 0}),
 	// 		})
-	// 		expect(counted).is(1)
-	// 		await a.mutate(a => a.x++)
-	// 		expect(counted).is(1)
-	// 	}),
+	// 		const chron = trunk.chronobranch(64, s => s.chron)
+	// 		return {trunk, chron}
+	// 	}
 	//
-	// 	"forbid submutation in mutation": Science.test(async() => {
-	// 		const trunk = new Tree({a: {b: 0}})
-	// 		const a = trunk.branch(s => s.a)
-	// 		await expect(async() => {
-	// 			let promise!: Promise<any>
-	// 			await trunk.mutate(() => {
-	// 				promise = a.mutate(() => {})
+	// 	return Science.suite({
+	// 		"get state": Science.test(async() => {
+	// 			const {chron} = setup()
+	// 			expect(chron.state.count).is(0)
+	// 		}),
+	//
+	// 		"mutate": Science.test(async() => {
+	// 			const {chron} = setup()
+	// 			expect(chron.state.count).is(0)
+	// 			await chron.mutate(s => s.count++)
+	// 			expect(chron.state.count).is(1)
+	// 			await chron.mutate(s => s.count++)
+	// 			expect(chron.state.count).is(2)
+	// 		}),
+	//
+	// 		"undoable/redoable": Science.test(async() => {
+	// 			const {chron} = setup()
+	// 			expect(chron.undoable).is(0)
+	// 			expect(chron.redoable).is(0)
+	// 			expect(chron.state.count).is(0)
+	// 			await chron.mutate(s => s.count++)
+	// 			expect(chron.undoable).is(1)
+	// 			await chron.mutate(s => s.count++)
+	// 			expect(chron.undoable).is(2)
+	// 			await chron.undo()
+	// 			expect(chron.undoable).is(1)
+	// 			expect(chron.redoable).is(1)
+	// 			await chron.undo()
+	// 			expect(chron.undoable).is(0)
+	// 			expect(chron.redoable).is(2)
+	// 			await chron.redo()
+	// 			expect(chron.undoable).is(1)
+	// 			expect(chron.redoable).is(1)
+	// 		}),
+	//
+	// 		"undo": Science.test(async() => {
+	// 			const {chron} = setup()
+	// 			await chron.mutate(s => s.count++)
+	// 			await chron.undo()
+	// 			expect(chron.state.count).is(0)
+	// 		}),
+	//
+	// 		"redo": Science.test(async() => {
+	// 			const {chron} = setup()
+	// 			await chron.mutate(s => s.count++)
+	// 			await chron.undo()
+	// 			expect(chron.state.count).is(0)
+	// 			await chron.redo()
+	// 			expect(chron.state.count).is(1)
+	// 		}),
+	//
+	// 		"undo/redo well ordered": Science.test(async() => {
+	// 			const {chron} = setup()
+	// 			await chron.mutate(s => s.count++)
+	// 			await chron.mutate(s => s.count++)
+	// 			await chron.mutate(s => s.count++)
+	// 			expect(chron.state.count).is(3)
+	//
+	// 			await chron.undo()
+	// 			expect(chron.state.count).is(2)
+	//
+	// 			await chron.undo()
+	// 			expect(chron.state.count).is(1)
+	//
+	// 			await chron.redo()
+	// 			expect(chron.state.count).is(2)
+	//
+	// 			await chron.redo()
+	// 			expect(chron.state.count).is(3)
+	//
+	// 			await chron.undo()
+	// 			expect(chron.state.count).is(2)
+	//
+	// 			await chron.undo()
+	// 			expect(chron.state.count).is(1)
+	//
+	// 			await chron.undo()
+	// 			expect(chron.state.count).is(0)
+	// 		}),
+	//
+	// 		"undo nothing does nothing": Science.test(async() => {
+	// 			const {chron} = setup()
+	// 			await chron.undo()
+	// 			expect(chron.state.count).is(0)
+	// 		}),
+	//
+	// 		"redo nothing does nothing": Science.test(async() => {
+	// 			const {chron} = setup()
+	// 			await chron.redo()
+	// 			expect(chron.state.count).is(0)
+	// 		}),
+	//
+	// 		"undo 2x": Science.test(async() => {
+	// 			const {chron} = setup()
+	// 			await chron.mutate(s => s.count++)
+	// 			await chron.mutate(s => s.count++)
+	// 			expect(chron.state.count).is(2)
+	// 			await chron.undo(2)
+	// 			expect(chron.state.count).is(0)
+	// 		}),
+	//
+	// 		"redo 2x": Science.test(async() => {
+	// 			const {chron} = setup()
+	// 			await chron.mutate(s => s.count++)
+	// 			await chron.mutate(s => s.count++)
+	// 			expect(chron.state.count).is(2)
+	// 			await chron.undo(2)
+	// 			expect(chron.state.count).is(0)
+	// 			await chron.redo(2)
+	// 			expect(chron.state.count).is(2)
+	// 		}),
+	//
+	// 		"substrata mutations are tracked": Science.test(async() => {
+	// 			const strata = new Trunk({
+	// 				chron: Trunk.chronicle({
+	// 					group: {count: 0},
+	// 				}),
 	// 			})
-	// 			await promise
-	// 		}).throwsAsync()
-	// 	}),
-	//
-	// 	"forbid mutation in submutation": Science.test(async() => {
-	// 		const trunk = new Tree({a: {b: 0}})
-	// 		const a = trunk.branch(s => s.a)
-	// 		await expect(async() => {
-	// 			let promise!: Promise<any>
-	// 			await a.mutate(() => {
-	// 				promise = trunk.mutate(() => {})
-	// 			})
-	// 			await promise
-	// 		}).throwsAsync()
-	// 	}),
-	// }),
-	//
-	// // "chronobranch": (() => {
-	// // 	const setup = () => {
-	// // 		const trunk = new Tree({
-	// // 			chron: Tree.chronicle({count: 0}),
-	// // 		})
-	// // 		const chron = trunk.chronobranch(64, s => s.chron)
-	// // 		return {trunk, chron}
-	// // 	}
-	// //
-	// // 	return Science.suite({
-	// // 		"get state": Science.test(async() => {
-	// // 			const {chron} = setup()
-	// // 			expect(chron.state.count).is(0)
-	// // 		}),
-	// //
-	// // 		"mutate": Science.test(async() => {
-	// // 			const {chron} = setup()
-	// // 			expect(chron.state.count).is(0)
-	// // 			await chron.mutate(s => s.count++)
-	// // 			expect(chron.state.count).is(1)
-	// // 			await chron.mutate(s => s.count++)
-	// // 			expect(chron.state.count).is(2)
-	// // 		}),
-	// //
-	// // 		"undoable/redoable": Science.test(async() => {
-	// // 			const {chron} = setup()
-	// // 			expect(chron.undoable).is(0)
-	// // 			expect(chron.redoable).is(0)
-	// // 			expect(chron.state.count).is(0)
-	// // 			await chron.mutate(s => s.count++)
-	// // 			expect(chron.undoable).is(1)
-	// // 			await chron.mutate(s => s.count++)
-	// // 			expect(chron.undoable).is(2)
-	// // 			await chron.undo()
-	// // 			expect(chron.undoable).is(1)
-	// // 			expect(chron.redoable).is(1)
-	// // 			await chron.undo()
-	// // 			expect(chron.undoable).is(0)
-	// // 			expect(chron.redoable).is(2)
-	// // 			await chron.redo()
-	// // 			expect(chron.undoable).is(1)
-	// // 			expect(chron.redoable).is(1)
-	// // 		}),
-	// //
-	// // 		"undo": Science.test(async() => {
-	// // 			const {chron} = setup()
-	// // 			await chron.mutate(s => s.count++)
-	// // 			await chron.undo()
-	// // 			expect(chron.state.count).is(0)
-	// // 		}),
-	// //
-	// // 		"redo": Science.test(async() => {
-	// // 			const {chron} = setup()
-	// // 			await chron.mutate(s => s.count++)
-	// // 			await chron.undo()
-	// // 			expect(chron.state.count).is(0)
-	// // 			await chron.redo()
-	// // 			expect(chron.state.count).is(1)
-	// // 		}),
-	// //
-	// // 		"undo/redo well ordered": Science.test(async() => {
-	// // 			const {chron} = setup()
-	// // 			await chron.mutate(s => s.count++)
-	// // 			await chron.mutate(s => s.count++)
-	// // 			await chron.mutate(s => s.count++)
-	// // 			expect(chron.state.count).is(3)
-	// //
-	// // 			await chron.undo()
-	// // 			expect(chron.state.count).is(2)
-	// //
-	// // 			await chron.undo()
-	// // 			expect(chron.state.count).is(1)
-	// //
-	// // 			await chron.redo()
-	// // 			expect(chron.state.count).is(2)
-	// //
-	// // 			await chron.redo()
-	// // 			expect(chron.state.count).is(3)
-	// //
-	// // 			await chron.undo()
-	// // 			expect(chron.state.count).is(2)
-	// //
-	// // 			await chron.undo()
-	// // 			expect(chron.state.count).is(1)
-	// //
-	// // 			await chron.undo()
-	// // 			expect(chron.state.count).is(0)
-	// // 		}),
-	// //
-	// // 		"undo nothing does nothing": Science.test(async() => {
-	// // 			const {chron} = setup()
-	// // 			await chron.undo()
-	// // 			expect(chron.state.count).is(0)
-	// // 		}),
-	// //
-	// // 		"redo nothing does nothing": Science.test(async() => {
-	// // 			const {chron} = setup()
-	// // 			await chron.redo()
-	// // 			expect(chron.state.count).is(0)
-	// // 		}),
-	// //
-	// // 		"undo 2x": Science.test(async() => {
-	// // 			const {chron} = setup()
-	// // 			await chron.mutate(s => s.count++)
-	// // 			await chron.mutate(s => s.count++)
-	// // 			expect(chron.state.count).is(2)
-	// // 			await chron.undo(2)
-	// // 			expect(chron.state.count).is(0)
-	// // 		}),
-	// //
-	// // 		"redo 2x": Science.test(async() => {
-	// // 			const {chron} = setup()
-	// // 			await chron.mutate(s => s.count++)
-	// // 			await chron.mutate(s => s.count++)
-	// // 			expect(chron.state.count).is(2)
-	// // 			await chron.undo(2)
-	// // 			expect(chron.state.count).is(0)
-	// // 			await chron.redo(2)
-	// // 			expect(chron.state.count).is(2)
-	// // 		}),
-	// //
-	// // 		"substrata mutations are tracked": Science.test(async() => {
-	// // 			const strata = new Trunk({
-	// // 				chron: Trunk.chronicle({
-	// // 					group: {count: 0},
-	// // 				}),
-	// // 			})
-	// // 			const chron = strata.chronobranch(64, s => s.chron)
-	// // 			const group = chron.branch(s => s.group)
-	// // 			expect(group.state.count).is(0)
-	// // 			await group.mutate(g => g.count = 101)
-	// // 			expect(group.state.count).is(101)
-	// // 			await chron.undo()
-	// // 			expect(group.state.count).is(0)
-	// // 		}),
-	// // 	})
-	// // })(),
+	// 			const chron = strata.chronobranch(64, s => s.chron)
+	// 			const group = chron.branch(s => s.group)
+	// 			expect(group.state.count).is(0)
+	// 			await group.mutate(g => g.count = 101)
+	// 			expect(group.state.count).is(101)
+	// 			await chron.undo()
+	// 			expect(group.state.count).is(0)
+	// 		}),
+	// 	})
+	// })(),
 })
 
 

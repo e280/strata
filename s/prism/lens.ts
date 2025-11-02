@@ -38,10 +38,13 @@ export class Lens<State> {
 	}
 
 	lens<State2>(selector: (state: State) => State2) {
-		return new Lens<State2>({
+		const lens = new Lens<State2>({
 			getState: () => selector(this.optic.getState()),
 			mutate: fn => this.optic.mutate(state => fn(selector(state))),
+			registerLens: this.optic.registerLens,
 		})
+		this.optic.registerLens(lens)
+		return lens
 	}
 }
 
