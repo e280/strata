@@ -1,10 +1,14 @@
 
+import {microbounce, sub} from "@e280/stz"
 import {Lens} from "./lens.js"
 
 /** state mangagement source-of-truth */
 export class Prism<State> {
 	#state: State
 	#lenses = new Set<Lens<any>>()
+
+	on = sub<[state: State]>()
+	#onPublishDebounced = microbounce(() => this.on.publish(this.#state))
 
 	constructor(state: State) {
 		this.#state = state
@@ -17,6 +21,7 @@ export class Prism<State> {
 	async set(state: State) {
 		this.#state = state
 		await Promise.all([...this.#lenses].map(lens => lens.update()))
+		await this.#onPublishDebounced()
 	}
 
 	lens<State2>(selector: (state: State) => State2) {

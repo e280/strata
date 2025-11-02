@@ -3,6 +3,7 @@ import {deep} from "@e280/stz"
 import {Lens} from "../lens.js"
 import {Chronicle} from "./types.js"
 import {LensLike} from "../types.js"
+import {_optic} from "../utils/optic-symbol.js"
 
 export class Chrono<State> implements LensLike<State> {
 	constructor(
@@ -26,17 +27,19 @@ export class Chrono<State> implements LensLike<State> {
 		return this.chronicle.future.length
 	}
 
-	/** progress forwards, depositing history into the past */
-	async mutate<R>(fn: (state: State) => R): Promise<R> {
+	#mut<R>(chronicle: Chronicle<State>, fn: (state: State) => R) {
 		const limit = Math.max(0, this.limit)
 		const snapshot = deep.clone(this.chronicle.present) as State
-		return this.basis.mutate(chronicle => {
-			const result = fn(chronicle.present)
-			chronicle.past.push(snapshot)
-			chronicle.past = chronicle.past.slice(-limit)
-			chronicle.future = []
-			return result
-		})
+		const result = fn(chronicle.present)
+		chronicle.past.push(snapshot)
+		chronicle.past = chronicle.past.slice(-limit)
+		chronicle.future = []
+		return result
+	}
+
+	/** progress forwards, depositing history into the past */
+	async mutate<R>(fn: (state: State) => R): Promise<R> {
+		return this.basis.mutate(chronicle => this.#mut(chronicle, fn))
 	}
 
 	/** step backwards into the past, by n steps */
@@ -74,7 +77,15 @@ export class Chrono<State> implements LensLike<State> {
 	}
 
 	lens<State2>(selector: (state: State) => State2) {
-		return this.basis.lens(chronicle => selector(chronicle.present))
+		const lens = new Lens<State2>({
+			registerLens: this.basis[_optic].registerLens,
+			getState: () => selector(this.basis[_optic].getState().present),
+			mutate: fn => this.basis[_optic].mutate(chronicle => {
+				return this.#mut(chronicle, state => fn(selector(state)))
+			}),
+		})
+		this.basis[_optic].registerLens(lens)
+		return lens
 	}
 }
 

@@ -12,6 +12,7 @@
 	],
 	"exports": {
 		".": "./x/index.js",
+		"./prism": "./x/prism/index.js",
 		"./signals": "./x/signals/index.js",
 		"./tracker": "./x/tracker/index.js",
 		"./tree": "./x/tree/index.js"
