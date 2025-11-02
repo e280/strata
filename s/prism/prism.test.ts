@@ -3,7 +3,8 @@ import {suite, test, expect} from "@e280/science"
 
 import {Prism} from "./prism.js"
 import {effect} from "../signals/core/effect.js"
-import { nap } from "@e280/stz"
+import { chronicle } from "./chrono/chronicle.js"
+import { Chrono } from "./chrono/chrono.js"
 
 export default suite({
 	"prism": suite({
@@ -111,7 +112,7 @@ export default suite({
 			expect(lensB.state.count).is(1)
 		}),
 
-		"deep mutations": test.only(async() => {
+		"deep mutations": test(async() => {
 			const prism = new Prism({a: {b: {count: 1}}})
 			const lensA = prism.lens(s => s.a)
 			const lensB = lensA.lens(s => s.b)
@@ -125,7 +126,7 @@ export default suite({
 			expect(lensB.state.count).is(3)
 		}),
 
-		"outside mutations ignored": test.only(async() => {
+		"outside mutations ignored": test(async() => {
 			const prism = new Prism({a: {count: 1}, b: {count: 101}})
 			const lensA = prism.lens(s => s.a)
 			const lensB = prism.lens(s => s.b)
@@ -140,7 +141,7 @@ export default suite({
 			stopB()
 		}),
 
-		"outside mutations ignored for effects": test.only(async() => {
+		"outside mutations ignored for effects": test(async() => {
 			const prism = new Prism({a: {count: 1}, b: {count: 101}})
 			const lensA = prism.lens(s => s.a)
 			const lensB = prism.lens(s => s.b)
@@ -162,143 +163,157 @@ export default suite({
 		}),
 	}),
 
-	// "chronobranch": (() => {
-	// 	const setup = () => {
-	// 		const trunk = new Tree({
-	// 			chron: Tree.chronicle({count: 0}),
-	// 		})
-	// 		const chron = trunk.chronobranch(64, s => s.chron)
-	// 		return {trunk, chron}
-	// 	}
-	//
-	// 	return Science.suite({
-	// 		"get state": Science.test(async() => {
-	// 			const {chron} = setup()
-	// 			expect(chron.state.count).is(0)
-	// 		}),
-	//
-	// 		"mutate": Science.test(async() => {
-	// 			const {chron} = setup()
-	// 			expect(chron.state.count).is(0)
-	// 			await chron.mutate(s => s.count++)
-	// 			expect(chron.state.count).is(1)
-	// 			await chron.mutate(s => s.count++)
-	// 			expect(chron.state.count).is(2)
-	// 		}),
-	//
-	// 		"undoable/redoable": Science.test(async() => {
-	// 			const {chron} = setup()
-	// 			expect(chron.undoable).is(0)
-	// 			expect(chron.redoable).is(0)
-	// 			expect(chron.state.count).is(0)
-	// 			await chron.mutate(s => s.count++)
-	// 			expect(chron.undoable).is(1)
-	// 			await chron.mutate(s => s.count++)
-	// 			expect(chron.undoable).is(2)
-	// 			await chron.undo()
-	// 			expect(chron.undoable).is(1)
-	// 			expect(chron.redoable).is(1)
-	// 			await chron.undo()
-	// 			expect(chron.undoable).is(0)
-	// 			expect(chron.redoable).is(2)
-	// 			await chron.redo()
-	// 			expect(chron.undoable).is(1)
-	// 			expect(chron.redoable).is(1)
-	// 		}),
-	//
-	// 		"undo": Science.test(async() => {
-	// 			const {chron} = setup()
-	// 			await chron.mutate(s => s.count++)
-	// 			await chron.undo()
-	// 			expect(chron.state.count).is(0)
-	// 		}),
-	//
-	// 		"redo": Science.test(async() => {
-	// 			const {chron} = setup()
-	// 			await chron.mutate(s => s.count++)
-	// 			await chron.undo()
-	// 			expect(chron.state.count).is(0)
-	// 			await chron.redo()
-	// 			expect(chron.state.count).is(1)
-	// 		}),
-	//
-	// 		"undo/redo well ordered": Science.test(async() => {
-	// 			const {chron} = setup()
-	// 			await chron.mutate(s => s.count++)
-	// 			await chron.mutate(s => s.count++)
-	// 			await chron.mutate(s => s.count++)
-	// 			expect(chron.state.count).is(3)
-	//
-	// 			await chron.undo()
-	// 			expect(chron.state.count).is(2)
-	//
-	// 			await chron.undo()
-	// 			expect(chron.state.count).is(1)
-	//
-	// 			await chron.redo()
-	// 			expect(chron.state.count).is(2)
-	//
-	// 			await chron.redo()
-	// 			expect(chron.state.count).is(3)
-	//
-	// 			await chron.undo()
-	// 			expect(chron.state.count).is(2)
-	//
-	// 			await chron.undo()
-	// 			expect(chron.state.count).is(1)
-	//
-	// 			await chron.undo()
-	// 			expect(chron.state.count).is(0)
-	// 		}),
-	//
-	// 		"undo nothing does nothing": Science.test(async() => {
-	// 			const {chron} = setup()
-	// 			await chron.undo()
-	// 			expect(chron.state.count).is(0)
-	// 		}),
-	//
-	// 		"redo nothing does nothing": Science.test(async() => {
-	// 			const {chron} = setup()
-	// 			await chron.redo()
-	// 			expect(chron.state.count).is(0)
-	// 		}),
-	//
-	// 		"undo 2x": Science.test(async() => {
-	// 			const {chron} = setup()
-	// 			await chron.mutate(s => s.count++)
-	// 			await chron.mutate(s => s.count++)
-	// 			expect(chron.state.count).is(2)
-	// 			await chron.undo(2)
-	// 			expect(chron.state.count).is(0)
-	// 		}),
-	//
-	// 		"redo 2x": Science.test(async() => {
-	// 			const {chron} = setup()
-	// 			await chron.mutate(s => s.count++)
-	// 			await chron.mutate(s => s.count++)
-	// 			expect(chron.state.count).is(2)
-	// 			await chron.undo(2)
-	// 			expect(chron.state.count).is(0)
-	// 			await chron.redo(2)
-	// 			expect(chron.state.count).is(2)
-	// 		}),
-	//
-	// 		"substrata mutations are tracked": Science.test(async() => {
-	// 			const strata = new Trunk({
-	// 				chron: Trunk.chronicle({
-	// 					group: {count: 0},
-	// 				}),
-	// 			})
-	// 			const chron = strata.chronobranch(64, s => s.chron)
-	// 			const group = chron.branch(s => s.group)
-	// 			expect(group.state.count).is(0)
-	// 			await group.mutate(g => g.count = 101)
-	// 			expect(group.state.count).is(101)
-	// 			await chron.undo()
-	// 			expect(group.state.count).is(0)
-	// 		}),
-	// 	})
-	// })(),
+	"chrono": suite({
+		"get present state": test(async() => {
+			const prism = new Prism({data: chronicle({count: 1})})
+			const lens = prism.lens(s => s.data)
+			const chrono = new Chrono(lens)
+			expect(chrono.state.count).is(1)
+		}),
+
+		"mutation": test(async() => {
+			const prism = new Prism({data: chronicle({count: 1})})
+			const lens = prism.lens(s => s.data)
+			const chrono = new Chrono(lens)
+			await chrono.mutate(s => s.count++)
+			expect(chrono.state.count).is(2)
+			await chrono.mutate(s => s.count++)
+			expect(chrono.state.count).is(3)
+		}),
+
+		"undoable/redoable": test(async() => {
+			const prism = new Prism({data: chronicle({count: 1})})
+			const lens = prism.lens(s => s.data)
+			const chrono = new Chrono(lens)
+			expect(chrono.undoable).is(0)
+			expect(chrono.redoable).is(0)
+			await chrono.mutate(s => s.count++)
+			expect(chrono.undoable).is(1)
+			await chrono.mutate(s => s.count++)
+			expect(chrono.undoable).is(2)
+			await chrono.undo()
+			expect(chrono.undoable).is(1)
+			expect(chrono.redoable).is(1)
+			await chrono.undo()
+			expect(chrono.undoable).is(0)
+			expect(chrono.redoable).is(2)
+			await chrono.redo()
+			expect(chrono.undoable).is(1)
+			expect(chrono.redoable).is(1)
+		}),
+
+		"undo": test(async() => {
+			const prism = new Prism({data: chronicle({count: 1})})
+			const lens = prism.lens(s => s.data)
+			const chrono = new Chrono(lens)
+
+			await chrono.mutate(s => s.count++)
+			expect(chrono.state.count).is(2)
+
+			await chrono.undo()
+			expect(chrono.state.count).is(1)
+		}),
+
+		"redo": test(async() => {
+			const prism = new Prism({data: chronicle({count: 1})})
+			const lens = prism.lens(s => s.data)
+			const chrono = new Chrono(lens)
+
+			await chrono.mutate(s => s.count++)
+			expect(chrono.state.count).is(2)
+
+			await chrono.undo()
+			expect(chrono.state.count).is(1)
+
+			await chrono.redo()
+			expect(chrono.state.count).is(2)
+		}),
+
+		"undo/redo is orderly": test(async() => {
+			const prism = new Prism({data: chronicle({count: 1})})
+			const lens = prism.lens(s => s.data)
+			const chrono = new Chrono(lens)
+
+			await chrono.mutate(s => s.count++)
+			await chrono.mutate(s => s.count++)
+			await chrono.mutate(s => s.count++)
+			expect(chrono.state.count).is(4)
+
+			await chrono.undo()
+			expect(chrono.state.count).is(3)
+
+			await chrono.undo()
+			expect(chrono.state.count).is(2)
+
+			await chrono.redo()
+			expect(chrono.state.count).is(3)
+
+			await chrono.redo()
+			expect(chrono.state.count).is(4)
+
+			await chrono.undo()
+			expect(chrono.state.count).is(3)
+
+			await chrono.undo()
+			expect(chrono.state.count).is(2)
+
+			await chrono.undo()
+			expect(chrono.state.count).is(1)
+		}),
+
+		"undo nothing does nothing": test(async() => {
+			const prism = new Prism({data: chronicle({count: 1})})
+			const lens = prism.lens(s => s.data)
+			const chrono = new Chrono(lens)
+			await chrono.undo()
+			expect(chrono.state.count).is(1)
+		}),
+
+		"redo nothing does nothing": test(async() => {
+			const prism = new Prism({data: chronicle({count: 1})})
+			const lens = prism.lens(s => s.data)
+			const chrono = new Chrono(lens)
+			await chrono.redo()
+			expect(chrono.state.count).is(1)
+		}),
+
+		"undo 2x": test(async() => {
+			const prism = new Prism({data: chronicle({count: 1})})
+			const lens = prism.lens(s => s.data)
+			const chrono = new Chrono(lens)
+			await chrono.mutate(s => s.count++)
+			await chrono.mutate(s => s.count++)
+			await chrono.mutate(s => s.count++)
+			expect(chrono.state.count).is(4)
+			await chrono.undo(2)
+			expect(chrono.state.count).is(2)
+		}),
+
+		"redo 2x": test(async() => {
+			const prism = new Prism({data: chronicle({count: 1})})
+			const lens = prism.lens(s => s.data)
+			const chrono = new Chrono(lens)
+			await chrono.mutate(s => s.count++)
+			await chrono.mutate(s => s.count++)
+			await chrono.mutate(s => s.count++)
+			expect(chrono.state.count).is(4)
+			await chrono.undo(2)
+			expect(chrono.state.count).is(2)
+			await chrono.redo(2)
+			expect(chrono.state.count).is(4)
+		}),
+
+		"sublens mutations are undoable": test(async() => {
+			const prism = new Prism({data: chronicle({a: {count: 1}})})
+			const chrono = new Chrono(prism.lens(s => s.data))
+			const sublens = chrono.lens(s => s.a)
+			expect(sublens.state.count).is(1)
+			await sublens.mutate(s => s.count++)
+			expect(sublens.state.count).is(2)
+			await chrono.undo()
+			expect(sublens.state.count).is(1)
+		}),
+	}),
 })
 
 
