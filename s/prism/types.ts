@@ -1,4 +1,9 @@
 
+export type Optic<State> = {
+	getState: () => State
+	mutate: <R>(fn: (state: State) => R) => Promise<R>
+}
+
 export type Immutable<T> =
 	T extends (...args: any[]) => any ? T :
 	T extends readonly any[] ? ReadonlyArray<Immutable<T[number]>> :
