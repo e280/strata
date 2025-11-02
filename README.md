@@ -15,6 +15,7 @@
 🧑‍💻 a project by https://e280.org/
 
 🚦 [**signals**](#signals) — ephemeral view-level state  
+🔮 [**prism**](#prism) — app-level state tree  
 🌳 [**tree**](#tree) — persistent app-level state  
 🪄 [**tracker**](#tracker) — reactivity integration hub  
 
@@ -147,6 +148,67 @@ import {signal, effect} from "@e280/strata"
   - these are types for the core primitive classes
 - **`SignalyFn<V>`** — can be `SignalFn<V>` or `DerivedFn<V>` or `LazyFn<V>`
   - these `*Fn` types are for the hipster-fn-syntax enabled variants
+
+
+
+<br/><br/>
+
+<a id="prism"></a>
+
+## 🔮 strata prism
+> *persistent app-level state*
+
+- single-source-of-truth state tree
+- no spooky-dookie proxy magic — just god's honest javascript
+- immutable except for `mutate(fn)` calls
+- use many lenses, efficient reactivity
+- chrono provides undo/redo history
+- persistence, localstorage, cross-tab sync
+
+### 🔭 prism and lenses
+- **import prism**
+    ```ts
+    import {Prism} from "@e280/strata"
+    ```
+- **prism is a state tree**
+    ```ts
+    const prism = new Prism({
+      person: {
+        name: "chase",
+        incredi: true,
+      },
+      snacks: {
+        peanuts: 7,
+        bag: ["popcorn", "butter"],
+      },
+    })
+    ```
+- **create lenses, which are views into state subtrees**
+    ```ts
+    const person = prism.lens(s => s.person)
+    const snacks = prism.lens(s => s.snacks)
+    ```
+- **lenses provide immutable copies of state**
+    ```ts
+    person.state.name // "chase"
+    snacks.state.peanuts // 7
+
+    snacks.state.peanuts++
+      // ⛔ error: casual mutations forbidden
+    ```
+- **formal mutations are allowed**
+    ```ts
+    snacks.mutate(state => state.peanuts++)
+      // ✅ all changes are proper mutations
+
+    snacks.state.peanuts // 8
+    ```
+
+### 🔭 chrono for time travel
+TODO docs coming soon
+
+### 🔭 archive for persistence
+TODO docs coming soon
 
 
 
