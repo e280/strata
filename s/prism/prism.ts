@@ -10,11 +10,11 @@ export class Prism<State> {
 		this.#state = state
 	}
 
-	getState() {
+	get() {
 		return this.#state
 	}
 
-	async setState(state: State) {
+	async set(state: State) {
 		this.#state = state
 		await Promise.all([...this.#lenses].map(lens => lens.update()))
 	}
@@ -24,7 +24,7 @@ export class Prism<State> {
 			getState: () => selector(this.#state),
 			mutate: async fn => {
 				const result = fn(selector(this.#state))
-				await this.setState(this.#state)
+				await this.set(this.#state)
 				return result
 			},
 		})

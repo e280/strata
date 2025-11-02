@@ -1,5 +1,5 @@
 
-import {deep, sub} from "@e280/stz"
+import {deep, microbounce, sub} from "@e280/stz"
 import {immute} from "./utils/immute.js"
 import {Immutable, Optic} from "./types.js"
 import {tracker} from "../tracker/tracker.js"
@@ -10,6 +10,7 @@ export class Lens<State> {
 	on = sub<[state: Immutable<State>]>()
 	#previous: State
 	#immutable: CacheCell<Immutable<State>>
+	#onPublishDebounced = microbounce(() => this.on.publish(this.state))
 
 	constructor(private optic: Optic<State>) {
 		this.#previous = deep.clone(optic.getState())
@@ -20,9 +21,9 @@ export class Lens<State> {
 		const state = this.optic.getState()
 		const isChanged = !deep.equal(state, this.#previous)
 		if (isChanged) {
-			this.#previous = deep.clone(state)
-			this.on.publish(this.state)
 			this.#immutable.invalidate()
+			this.#previous = deep.clone(state)
+			this.#onPublishDebounced()
 			await tracker.notifyWrite(this)
 		}
 	}
