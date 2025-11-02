@@ -1,8 +1,9 @@
 
 import {deep} from "@e280/stz"
+import {Immutable} from "../../prism/types.js"
 import {SignalFn} from "../../signals/types.js"
 import {signal} from "../../signals/porcelain.js"
-import {Branchstate, Immutable, Mutator, TreeOptions, Selector, Tree} from "./types.js"
+import {Branchstate, Mutator, TreeOptions, Selector, Tree} from "./types.js"
 
 export class Branch<S extends Branchstate, ParentState extends Branchstate = any> implements Tree<S> {
 	#previous: Immutable<S>

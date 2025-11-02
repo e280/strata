@@ -11,7 +11,7 @@ export type EzStore<X> = {
 	set(data: X | undefined): Promise<void>
 }
 
-export type PersistenceOptions<State> = {
+export type VaultOptions<State> = {
 	version: number
 	prism: Prism<State>
 	store: EzStore<Versioned<State>>

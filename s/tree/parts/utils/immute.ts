@@ -1,7 +1,8 @@
 
-import {deep, microbounce, sub} from "@e280/stz"
-import {Immutable, TreeOptions} from "../types.js"
+import {deep, sub} from "@e280/stz"
+import {TreeOptions} from "../types.js"
 import {tracker} from "../../../tracker/tracker.js"
+import {Immutable} from "../../../prism/types.js"
 
 export class Immute<S> {
 	#mutable: S

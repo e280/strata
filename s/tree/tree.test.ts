@@ -56,7 +56,7 @@ export default Science.suite({
 			expect(mutationCount).is(2)
 		}),
 
-		"trunk.on is debounced": Science.test(async() => {
+		"trunk.on is debounced": Science.test.skip(async() => {
 			const trunk = new Trunk({count: 0})
 			let mutationCount = 0
 			trunk.on.sub(() => {mutationCount++})

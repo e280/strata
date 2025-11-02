@@ -1,8 +1,7 @@
 
 import {expect, Science, test} from "@e280/science"
 
-// import tree from "./tree/tree.test.js"
-// import tree2 from "./tree2/tree.test.js"
+import tree from "./tree/tree.test.js"
 import prism from "./prism/prism.test.js"
 import signals from "./signals/signals.test.js"
 import tracker from "./tracker/tracker.test.js"
@@ -12,8 +11,7 @@ import {effect} from "./signals/core/effect.js"
 import {Trunk} from "./tree/parts/trunk.js"
 
 await Science.run({
-	// tree,
-	// tree2,
+	tree,
 	prism,
 
 	signals,

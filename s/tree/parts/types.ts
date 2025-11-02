@@ -1,4 +1,6 @@
 
+import { EzStore, Versioned } from "../../prism/index.js"
+import { Immutable } from "../../prism/types.js"
 import {Branch} from "./branch.js"
 
 export type TreeOptions = {
@@ -14,22 +16,22 @@ export type Mutator<S> = (state: S) => void
 export type Trunkstate = {}
 export type Branchstate = {} | null | undefined
 
-export type Versioned<S extends Trunkstate> = {
-	state: S
-	version: number
-}
-
-export type Immutable<T> =
-	T extends (...args: any[]) => any ? T :
-	T extends readonly any[] ? ReadonlyArray<Immutable<T[number]>> :
-	T extends object ? { readonly [K in keyof T]: Immutable<T[K]> } :
-	T
-
-export type Mutable<T> =
-	T extends (...args: any[]) => any ? T :
-	T extends ReadonlyArray<infer U> ? Mutable<U>[] :
-	T extends object ? { -readonly [K in keyof T]: Mutable<T[K]> } :
-	T
+// export type Versioned<S extends Trunkstate> = {
+// 	state: S
+// 	version: number
+// }
+//
+// export type Immutable<T> =
+// 	T extends (...args: any[]) => any ? T :
+// 	T extends readonly any[] ? ReadonlyArray<Immutable<T[number]>> :
+// 	T extends object ? { readonly [K in keyof T]: Immutable<T[K]> } :
+// 	T
+//
+// export type Mutable<T> =
+// 	T extends (...args: any[]) => any ? T :
+// 	T extends ReadonlyArray<infer U> ? Mutable<U>[] :
+// 	T extends object ? { -readonly [K in keyof T]: Mutable<T[K]> } :
+// 	T
 
 export type Tree<S extends Branchstate> = {
 	get state(): Immutable<S>
@@ -45,21 +47,21 @@ export type SetupOptions<S extends Trunkstate> = {
 	persistence?: Persistence<Versioned<S>>
 }
 
-export type Chronicle<S extends Branchstate> = {
-	// [abc] d [efg]
-	//    \   \   \
-	//     \   \   future
-	//      \   present
-	//       past
-	past: S[]
-	present: S
-	future: S[]
-}
+// export type Chronicle<S extends Branchstate> = {
+// 	// [abc] d [efg]
+// 	//    \   \   \
+// 	//     \   \   future
+// 	//      \   present
+// 	//       past
+// 	past: S[]
+// 	present: S
+// 	future: S[]
+// }
 
-export type EzStore<X> = {
-	get(): Promise<X | undefined>
-	set(state: X | undefined): Promise<void>
-}
+// export type EzStore<X> = {
+// 	get(): Promise<X | undefined>
+// 	set(state: X | undefined): Promise<void>
+// }
 
 export type Persistence<X> = {
 	store: EzStore<X>

@@ -5,7 +5,8 @@ import {Immute} from "./utils/immute.js"
 import {trunkSetup} from "./utils/setup.js"
 import {Chronobranch} from "./chronobranch.js"
 import {processOptions} from "./utils/process-options.js"
-import {Branchstate, Chronicle, Mutator, TreeOptions, Selector, Tree, Trunkstate} from "./types.js"
+import {Branchstate, Mutator, TreeOptions, Selector, Tree, Trunkstate} from "./types.js"
+import {Chronicle} from "../../prism/index.js"
 
 export class Trunk<S extends Trunkstate> implements Tree<S> {
 	static setup = trunkSetup

@@ -1,8 +1,8 @@
 
-import {PersistenceOptions} from "./types.js"
+import {VaultOptions} from "./types.js"
 
-export class Persistence<State> {
-	constructor(private options: PersistenceOptions<State>) {}
+export class Vault<State> {
+	constructor(private options: VaultOptions<State>) {}
 
 	load = async() => {
 		const {store, version, prism} = this.options
