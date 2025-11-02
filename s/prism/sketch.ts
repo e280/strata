@@ -7,35 +7,30 @@ function immute<S>(s: S) {
 	return deep.freeze(deep.clone(s)) as Immutable<S>
 }
 
-export type Adapter<State> = {
-	getMutable: () => State
-	getImmutable: () => Immutable<State>
+export type Optic<State> = {
+	getState: () => State
 	mutate: <R>(fn: (state: State) => R) => Promise<R>
 }
 
 export class Prism<State> {
-	#mutable: State
-	#immutable: Immutable<State>
+	#state: State
 	#lenses = new Set<Lens<any>>()
 
 	constructor(state: State) {
-		this.#mutable = state
-		this.#immutable = immute(state)
+		this.#state = state
 	}
 
 	async overwrite(state: State) {
-		this.#mutable = state
-		this.#immutable = immute(state)
+		this.#state = state
 		await Promise.all([...this.#lenses].map(lens => lens.update()))
 	}
 
 	lens<State2>(selector: (state: State) => State2) {
 		const lens = new Lens<State2>({
-			getMutable: () => selector(this.#mutable),
-			getImmutable: () => selector(this.#immutable as State) as Immutable<State2>,
+			getState: () => selector(this.#state),
 			mutate: async fn => {
-				const result = fn(selector(this.#mutable))
-				await this.overwrite(this.#mutable)
+				const result = fn(selector(this.#state))
+				await this.overwrite(this.#state)
 				return result
 			},
 		})
@@ -44,36 +39,61 @@ export class Prism<State> {
 	}
 }
 
+export class CacheBox<R> {
+	#dirty = false
+	#value: R
+
+	constructor(private calculate: () => R) {
+		this.#value = calculate()
+	}
+
+	get() {
+		if (this.#dirty) {
+			this.#dirty = false
+			this.#value = this.calculate()
+		}
+		return this.#value
+	}
+
+	markDirty() {
+		this.#dirty = true
+	}
+}
+
 export class Lens<State> {
 	on = sub<[state: Immutable<State>]>()
 	#previous: State
+	#immutable: CacheBox<Immutable<State>>
 
-	constructor(private adapter: Adapter<State>) {
-		this.#previous = deep.clone(adapter.getMutable())
+	constructor(private optic: Optic<State>) {
+		this.#previous = deep.clone(optic.getState())
+		this.#immutable = new CacheBox(() => immute(optic.getState()))
 	}
 
 	async update() {
-		const isChanged = !deep.equal(this.adapter.getMutable(), this.#previous)
+		const state = this.optic.getState()
+		const isChanged = !deep.equal(state, this.#previous)
 		if (isChanged) {
+			this.#previous = deep.clone(state)
 			this.on.publish(this.state)
+			this.#immutable.markDirty()
 			await tracker.notifyWrite(this)
 		}
 	}
 
 	get state() {
 		tracker.notifyRead(this)
-		return this.adapter.getImmutable()
+		return this.#immutable.get()
 	}
 
 	async mutate<R>(fn: (state: State) => R) {
-		return this.adapter.mutate(fn)
+		return this.optic.mutate(fn)
 	}
 
 	lens<State2>(selector: (state: State) => State2) {
 		return new Lens<State2>({
-			getMutable: () => selector(this.adapter.getMutable()),
-			getImmutable: () => selector(this.adapter.getImmutable() as State) as Immutable<State2>,
-			mutate: fn => this.adapter.mutate(state => fn(selector(state))),
+			getState: () => selector(this.optic.getState()),
+			mutate: fn => this.optic.mutate(state => fn(selector(state))),
 		})
 	}
 }
