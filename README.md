@@ -25,7 +25,7 @@
 
 <a id="signals"></a>
 
-## 🚦 strata signals
+## 🍋 strata signals
 > *ephemeral view-level state*
 
 ```ts
@@ -155,7 +155,7 @@ import {signal, effect} from "@e280/strata"
 
 <a id="prism"></a>
 
-## 🔮 strata prism
+## 🍋 strata prism
 > *persistent app-level state*
 
 - single-source-of-truth state tree
@@ -165,7 +165,7 @@ import {signal, effect} from "@e280/strata"
 - chrono provides undo/redo history
 - persistence, localstorage, cross-tab sync
 
-### 🔭 prism and lenses
+### 🔮 prism and lenses
 - **import prism**
     ```ts
     import {Prism} from "@e280/strata"
@@ -185,8 +185,8 @@ import {signal, effect} from "@e280/strata"
     ```
 - **create lenses, which are views into state subtrees**
     ```ts
-    const person = prism.lens(s => s.person)
-    const snacks = prism.lens(s => s.snacks)
+    const person = prism.lens(state => state.person)
+    const snacks = prism.lens(state => state.snacks)
     ```
 - **lenses provide immutable copies of state**
     ```ts
@@ -204,10 +204,10 @@ import {signal, effect} from "@e280/strata"
     snacks.state.peanuts // 8
     ```
 
-### 🔭 chrono for time travel
+### 🔮 chrono for time travel
 TODO docs coming soon
 
-### 🔭 archive for persistence
+### 🔮 archive for persistence
 TODO docs coming soon
 
 
@@ -216,7 +216,7 @@ TODO docs coming soon
 
 <a id="tree"></a>
 
-## 🌳 strata tree
+## 🍋 strata tree
 > *persistent app-level state*
 
 ```ts
@@ -355,7 +355,7 @@ import {Trunk} from "@e280/strata"
 
 <a id="tracker"></a>
 
-## 🪄 strata tracker
+## 🍋 strata tracker
 > *reactivity integration hub*
 
 ```ts
