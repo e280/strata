@@ -258,7 +258,7 @@ import {signal, effect} from "@e280/strata"
 ### 🔮 persistence to localStorage
 - **import prism**
     ```ts
-    import {Vault} from "@e280/strata"
+    import {Vault, LocalStore} from "@e280/strata"
     ```
 - **create a local storage store**
     ```ts
