@@ -8,6 +8,7 @@ import {processOptions} from "./utils/process-options.js"
 import {Branchstate, Mutator, TreeOptions, Selector, Tree, Trunkstate} from "./types.js"
 import {Chronicle} from "../../prism/index.js"
 
+/** @deprecated tree stuff has been replaced by prism/lens stuff */
 export class Trunk<S extends Trunkstate> implements Tree<S> {
 	static setup = trunkSetup
 	static chronicle = <S extends Branchstate>(state: S): Chronicle<S> => ({

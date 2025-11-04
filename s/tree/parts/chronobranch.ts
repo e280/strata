@@ -3,6 +3,7 @@ import {Chronicle, Immutable} from "../../prism/index.js"
 import {Branch} from "./branch.js"
 import {Branchstate, Mutator, TreeOptions, Selector, Tree} from "./types.js"
 
+/** @deprecated tree stuff has been replaced by prism/lens stuff */
 export class Chronobranch<S extends Branchstate, ParentState extends Branchstate = any> implements Tree<S> {
 	#branch: Branch<Chronicle<S>, ParentState>
 

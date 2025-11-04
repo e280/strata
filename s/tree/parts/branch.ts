@@ -5,6 +5,7 @@ import {SignalFn} from "../../signals/types.js"
 import {signal} from "../../signals/porcelain.js"
 import {Branchstate, Mutator, TreeOptions, Selector, Tree} from "./types.js"
 
+/** @deprecated tree stuff has been replaced by prism/lens stuff */
 export class Branch<S extends Branchstate, ParentState extends Branchstate = any> implements Tree<S> {
 	#previous: Immutable<S>
 	#$data: SignalFn<Immutable<S>>
