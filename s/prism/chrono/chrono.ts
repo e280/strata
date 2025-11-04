@@ -7,8 +7,8 @@ import {_optic} from "../utils/optic-symbol.js"
 
 export class Chrono<State> implements LensLike<State> {
 	constructor(
+		public limit: number,
 		private basis: Lens<Chronicle<State>>,
-		public limit = 64,
 	) {}
 
 	get chronicle() {

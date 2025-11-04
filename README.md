@@ -173,42 +173,109 @@ import {signal, effect} from "@e280/strata"
 - **prism is a state tree**
     ```ts
     const prism = new Prism({
-      person: {
-        name: "chase",
-        incredi: true,
-      },
       snacks: {
-        peanuts: 7,
+        peanuts: 8,
         bag: ["popcorn", "butter"],
+        person: {
+          name: "chase",
+          incredi: true,
+        },
       },
     })
     ```
 - **create lenses, which are views into state subtrees**
     ```ts
-    const person = prism.lens(state => state.person)
     const snacks = prism.lens(state => state.snacks)
+    const person = snacks.lens(state => state.person)
     ```
-- **lenses provide immutable copies of state**
+- **lenses provide immutable access to state**
     ```ts
+    snacks.state.peanuts // 8
     person.state.name // "chase"
-    snacks.state.peanuts // 7
-
+    ```
+- **only formal mutations can change state**
+    ```ts
     snacks.state.peanuts++
       // ⛔ error: casual mutations forbidden
     ```
-- **formal mutations are allowed**
     ```ts
     snacks.mutate(state => state.peanuts++)
-      // ✅ all changes are proper mutations
+      // ✅ only proper mutations can make state changes
 
-    snacks.state.peanuts // 8
+    snacks.state.peanuts // 9
     ```
 
 ### 🔮 chrono for time travel
-TODO docs coming soon
+- **import stuff**
+    ```ts
+    import {Chrono, chronicle} from "@e280/strata"
+    ```
+- **create a chronicle in your state**
+    ```ts
+    const prism = new Prism({
 
-### 🔮 archive for persistence
-TODO docs coming soon
+        // chronicle stores history
+        //        👇
+      snacks: chronicle({
+        peanuts: 8,
+        bag: ["popcorn", "butter"],
+        person: {
+          name: "chase",
+          incredi: true,
+        },
+      }),
+    })
+    ```
+    - *big-brain moment:* the whole chronicle *itself* is stored in the state.. serializable.. think persistence — user can close their project, reopen, and their undo/redo history is still chillin' — *brat girl summer*
+- **create a chrono-wrapped lens to interact with your chronicle**
+    ```ts
+    const snacks = new Chrono(64, prism.lens(state => state.snacks))
+      //                      👆
+      // how many past snapshots to store
+    ```
+- **mutations will advance history,** and undo/redo works
+    ```ts
+    snacks.mutate(s => s.peanuts = 101)
+
+    snacks.undo()
+      // back to 8 peanuts
+
+    snacks.redo()
+      // forward to 101 peanuts
+    ```
+- **check how many undoable or redoable steps are available**
+    ```ts
+    snacks.undoable // 1
+    snacks.redoable // 0
+    ```
+- **you can make sub-lenses of a chrono,** all their mutations advance history too
+- **plz pinky-swear right now,** that you won't create a chrono under a lens under another chrono 💀
+
+### 🔮 persistence to localStorage
+- **import prism**
+    ```ts
+    import {Vault} from "@e280/strata"
+    ```
+- **create a local storage store**
+    ```ts
+    const store = new LocalStore("myAppState")
+    ```
+- **make a vault for your prism**
+    ```ts
+    const vault = new Vault({
+      prism,
+      store,
+      version: 1, // 👈 bump this when you break your state schema!
+    })
+    ```
+- **cross-tab sync (load on storage events)**
+    ```ts
+    store.onStorageEvent(vault.load)
+    ```
+- **initial load**
+    ```ts
+    await vault.load()
+    ```
 
 
 

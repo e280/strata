@@ -19,7 +19,7 @@ export class LocalStore<X> implements EzStore<X> {
 		this.storage.setItem(this.key, json)
 	}
 
-	onChange(fn: () => void) {
+	onStorageEvent(fn: () => void) {
 		const listener = (event: StorageEvent) => {
 			if (event.storageArea === this.storage && event.key === this.key)
 				fn()

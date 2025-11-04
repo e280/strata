@@ -167,14 +167,14 @@ export default suite({
 		"get present state": test(async() => {
 			const prism = new Prism({data: chronicle({count: 1})})
 			const lens = prism.lens(s => s.data)
-			const chrono = new Chrono(lens)
+			const chrono = new Chrono(64, lens)
 			expect(chrono.state.count).is(1)
 		}),
 
 		"mutation": test(async() => {
 			const prism = new Prism({data: chronicle({count: 1})})
 			const lens = prism.lens(s => s.data)
-			const chrono = new Chrono(lens)
+			const chrono = new Chrono(64, lens)
 			await chrono.mutate(s => s.count++)
 			expect(chrono.state.count).is(2)
 			await chrono.mutate(s => s.count++)
@@ -184,7 +184,7 @@ export default suite({
 		"undoable/redoable": test(async() => {
 			const prism = new Prism({data: chronicle({count: 1})})
 			const lens = prism.lens(s => s.data)
-			const chrono = new Chrono(lens)
+			const chrono = new Chrono(64, lens)
 			expect(chrono.undoable).is(0)
 			expect(chrono.redoable).is(0)
 			await chrono.mutate(s => s.count++)
@@ -205,7 +205,7 @@ export default suite({
 		"undo": test(async() => {
 			const prism = new Prism({data: chronicle({count: 1})})
 			const lens = prism.lens(s => s.data)
-			const chrono = new Chrono(lens)
+			const chrono = new Chrono(64, lens)
 
 			await chrono.mutate(s => s.count++)
 			expect(chrono.state.count).is(2)
@@ -214,10 +214,22 @@ export default suite({
 			expect(chrono.state.count).is(1)
 		}),
 
+		"sync undo": test(async() => {
+			const prism = new Prism({data: chronicle({count: 1})})
+			const lens = prism.lens(s => s.data)
+			const chrono = new Chrono(64, lens)
+
+			chrono.mutate(s => s.count++)
+			expect(chrono.state.count).is(2)
+
+			chrono.undo()
+			expect(chrono.state.count).is(1)
+		}),
+
 		"redo": test(async() => {
 			const prism = new Prism({data: chronicle({count: 1})})
 			const lens = prism.lens(s => s.data)
-			const chrono = new Chrono(lens)
+			const chrono = new Chrono(64, lens)
 
 			await chrono.mutate(s => s.count++)
 			expect(chrono.state.count).is(2)
@@ -232,7 +244,7 @@ export default suite({
 		"undo/redo is orderly": test(async() => {
 			const prism = new Prism({data: chronicle({count: 1})})
 			const lens = prism.lens(s => s.data)
-			const chrono = new Chrono(lens)
+			const chrono = new Chrono(64, lens)
 
 			await chrono.mutate(s => s.count++)
 			await chrono.mutate(s => s.count++)
@@ -264,7 +276,7 @@ export default suite({
 		"undo nothing does nothing": test(async() => {
 			const prism = new Prism({data: chronicle({count: 1})})
 			const lens = prism.lens(s => s.data)
-			const chrono = new Chrono(lens)
+			const chrono = new Chrono(64, lens)
 			await chrono.undo()
 			expect(chrono.state.count).is(1)
 		}),
@@ -272,7 +284,7 @@ export default suite({
 		"redo nothing does nothing": test(async() => {
 			const prism = new Prism({data: chronicle({count: 1})})
 			const lens = prism.lens(s => s.data)
-			const chrono = new Chrono(lens)
+			const chrono = new Chrono(64, lens)
 			await chrono.redo()
 			expect(chrono.state.count).is(1)
 		}),
@@ -280,7 +292,7 @@ export default suite({
 		"undo 2x": test(async() => {
 			const prism = new Prism({data: chronicle({count: 1})})
 			const lens = prism.lens(s => s.data)
-			const chrono = new Chrono(lens)
+			const chrono = new Chrono(64, lens)
 			await chrono.mutate(s => s.count++)
 			await chrono.mutate(s => s.count++)
 			await chrono.mutate(s => s.count++)
@@ -292,7 +304,7 @@ export default suite({
 		"redo 2x": test(async() => {
 			const prism = new Prism({data: chronicle({count: 1})})
 			const lens = prism.lens(s => s.data)
-			const chrono = new Chrono(lens)
+			const chrono = new Chrono(64, lens)
 			await chrono.mutate(s => s.count++)
 			await chrono.mutate(s => s.count++)
 			await chrono.mutate(s => s.count++)
@@ -305,7 +317,7 @@ export default suite({
 
 		"sublens mutations are undoable": test(async() => {
 			const prism = new Prism({data: chronicle({a: {count: 1}})})
-			const chrono = new Chrono(prism.lens(s => s.data))
+			const chrono = new Chrono(64, prism.lens(s => s.data))
 			const sublens = chrono.lens(s => s.a)
 			expect(sublens.state.count).is(1)
 			await sublens.mutate(s => s.count++)
