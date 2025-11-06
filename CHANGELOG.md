@@ -11,7 +11,8 @@
 ## v0.2
 
 ### v0.2.3
-- 🔶 deprecated `Tree`, `Trunk`, `Branch` -- in favor of newer `Prism` and `Lens` systems
+- 🔶 deprecated `Tree`, `Trunk`, `Branch` -- in favor of newer `Prism` and `Lens` systems (see readme!)
+- 🍏 update dependencies
 
 ### v0.2.2
 - 🔶 branch `.on` is no longer a full stz `Sub`, but is now a simple subscriber fn
