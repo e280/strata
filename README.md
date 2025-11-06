@@ -9,10 +9,10 @@
 
 ### get in loser, we're managing state
 📦 `npm install @e280/strata`  
+✨ it's all about automagically rerendering ui when data changes  
+🦝 powers auto-reactivity in our view library [@e280/sly](https://github.com/e280/sly)  
 🧙‍♂️ probably my tenth state management library, lol  
-💁 it's all about rerendering ui when data changes  
-🦝 powers reactivity in our view library [@e280/sly](https://github.com/e280/sly)  
-🧑‍💻 a project by https://e280.org/
+🧑‍💻 a project by https://e280.org/  
 
 🚦 [**signals**](#signals) — ephemeral view-level state  
 🔮 [**prism**](#prism) — app-level state tree  
