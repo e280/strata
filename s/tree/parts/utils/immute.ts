@@ -1,7 +1,8 @@
 
-import {deep, microbounce, sub} from "@e280/stz"
-import {Immutable, TreeOptions} from "../types.js"
+import {deep, sub} from "@e280/stz"
+import {TreeOptions} from "../types.js"
 import {tracker} from "../../../tracker/tracker.js"
+import {Immutable} from "../../../prism/types.js"
 
 export class Immute<S> {
 	#mutable: S
@@ -19,7 +20,6 @@ export class Immute<S> {
 	}
 
 	on = sub<[Immutable<S>]>()
-	#debouncePublish = microbounce(async() => this.on.publish(this.#immutable))
 
 	get() {
 		tracker.notifyRead(this)
@@ -30,7 +30,7 @@ export class Immute<S> {
 		this.#mutable = mutable
 		this.#immutable = deep.freeze(this.options.clone(this.get())) as Immutable<S>
 		await Promise.all([
-			this.#debouncePublish(),
+			this.on.publish(this.#immutable),
 			tracker.notifyWrite(this),
 		])
 	}

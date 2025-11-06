@@ -56,7 +56,7 @@ export default Science.suite({
 			expect(mutationCount).is(2)
 		}),
 
-		"signal.on is debounced": Science.test(async() => {
+		"trunk.on is debounced": Science.test.skip(async() => {
 			const trunk = new Trunk({count: 0})
 			let mutationCount = 0
 			trunk.on.sub(() => {mutationCount++})
@@ -111,6 +111,20 @@ export default Science.suite({
 			expect(branch.state.rofls).is(0)
 		}),
 
+		"mutation triggers effect": Science.test(async() => {
+			const trunk = new Trunk({a: {x: 0}})
+			const branch = trunk.branch(s => s.a)
+			expect(branch.state.x).is(0)
+			let triggered = 0
+			effect(() => {
+				void branch.state.x
+				triggered++
+			})
+			expect(triggered).is(1)
+			await branch.mutate(s => s.x++)
+			expect(triggered).is(2)
+		}),
+
 		"sync coherence": Science.test(async() => {
 			const trunk = new Trunk({count: 0, sub: {rofls: 0}})
 			const branch = trunk.branch(s => s.sub)
@@ -161,7 +175,7 @@ export default Science.suite({
 			expect(b.state.c).is(103)
 		}),
 
-		"signal.on ignores outside mutations": Science.test(async() => {
+		"branch.on ignores outside mutations": Science.test(async() => {
 			const trunk = new Trunk({a: {x: 0}, b: {x: 0}})
 			const a = trunk.branch(s => s.a)
 			const b = trunk.branch(s => s.b)
@@ -170,6 +184,20 @@ export default Science.suite({
 			expect(counted).is(0)
 			await a.mutate(a => a.x = 1)
 			expect(counted).is(0)
+		}),
+
+		"effects ignore outside mutations": Science.test(async() => {
+			const trunk = new Trunk({a: {x: 0}, b: {x: 0}})
+			const a = trunk.branch(s => s.a)
+			const b = trunk.branch(s => s.b)
+			let counted = 0
+			effect(() => {
+				void b.state.x
+				counted++
+			})
+			expect(counted).is(1)
+			await a.mutate(a => a.x++)
+			expect(counted).is(1)
 		}),
 
 		"forbid submutation in mutation": Science.test(async() => {

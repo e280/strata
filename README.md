@@ -9,13 +9,13 @@
 
 ### get in loser, we're managing state
 📦 `npm install @e280/strata`  
+✨ it's all about automagically rerendering ui when data changes  
+🦝 powers auto-reactivity in our view library [@e280/sly](https://github.com/e280/sly)  
 🧙‍♂️ probably my tenth state management library, lol  
-💁 it's all about rerendering ui when data changes  
-🦝 powers reactivity in our view library [@e280/sly](https://github.com/e280/sly)  
-🧑‍💻 a project by https://e280.org/
+🧑‍💻 a project by https://e280.org/  
 
 🚦 [**signals**](#signals) — ephemeral view-level state  
-🌳 [**tree**](#tree) — persistent app-level state  
+🔮 [**prism**](#prism) — app-level state tree  
 🪄 [**tracker**](#tracker) — reactivity integration hub  
 
 
@@ -24,7 +24,7 @@
 
 <a id="signals"></a>
 
-## 🚦 strata signals
+## 🍋 strata signals
 > *ephemeral view-level state*
 
 ```ts
@@ -152,140 +152,135 @@ import {signal, effect} from "@e280/strata"
 
 <br/><br/>
 
-<a id="tree"></a>
+<a id="prism"></a>
 
-## 🌳 strata tree
+## 🍋 strata prism
 > *persistent app-level state*
 
-```ts
-import {Trunk} from "@e280/strata"
-```
-
 - single-source-of-truth state tree
-- immutable except for `mutate(fn)` calls
-- localStorage persistence, cross-tab sync, undo/redo history
 - no spooky-dookie proxy magic — just god's honest javascript
+- immutable except for `mutate(fn)` calls
+- use many lenses, efficient reactivity
+- chrono provides undo/redo history
+- persistence, localstorage, cross-tab sync
 
-#### 🌳 `Trunk` is your app's state tree root
-- better stick to json-friendly serializable data
-  ```ts
-  const trunk = new Trunk({
-    count: 0,
-    snacks: {
-      peanuts: 8,
-      bag: ["popcorn", "butter"],
-    },
-  })
+### 🔮 prism and lenses
+- **import prism**
+    ```ts
+    import {Prism} from "@e280/strata"
+    ```
+- **prism is a state tree**
+    ```ts
+    const prism = new Prism({
+      snacks: {
+        peanuts: 8,
+        bag: ["popcorn", "butter"],
+        person: {
+          name: "chase",
+          incredi: true,
+        },
+      },
+    })
+    ```
+- **create lenses, which are views into state subtrees**
+    ```ts
+    const snacks = prism.lens(state => state.snacks)
+    const person = snacks.lens(state => state.person)
+    ```
+    - you can lens another lens
+- **lenses provide immutable access to state**
+    ```ts
+    snacks.state.peanuts // 8
+    person.state.name // "chase"
+    ```
+- **only formal mutations can change state**
+    ```ts
+    snacks.state.peanuts++
+      // ⛔ error: casual mutations forbidden
+    ```
+    ```ts
+    snacks.mutate(state => state.peanuts++)
+      // ✅ only proper mutations can make state changes
 
-  trunk.state.count // 0
-  trunk.state.snacks.peanuts // 8
-  ```
+    snacks.state.peanuts // 9
+    ```
+- **array mutations are unironically based, actually**
+    ```ts
+    await snacks.mutate(state => state.bag.push("salt"))
+    ```
 
-#### 🌳 formal mutations to change state
-- ⛔ informal mutations are denied
-  ```ts
-  trunk.state.count++ // error is thrown
-  ```
-- ✅ formal mutations are allowed
-  ```ts
-  await trunk.mutate(s => s.count++)
-  ```
+### 🔮 chrono for time travel
+- **import stuff**
+    ```ts
+    import {Chrono, chronicle} from "@e280/strata"
+    ```
+- **create a chronicle in your state**
+    ```ts
+    const prism = new Prism({
 
-#### 🌳 `Branch` is a view into a subtree
-- it's a lens, make lots of them, pass 'em around your app
-  ```ts
-  const snacks = trunk.branch(s => s.snacks)
-  ```
-- run branch mutations
-  ```ts
-  await snacks.mutate(s => s.peanuts++)
-  ```
-- array mutations are unironically based, actually
-  ```ts
-  await snacks.mutate(s => s.bag.push("salt"))
-  ```
-- you can branch a branch
+        // chronicle stores history
+        //        👇
+      snacks: chronicle({
+        peanuts: 8,
+        bag: ["popcorn", "butter"],
+        person: {
+          name: "chase",
+          incredi: true,
+        },
+      }),
+    })
+    ```
+    - *big-brain moment:* the whole chronicle *itself* is stored in the state.. serializable.. think persistence — user can close their project, reopen, and their undo/redo history is still chillin' — *brat girl summer*
+- **create a chrono-wrapped lens to interact with your chronicle**
+    ```ts
+    const snacks = new Chrono(64, prism.lens(state => state.snacks))
+      //                      👆
+      // how many past snapshots to store
+    ```
+- **mutations will advance history,** and undo/redo works
+    ```ts
+    snacks.mutate(s => s.peanuts = 101)
 
-#### 🌳 `on` to watch for mutations
-- on the trunk, we can listen deeply for mutations within the whole tree
-  ```ts
-  trunk.on(s => console.log(s.count))
-  ```
-- whereas branch listeners don't care about changes outside their scope
-  ```ts
-  snacks.on(s => console.log(s.peanuts))
-  ```
-- on returns a fn to stop listening
-  ```ts
-  const stop = trunk.on(s => console.log(s.count))
-  stop() // stop listening
-  ```
+    snacks.undo()
+      // back to 8 peanuts
 
-### 🌳 fancy advanced usage
-> *only discerning high-class aristocrats are permitted beyond this point*
+    snacks.redo()
+      // forward to 101 peanuts
+    ```
+- **check how many undoable or redoable steps are available**
+    ```ts
+    snacks.undoable // 1
+    snacks.redoable // 0
+    ```
+- **you can make sub-lenses of a chrono,** all their mutations advance history too
+- **plz pinky-swear right now,** that you won't create a chrono under a lens under another chrono 💀
 
-#### 🌳 `Trunk.setup` for localStorage persistence etc
-- it automatically handles persistence to localStorage and cross-tab synchronization
-- simple setup
-  ```ts
-  const {trunk} = await Trunk.setup({
-    version: 1, // 👈 bump whenever you change state schema!
-    initialState: {count: 0},
-  })
-  ```
-  - uses localStorage by default
-- it's compatible with [`@e280/kv`](https://github.com/e280/kv)
-  ```ts
-  import {Kv, StorageDriver} from "@e280/kv"
-
-  const kv = new Kv(new StorageDriver())
-  const store = kv.store<any>("appState")
-
-  const {trunk} = await Trunk.setup({
-    version: 1,
-    initialState: {count: 0},
-    persistence: {
+### 🔮 persistence to localStorage
+- **import prism**
+    ```ts
+    import {Vault, LocalStore} from "@e280/strata"
+    ```
+- **create a local storage store**
+    ```ts
+    const store = new LocalStore("myAppState")
+    ```
+- **make a vault for your prism**
+    ```ts
+    const vault = new Vault({
+      prism,
       store,
-      onChange: StorageDriver.onStorageEvent,
-    },
-  })
-  ```
-
-#### 🌳 `Chronobranch` for undo/redo history
-- first, put a `Chronicle` into your state tree
-  ```ts
-  const trunk = new Trunk({
-    count: 0,
-    snacks: Trunk.chronicle({
-      peanuts: 8,
-      bag: ["popcorn", "butter"],
-    }),
-  })
-  ```
-  - *big-brain moment:* the whole chronicle *itself* is stored in the state.. serializable.. think persistence — user can close their project, reopen, and their undo/redo history is still chillin' — *brat girl summer*
-- second, make a `Chronobranch` which is like a branch, but is concerned with history
-  ```ts
-  const snacks = trunk.chronobranch(64, s => s.snacks)
-    //                               \
-    //               how many past snapshots to store
-  ```
-- mutations will advance history (undoable/redoable)
-  ```ts
-  await snacks.mutate(s => s.peanuts = 101)
-
-  await snacks.undo()
-    // back to 8 peanuts
-
-  await snacks.redo()
-    // forward to 101 peanuts
-  ```
-- you can check how many undoable or redoable steps are available
-  ```ts
-  snacks.undoable // 2
-  snacks.redoable // 1
-  ```
-- chronobranch can have its own branches — all their mutations advance history
-- plz pinky-swear right now, that you won't create a chronobranch under a branch under another chronobranch 💀
+      version: 1, // 👈 bump this when you break your state schema!
+    })
+    ```
+    - `store` type is compatible with [`@e280/kv`](https://github.com/e280/kv)
+- **cross-tab sync (load on storage events)**
+    ```ts
+    store.onStorageEvent(vault.load)
+    ```
+- **initial load**
+    ```ts
+    await vault.load()
+    ```
 
 
 
@@ -293,7 +288,7 @@ import {Trunk} from "@e280/strata"
 
 <a id="tracker"></a>
 
-## 🪄 strata tracker
+## 🍋 strata tracker
 > *reactivity integration hub*
 
 ```ts

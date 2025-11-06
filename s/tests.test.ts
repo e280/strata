@@ -2,6 +2,7 @@
 import {expect, Science, test} from "@e280/science"
 
 import tree from "./tree/tree.test.js"
+import prism from "./prism/prism.test.js"
 import signals from "./signals/signals.test.js"
 import tracker from "./tracker/tracker.test.js"
 
@@ -11,10 +12,12 @@ import {Trunk} from "./tree/parts/trunk.js"
 
 await Science.run({
 	tree,
+	prism,
+
 	signals,
 	tracker,
 
-	interop: Science.suite({
+	interop: Science.suite.skip({
 		"effect responds to trunk change": test(async() => {
 			const trunk = new Trunk({count: 1})
 
