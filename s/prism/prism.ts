@@ -1,6 +1,7 @@
 
 import {microbounce, sub} from "@e280/stz"
 import {Lens} from "./lens.js"
+import { tracker } from "../tracker/tracker.js"
 
 /** state mangagement source-of-truth */
 export class Prism<State> {
@@ -15,6 +16,7 @@ export class Prism<State> {
 	}
 
 	get() {
+		tracker.notifyRead(this)
 		return this.#state
 	}
 
@@ -22,6 +24,7 @@ export class Prism<State> {
 		this.#state = state
 		await Promise.all([...this.#lenses].map(lens => lens.update()))
 		await this.#onPublishDebounced()
+		await tracker.notifyWrite(this)
 	}
 
 	lens<State2>(selector: (state: State) => State2) {
