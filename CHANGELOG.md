@@ -10,6 +10,10 @@
 
 ## v0.2
 
+### v0.2.4
+- 🍏 fix: reactivity for plain `prism.get()` and `prism.set()`
+- 🍏 update dependencies
+
 ### v0.2.3
 - 🔶 deprecated `Tree`, `Trunk`, `Branch` -- in favor of newer `Prism` and `Lens` systems (see readme!)
 - 🍏 update dependencies
