@@ -8,11 +8,23 @@ import {effect} from "../signals/core/effect.js"
 
 export default suite({
 	"prism": suite({
-		"get and set state": test(async() => {
+		"get/set state": test(async() => {
 			const prism = new Prism({count: 1})
 			expect(prism.get().count).is(1)
 			await prism.set({count: 2})
 			expect(prism.get().count).is(2)
+		}),
+		"get/set state can trigger effects": test(async() => {
+			const prism = new Prism({count: 1})
+			let triggered = 0
+			const stop = effect(() => {
+				void prism.get().count
+				triggered++
+			})
+			expect(triggered).is(1)
+			await prism.set({count: 2})
+			expect(triggered).is(2)
+			stop()
 		}),
 	}),
 
