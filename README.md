@@ -17,6 +17,7 @@
 🚦 [**signals**](#signals) — ephemeral view-level state  
 🔮 [**prism**](#prism) — app-level state tree  
 🪄 [**tracker**](#tracker) — reactivity integration hub  
+⚛️ [**react**](#react) — optional bindings for react  
 
 
 
@@ -360,6 +361,50 @@ note, the *items* that the tracker tracks can be any object, or symbol.. the tra
       }
     }
     ```
+
+
+
+<br/><br/>
+
+<a id="react"></a>
+
+## 🍋 react bindings
+> *easy peasy*
+
+### ⚛️ react setup
+
+1. setup your `strata.ts` module
+    ```ts
+    import * as react from "react"
+    import {react as strata} from "@e280/strata"
+
+    export const {component, useStrata} = strata(react)
+    ```
+1. now you import `component` and `useStrata` from your module
+    ```ts
+    import {component, useStrata} from "./strata.js"
+    ```
+
+### ⚛️ `component` enables fully automatic reactive re-rendering
+```ts
+const $count = signal(0)
+
+export const MyCounter = component(() => {
+  const add = () => $count.value++
+  return <button onClick={add}>{$count()}</button>
+})
+```
+
+### ⚛️ `useStrata` for a manual hands-on approach
+```ts
+const $count = signal(0)
+
+export const MyCounter = () => {
+  const count = useStrata(() => $count())
+  const add = () => $count.value++
+  return <button onClick={add}>{count}</button>
+}
+```
 
 
 

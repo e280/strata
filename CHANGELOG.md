@@ -10,6 +10,10 @@
 
 ## v0.2
 
+### v0.2.8
+- 🍏 added react bindings!
+- 🍏 update license year
+
 ### v0.2.7
 - 🍏 update github action workflows for publishing
 
