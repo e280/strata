@@ -10,6 +10,9 @@
 
 ## v0.2
 
+### v0.2.7
+- 🍏 update github action workflows for publishing
+
 ### v0.2.6
 - 🍏 update dependencies
 
