@@ -10,6 +10,12 @@
 
 ## v0.2
 
+### v0.2.6
+- 🍏 update dependencies
+
+### v0.2.5
+- 🍏 update dependencies
+
 ### v0.2.4
 - 🍏 fix: reactivity for plain `prism.get()` and `prism.set()`
 - 🍏 update dependencies
