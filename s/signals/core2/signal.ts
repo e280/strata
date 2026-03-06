@@ -1,5 +1,5 @@
 
-import {Sub} from "@e280/stz"
+import {sub, Sub} from "@e280/stz"
 import {SignalOptions} from "../types.js"
 import {tracker} from "../../tracker/tracker.js"
 import {defaultCompare} from "../utils/default-compare.js"
@@ -7,12 +7,16 @@ import {defaultCompare} from "../utils/default-compare.js"
 const _lock = Symbol("lock")
 const _compare = Symbol("compare")
 
-export type Signal<Value> = {
+export interface Signal<Value> {
 	(): Value
 	(value: Value): Promise<Value>
+
+	// instance members
 	sneak: Value
-	value: Value
 	on: Sub<[Value]>
+
+	// inherited
+	value: Value
 	get(): Value
 	set(value: Value, forcePublish?: boolean): Promise<Value>
 	publish(): Promise<Value>
@@ -20,6 +24,12 @@ export type Signal<Value> = {
 	[_lock]: boolean
 	[_compare]: (a: any, b: any) => boolean
 }
+
+// export class Signal<Value> {
+// 	constructor(value: Value, options?: Partial<SignalOptions>) {
+// 		return signal(value, options)
+// 	}
+// }
 
 export function signal<Value>(value: Value, options?: Partial<SignalOptions>) {
 	function fn(): Value
@@ -33,6 +43,7 @@ export function signal<Value>(value: Value, options?: Partial<SignalOptions>) {
 
 	Object.setPrototypeOf(fn, proto)
 	fn.sneak = value
+	fn.on = sub<[Value]>()
 	fn[_compare] = options?.compare ?? defaultCompare
 
 	return fn as Signal<Value>
@@ -76,7 +87,7 @@ const proto = {
 			this[_lock] = true
 			promise = Promise.all([
 				tracker.notifyWrite(this),
-				this.on.publish(value),
+				this.on.pub(value),
 			])
 		}
 		finally {

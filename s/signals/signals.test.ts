@@ -1,15 +1,19 @@
 
 import {Science} from "@e280/science"
 
-import effectTest from "./tests/effect.test.js"
-import signalTest from "./tests/signal.test.js"
-import derivedTest from "./tests/derived.test.js"
-import lazyTest from "./tests/lazy.test.js"
+import effect from "./tests/effect.test.js"
+import signal from "./tests/signal.test.js"
+import derived from "./tests/derived.test.js"
+import lazy from "./tests/lazy.test.js"
+
+import signal2 from "./tests/signal2.test.js"
 
 export default Science.suite({
-	"effect": effectTest,
-	"signal": signalTest,
-	"derived": derivedTest,
-	"lazy": lazyTest,
+	effect,
+	signal,
+	derived,
+	lazy,
+
+	signal2,
 })
 
