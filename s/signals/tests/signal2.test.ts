@@ -2,12 +2,7 @@
 import {Science, test, expect} from "@e280/science"
 import {Signal, signal} from "../core2/signal.js"
 
-export default Science.suite.only({
-	// "signal instanceof Signal": test(async() => {
-	// 	const count = signal(0)
-	// 	expect(count instanceof Signal).ok()
-	// }),
-
+export default Science.suite({
 	"get() and set()": test(async() => {
 		const count = signal(0)
 		expect(count.get()).is(0)
@@ -61,7 +56,26 @@ export default Science.suite.only({
 		expect(count.value).is(3)
 	}),
 
-	"on": Science.suite({
+	"class magic": {
+		"signal instanceof Signal": test(async() => {
+			const count = signal(0)
+			expect(count instanceof Signal).ok()
+		}),
+
+		"new Signal": test(async() => {
+			const count = new Signal(0)
+			expect(count instanceof Signal).ok()
+			expect(count()).is(0)
+			await count(1)
+			expect(count.value).is(1)
+		}),
+
+		"subclassing Signal is forbidden": test(async() => {
+			expect(() => new class extends Signal<any> {}(0)).throws()
+		}),
+	},
+
+	"on": {
 		"on is not debounced": test(async() => {
 			const count = signal(1)
 			let runs = 0
@@ -92,6 +106,6 @@ export default Science.suite.only({
 			}).throwsAsync()
 			expect(runs).is(0)
 		}),
-	}),
+	},
 })
 

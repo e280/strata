@@ -7,30 +7,6 @@ import {defaultCompare} from "../utils/default-compare.js"
 const _lock = Symbol("lock")
 const _compare = Symbol("compare")
 
-export interface Signal<Value> {
-	(): Value
-	(value: Value): Promise<Value>
-
-	// instance members
-	sneak: Value
-	on: Sub<[Value]>
-
-	// inherited
-	value: Value
-	get(): Value
-	set(value: Value, forcePublish?: boolean): Promise<Value>
-	publish(): Promise<Value>
-	toString(): string
-	[_lock]: boolean
-	[_compare]: (a: any, b: any) => boolean
-}
-
-// export class Signal<Value> {
-// 	constructor(value: Value, options?: Partial<SignalOptions>) {
-// 		return signal(value, options)
-// 	}
-// }
-
 export function signal<Value>(value: Value, options?: Partial<SignalOptions>) {
 	function fn(): Value
 	function fn(value: Value): Promise<Value>
@@ -41,37 +17,54 @@ export function signal<Value>(value: Value, options?: Partial<SignalOptions>) {
 			: self.set(arguments[0])
 	}
 
-	Object.setPrototypeOf(fn, proto)
+	Object.setPrototypeOf(fn, Signal.prototype)
 	fn.sneak = value
 	fn.on = sub<[Value]>()
+	fn[_lock] = false
 	fn[_compare] = options?.compare ?? defaultCompare
 
 	return fn as Signal<Value>
 }
 
-const proto = {
+export interface Signal<Value> {
+	(): Value
+	(value: Value): Promise<Value>
+}
+
+export class Signal<Value> {
+	sneak!: Value
+	on!: Sub<[Value]>
+
+	;[_lock]!: boolean
+	;[_compare]!: (a: any, b: any) => boolean
+
+	constructor(value: Value, options?: Partial<SignalOptions>) {
+		if (new.target !== Signal) throw new Error("Signal cannot be subclassed")
+		return signal(value, options)
+	}
+
 	get value() {
 		return (this as Signal<any>).get()
-	},
+	}
 
 	set value(value: any) {
 		void (this as Signal<any>).set(value)
-	},
+	}
 
-	get<Value>(this: Signal<Value>) {
+	get() {
 		tracker.notifyRead(this)
 		return this.sneak
-	},
+	}
 
-	async set<Value>(this: Signal<Value>, value: Value, forcePublish = false) {
+	async set(value: Value, forcePublish = false) {
 		const previous = this.sneak
 		this.sneak = value
 		if (forcePublish || !this[_compare](previous, value))
 			await this.publish()
 		return value
-	},
+	}
 
-	async publish<Value>(this: Signal<Value>): Promise<Value> {
+	async publish(): Promise<Value> {
 		// only wizards are allowed beyond this point.
 		// - the implementation is subtle
 		// - it looks wrong, but it's right
@@ -96,9 +89,9 @@ const proto = {
 
 		await promise
 		return value
-	},
+	}
 
-	toString<Value>(this: Signal<Value>) {
+	toString() {
 		return `($signal "${String(this.get())}")`
 	}
 }
