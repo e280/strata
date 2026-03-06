@@ -1,7 +1,7 @@
 
-import {SignalOptions} from "./types.js"
 import {Lazy} from "./core/lazy.js"
 import {Signal} from "./core/signal.js"
+import {SignalOptions} from "./types.js"
 import {Derived} from "./core/derived.js"
 
 export function lazy<V>(
