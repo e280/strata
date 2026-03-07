@@ -8,6 +8,22 @@
 
 <br/>
 
+## v0.3
+
+### v0.3.0
+- 🟥 reworked effects
+  - 🟥 `collectorEffect` renamed to `watch`
+  - 🍏 you can now pass values from the collector to the responder fns
+  - 🍏 dynamic dependencies: effects now refresh the tracking whenever re-collecting
+- 🟥 rewrote signal, derived, and lazy
+  - 🟥 deleted hipster fn types `SignalFn`, `DerivedFn`, `LazyFn` (SignalFn becomes just `Signal` because now all signals are hipster fns!)
+  - 🔶 all signals are now an unholy hybrid of class-based and hipster fns
+  - 🍏 but most behaviors have not actually changed
+
+
+
+<br/>
+
 ## v0.2
 
 ### v0.2.8
