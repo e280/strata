@@ -1,5 +1,7 @@
 
 import {sub, Sub} from "@e280/stz"
+import {lazy} from "./lazy.js"
+import {derived} from "./derived.js"
 import {SignalOptions} from "../types.js"
 import {tracker} from "../../tracker/tracker.js"
 import {defaultCompare} from "../utils/default-compare.js"
@@ -25,6 +27,9 @@ export function signal<Value>(value: Value, options?: Partial<SignalOptions>) {
 
 	return fn as Signal<Value>
 }
+
+signal.derived = derived
+signal.lazy = lazy
 
 export interface Signal<Value> {
 	(): Value
