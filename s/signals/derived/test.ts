@@ -61,6 +61,18 @@ export default Science.suite({
 		expect(derivedSpy.spy.calls.length).is(1)
 	}),
 
+	"derived handles changing deps": test(async() => {
+		const toggle = signal(true)
+		const a = signal(1)
+		const b = signal(2)
+		const comp = derived(() => toggle() ? a() : b())
+		expect(comp()).is(1)
+		await toggle(false)
+		expect(comp()).is(2)
+		await b(3)
+		expect(comp()).is(3)
+	}),
+
 	"derived.on": test(async() => {
 		const a = signal(1)
 		const b = signal(10)

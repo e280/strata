@@ -16,8 +16,7 @@ export function derived<Value>(formula: () => Value, options?: Partial<SignalOpt
 	Object.setPrototypeOf(fn, Derived.prototype)
 	fn.on = sub<[Value]>()
 
-	const {result, dispose} = watch(formula, async() => {
-		const value = formula()
+	const {result, dispose} = watch(formula, async(value) => {
 		const isChanged = !compare(fn.sneak, value)
 		if (isChanged) {
 			fn.sneak = value
