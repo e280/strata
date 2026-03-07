@@ -1,10 +1,10 @@
 
 import {sub} from "@e280/stz"
 import {Derived} from "./class.js"
+import {watch} from "../effect/watch.js"
 import {SignalOptions} from "../types.js"
 import {tracker} from "../../tracker/tracker.js"
 import {defaultCompare} from "../utils/default-compare.js"
-import {collectorEffect} from "../effect/collector-effect.js"
 
 export function derived<Value>(formula: () => Value, options?: Partial<SignalOptions>) {
 	function fn(): Value {
@@ -16,7 +16,7 @@ export function derived<Value>(formula: () => Value, options?: Partial<SignalOpt
 	Object.setPrototypeOf(fn, Derived.prototype)
 	fn.on = sub<[Value]>()
 
-	const {result, dispose} = collectorEffect(formula, async() => {
+	const {result, dispose} = watch(formula, async() => {
 		const value = formula()
 		const isChanged = !compare(fn.sneak, value)
 		if (isChanged) {

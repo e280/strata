@@ -2,7 +2,6 @@
 import {lazy} from "./fn.js"
 import {SignalOptions} from "../types.js"
 import {tracker} from "../../tracker/tracker.js"
-import {collectorEffect} from "../effect/collector-effect.js"
 import {_compare, _dirty, _effect, _formula} from "../utils/symbols.js"
 
 export interface Lazy<Value> {
@@ -27,20 +26,22 @@ export class Lazy<Value> {
 
 	get() {
 		if (!this[_effect]) {
-			const {result, dispose} = collectorEffect(
-				this[_formula],
-				() => this[_dirty] = true,
-			)
-			this[_effect] = dispose
+			const {seen, result} = tracker.observe(this[_formula])
+			const fn = async() => { this[_dirty] = true }
+			let disposers: (() => void)[] = []
+			for (const saw of seen)
+				disposers.push(tracker.subscribe(saw, fn))
 			this.sneak = result
+			tracker.notifyWrite(this)
+			this[_effect] = () => disposers.forEach(d => d())
 		}
+
 		if (this[_dirty]) {
 			this[_dirty] = false
-
-			const v = this[_formula]()
-			const isChanged = !this[_compare](this.sneak, v)
+			const value = this[_formula]()
+			const isChanged = !this[_compare](this.sneak, value)
 			if (isChanged) {
-				this.sneak = v
+				this.sneak = value
 				tracker.notifyWrite(this)
 			}
 		}
