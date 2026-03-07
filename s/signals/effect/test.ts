@@ -87,6 +87,17 @@ export default Science.suite({
 		expect(order[2]).is("after")
 	}),
 
+	"simple effect called the correct number of times": test(async() => {
+		const count = signal(0)
+		let runs = 0
+		effect(() => { count(); runs++ })
+		expect(runs).is(1)
+		await count(1)
+		expect(runs).is(2)
+		await count(2)
+		expect(runs).is(3)
+	}),
+
 	"is only called when signal actually changes": test(async() => {
 		const count = signal(1)
 		let runs = 0
