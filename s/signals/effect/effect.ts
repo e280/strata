@@ -1,11 +1,7 @@
 
-import {collectorEffect} from "./collector-effect.js"
+import {watch} from "./watch.js"
 
-export function effect(
-		collector: () => void,
-		responder: () => void = collector,
-	) {
-
-	return collectorEffect(collector, responder).dispose
+export function effect(collector: () => void, responder?: () => void) {
+	return watch(collector, responder).dispose
 }
 

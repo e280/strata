@@ -1,9 +1,62 @@
 
 import {Science, test, expect} from "@e280/science"
+import {watch} from "./watch.js"
 import {effect} from "./effect.js"
 import {signal} from "../signal/fn.js"
 
 export default Science.suite({
+	"watch": Science.suite({
+		"responder gets value": test(async() => {
+			const count = signal(1)
+			let collected = 0
+			watch(
+				() => count(),
+				x => { collected = x }
+			)
+			expect(collected).is(0)
+			await count(2)
+			expect(collected).is(2)
+		}),
+
+		"responder not called until change": test(async() => {
+			const count = signal(1)
+			let calls = 0
+			watch(
+				() => count(),
+				() => { calls++ }
+			)
+			expect(calls).is(0)
+			await count(2)
+			expect(calls).is(1)
+		}),
+
+		"watch updates dynamic dependencies": test(async() => {
+			const toggle = signal(true)
+			const a = signal(1)
+			const b = signal(10)
+
+			let collected = 0
+
+			watch(
+				() => toggle() ? a() : b(),
+				x => { collected = x }
+			)
+
+			await a(2)
+			expect(collected).is(2)
+
+			await toggle(false)
+			expect(collected).is(10)
+
+			collected = 0
+			await a(3)
+			expect(collected).is(0)
+
+			await b(11)
+			expect(collected).is(11)
+		})
+	}),
+
 	"tracks signal changes": test(async() => {
 		const count = signal(1)
 		let doubled = 0

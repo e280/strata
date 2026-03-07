@@ -1,7 +1,7 @@
 
 import {microbounce, sub} from "@e280/stz"
 import {Lens} from "./lens.js"
-import { tracker } from "../tracker/tracker.js"
+import {tracker} from "../tracker/tracker.js"
 
 /** state mangagement source-of-truth */
 export class Prism<State> {

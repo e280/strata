@@ -14,6 +14,7 @@ export default suite({
 			await prism.set({count: 2})
 			expect(prism.get().count).is(2)
 		}),
+
 		"get/set state can trigger effects": test(async() => {
 			const prism = new Prism({count: 1})
 			let triggered = 0

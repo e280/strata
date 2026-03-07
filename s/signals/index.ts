@@ -3,7 +3,7 @@ export * from "./derived/fn.js"
 export * from "./derived/class.js"
 
 export * from "./effect/effect.js"
-export * from "./effect/collector-effect.js"
+export * from "./effect/watch.js"
 
 export * from "./lazy/fn.js"
 export * from "./lazy/class.js"
