@@ -7,6 +7,8 @@ import derived from "./tests/derived.test.js"
 import lazy from "./tests/lazy.test.js"
 
 import signal2 from "./tests/signal2.test.js"
+import derived2 from "./tests/derived2.test.js"
+import lazy2 from "./tests/lazy2.test.js"
 
 export default Science.suite({
 	effect,
@@ -15,5 +17,7 @@ export default Science.suite({
 	lazy,
 
 	signal2,
+	derived2,
+	lazy2,
 })
 

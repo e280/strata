@@ -43,7 +43,7 @@ export class Derived<Value> {
 	dispose!: () => void
 
 	constructor(formula: () => Value, options?: Partial<SignalOptions>) {
-		if (new.target !== Derived) throw new Error("Signal cannot be subclassed")
+		if (new.target !== Derived) throw new Error("Derived cannot be subclassed")
 		return derived(formula, options)
 	}
 
