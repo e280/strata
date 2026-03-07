@@ -1,9 +1,9 @@
 
 import {Science} from "@e280/science"
 
-import lazy from "./tests/lazy2.test.js"
-import signal from "./tests/signal2.test.js"
-import derived from "./tests/derived2.test.js"
+import lazy from "./lazy/test.js"
+import signal from "./signal/test.js"
+import derived from "./derived/test.js"
 
 export default Science.suite({
 	lazy,

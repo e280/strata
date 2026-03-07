@@ -1,6 +1,7 @@
 
 import {Science, test, expect} from "@e280/science"
-import {Signal, signal} from "../core2/signal.js"
+import {signal} from "./fn.js"
+import {Signal} from "./class.js"
 
 export default Science.suite({
 	"get() and set()": test(async() => {

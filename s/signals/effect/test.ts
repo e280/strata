@@ -1,7 +1,7 @@
 
 import {Science, test, expect} from "@e280/science"
-import {effect} from "../core2/effect.js"
-import {signal} from "../core2/signal.js"
+import {effect} from "./effect.js"
+import {signal} from "../signal/fn.js"
 
 export default Science.suite({
 	"tracks signal changes": test(async() => {

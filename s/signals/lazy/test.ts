@@ -1,7 +1,7 @@
 
 import {Science, test, expect} from "@e280/science"
-import {lazy} from "../core2/lazy.js"
-import {signal} from "../core2/signal.js"
+import {lazy} from "./fn.js"
+import {signal} from "../signal/fn.js"
 
 export default Science.suite({
 	"lazy values": test(async() => {

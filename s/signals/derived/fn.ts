@@ -1,9 +1,10 @@
 
-import {sub, Sub} from "@e280/stz"
+import {sub} from "@e280/stz"
+import {Derived} from "./class.js"
 import {SignalOptions} from "../types.js"
 import {tracker} from "../../tracker/tracker.js"
-import {collectorEffect} from "./effect.js"
 import {defaultCompare} from "../utils/default-compare.js"
+import {collectorEffect} from "../effect/collector-effect.js"
 
 export function derived<Value>(formula: () => Value, options?: Partial<SignalOptions>) {
 	function fn(): Value {
@@ -31,33 +32,5 @@ export function derived<Value>(formula: () => Value, options?: Partial<SignalOpt
 	fn.dispose = dispose
 
 	return fn as Derived<Value>
-}
-
-export interface Derived<Value> {
-	(): Value
-}
-
-export class Derived<Value> {
-	sneak!: Value
-	on!: Sub<[Value]>
-	dispose!: () => void
-
-	constructor(formula: () => Value, options?: Partial<SignalOptions>) {
-		if (new.target !== Derived) throw new Error("Derived cannot be subclassed")
-		return derived(formula, options)
-	}
-
-	get value() {
-		return (this as Derived<any>).get()
-	}
-
-	get() {
-		tracker.notifyRead(this)
-		return this.sneak
-	}
-
-	toString() {
-		return `(derived "${String(this.get())}")`
-	}
 }
 

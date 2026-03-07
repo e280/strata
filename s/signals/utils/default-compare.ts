@@ -1,5 +1,5 @@
 
 export function defaultCompare(a: any, b: any) {
-	return a === b
+	return Object.is(a, b)
 }
 

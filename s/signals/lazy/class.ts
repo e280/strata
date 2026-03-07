@@ -1,28 +1,9 @@
 
+import {lazy} from "./fn.js"
 import {SignalOptions} from "../types.js"
 import {tracker} from "../../tracker/tracker.js"
-import {collectorEffect} from "./effect.js"
-import {defaultCompare} from "../utils/default-compare.js"
-
-const _dirty = Symbol()
-const _effect = Symbol()
-const _compare = Symbol()
-const _formula = Symbol()
-
-export function lazy<Value>(formula: () => Value, options?: Partial<SignalOptions>) {
-	function fn(): Value {
-		return (fn as Lazy<Value>).get()
-	}
-
-	Object.setPrototypeOf(fn, Lazy.prototype)
-	fn.sneak = undefined
-	fn[_formula] = formula
-	fn[_dirty] = false
-	fn[_effect] = undefined
-	fn[_compare] = options?.compare ?? defaultCompare
-
-	return fn as Lazy<Value>
-}
+import {collectorEffect} from "../effect/collector-effect.js"
+import {_compare, _dirty, _effect, _formula} from "../utils/symbols.js"
 
 export interface Lazy<Value> {
 	(): Value
