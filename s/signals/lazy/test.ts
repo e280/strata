@@ -36,6 +36,18 @@ export default Science.suite({
 		expect(runs).is(2)
 	}),
 
+	"lazy handles changing deps": test(async() => {
+		const toggle = signal(true)
+		const a = signal(1)
+		const b = signal(2)
+		const comp = lazy(() => toggle() ? a() : b())
+		expect(comp()).is(1)
+		await toggle(false)
+		expect(comp()).is(2)
+		await b(3)
+		expect(comp()).is(3)
+	}),
+
 	"lazy syntax": test(async() => {
 		const a = signal(2)
 		const b = signal(3)
@@ -47,19 +59,17 @@ export default Science.suite({
 		expect(sum.get()).is(8)
 	}),
 
-	"hipster fns": Science.suite({
-		"lazy values": test(async() => {
-			const a = signal(2)
-			const b = signal(3)
-			const sum = lazy(() => a() + b())
-			expect(sum()).is(5)
+	"lazy hipster syntax": test(async() => {
+		const a = signal(2)
+		const b = signal(3)
+		const sum = lazy(() => a() + b())
+		expect(sum()).is(5)
 
-			await a(5)
-			expect(sum()).is(8)
+		await a(5)
+		expect(sum()).is(8)
 
-			await b(7)
-			expect(sum()).is(12)
-		}),
+		await b(7)
+		expect(sum()).is(12)
 	}),
 })
 

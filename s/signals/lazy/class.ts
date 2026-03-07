@@ -2,7 +2,7 @@
 import {lazy} from "./fn.js"
 import {SignalOptions} from "../types.js"
 import {tracker} from "../../tracker/tracker.js"
-import {_compare, _dirty, _effect, _formula} from "../utils/symbols.js"
+import {_collect, _compare, _dirty, _disposers, _effect, _formula} from "../utils/symbols.js"
 
 export interface Lazy<Value> {
 	(): Value
@@ -12,6 +12,7 @@ export class Lazy<Value> {
 	sneak!: Value
 	;[_formula]!: () => Value
 	;[_dirty]!: boolean
+	;[_disposers]!: (() => void)[]
 	;[_effect]!: (() => void) | undefined
 	;[_compare]!: (a: any, b: any) => boolean
 
@@ -24,21 +25,32 @@ export class Lazy<Value> {
 		return this.get()
 	}
 
-	get() {
-		if (!this[_effect]) {
-			const {seen, result} = tracker.observe(this[_formula])
-			const fn = async() => { this[_dirty] = true }
-			let disposers: (() => void)[] = []
-			for (const saw of seen)
-				disposers.push(tracker.subscribe(saw, fn))
-			this.sneak = result
-			tracker.notifyWrite(this)
-			this[_effect] = () => disposers.forEach(d => d())
+	[_collect]() {
+		for (const d of this[_disposers]) d()
+		this[_disposers] = []
+
+		const {seen, result} = tracker.observe(this[_formula])
+
+		const markDirty = async() => { this[_dirty] = true }
+		for (const saw of seen)
+			this[_disposers].push(tracker.subscribe(saw, markDirty))
+
+		this[_effect] = () => {
+			for (const d of this[_disposers]) d()
+			this[_disposers] = []
 		}
 
-		if (this[_dirty]) {
+		return result
+	}
+
+	get() {
+		if (!this[_effect]) {
+			this.sneak = this[_collect]()
 			this[_dirty] = false
-			const value = this[_formula]()
+		}
+		else if (this[_dirty]) {
+			this[_dirty] = false
+			const value = this[_collect]()
 			const isChanged = !this[_compare](this.sneak, value)
 			if (isChanged) {
 				this.sneak = value
