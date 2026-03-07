@@ -1,6 +1,6 @@
 
 import {Science, test, expect} from "@e280/science"
-import {effect} from "../core/effect.js"
+import {effect} from "../core2/effect.js"
 import {signal} from "../core2/signal.js"
 
 export default Science.suite({
@@ -13,6 +13,25 @@ export default Science.suite({
 
 		await count.set(3)
 		expect(doubled).is(6)
+	}),
+
+	"correct signal effect order": test(async() => {
+		let order: string[] = []
+		const count = signal(0)
+
+		effect(() => {
+			if (count.value)
+				order.push("effect")
+		})
+
+		order.push("before")
+		await count.set(1)
+		order.push("after")
+
+		expect(order.length).is(3)
+		expect(order[0]).is("before")
+		expect(order[1]).is("effect")
+		expect(order[2]).is("after")
 	}),
 
 	"is only called when signal actually changes": test(async() => {

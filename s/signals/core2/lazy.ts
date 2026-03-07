@@ -1,7 +1,7 @@
 
 import {SignalOptions} from "../types.js"
 import {tracker} from "../../tracker/tracker.js"
-import {collectorEffect} from "../core/effect.js"
+import {collectorEffect} from "./effect.js"
 import {defaultCompare} from "../utils/default-compare.js"
 
 const _dirty = Symbol()

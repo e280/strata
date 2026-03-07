@@ -1,6 +1,6 @@
 
 import {Science, test, expect, spy} from "@e280/science"
-import {effect} from "../core/effect.js"
+import {effect} from "../core2/effect.js"
 import {signal} from "../core2/signal.js"
 import {derived} from "../core2/derived.js"
 
