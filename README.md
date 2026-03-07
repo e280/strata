@@ -29,7 +29,7 @@
 > *ephemeral view-level state*
 
 ```ts
-import {signal, effect} from "@e280/strata"
+import {signal, effect, derived, lazy} from "@e280/strata"
 ```
 
 ### 🚦 each signal holds a value
@@ -46,7 +46,7 @@ import {signal, effect} from "@e280/strata"
   ```ts
   $count(1)
   ```
-- **write signal *(and await all downstream effects)***
+- 🤯 **await all downstream effects***
   ```ts
   await $count(2)
   ```
@@ -86,13 +86,12 @@ import {signal, effect} from "@e280/strata"
     // when $count is changed, the effect fn is run
   ```
 
-### 🚦 `signal.derived` and `signal.lazy` are computed signals
-- **signal.derived**  
-  is for combining signals, like a formula
+### 🚦 computed signals
+- **derived,** for combining signals, like a formula
   ```ts
   const $a = signal(1)
   const $b = signal(10)
-  const $product = signal.derived(() => $a() * $b())
+  const $product = derived(() => $a() * $b())
 
   $product() // 10
 
@@ -102,52 +101,17 @@ import {signal, effect} from "@e280/strata"
 
   $product() // 20
   ```
-- **signal.lazy**  
-  is for making special optimizations.  
+- **lazy,** for making special optimizations.  
   it's like derived, except it cannot trigger effects,  
   because it's so damned lazy, it only computes the value on read, and only when necessary.  
   > *i repeat: lazy signals cannot trigger effects!*
 
-### 🚦 core primitive classes
-- **the hipster-fn syntax has a slight performance cost**
-- **you can instead use the core primitive classes**
-  ```ts
-  const $count = new Signal(1)
-  ```
-  core signals work mostly the same
-  ```ts
-  // ✅ legal
-  $count.get()
-  $count.set(2)
-  ```
-  except you cannot directly invoke them
-  ```ts
-  // ⛔ illegal on core primitives
-  $count()
-  $count(2)
-  ```
-- **same thing for derived/lazy**
-  ```ts
-  const $product = new Derived(() => $a() * $b())
-  ```
-  ```ts
-  const $product = new Lazy(() => $a() * $b())
-  ```
-- **conversions**
-  - all core primitives (signal/derived/lazy) have a convert-to-hipster-fn method
-    ```ts
-    new Signal(1).fn() // SignalFn<number>, hipster-fn
-    ```
-  - and all hipster fns (signal/derived/lazy) have a `.core` property to get the primitive
-    ```ts
-    signal(0).core // Signal<number>, primitive instance
-    ```
-
-### 🚦 types
-- **`Signaly<V>`** — can be `Signal<V>` or `Derived<V>` or `Lazy<V>`
+### 🚦 types and such
+- **`Signaly<Value>`** — can be `Signal<Value>` or `Derived<Value>` or `Lazy<Value>`
   - these are types for the core primitive classes
-- **`SignalyFn<V>`** — can be `SignalFn<V>` or `DerivedFn<V>` or `LazyFn<V>`
-  - these `*Fn` types are for the hipster-fn-syntax enabled variants
+- **the classes are funky**
+  - Signal, Derived, and Lazy classes cannot be subclassed or extended, due to spooky magic we've done to make the instances callable as functions (hipster syntax).
+  - however, at least `$count instanceof Signal` works, so at least that's working.
 
 
 
