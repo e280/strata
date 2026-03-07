@@ -46,7 +46,7 @@ import {signal, effect, derived, lazy} from "@e280/strata"
   ```ts
   $count(1)
   ```
-- 🤯 **await all downstream effects***
+- 🤯 **await all downstream effects**
   ```ts
   await $count(2)
   ```
