@@ -23,11 +23,11 @@ export class Signal<Value> {
 	}
 
 	get value() {
-		return (this as Signal<any>).get()
+		return this.get()
 	}
 
-	set value(value: any) {
-		void (this as Signal<any>).set(value)
+	set value(value: Value) {
+		void this.set(value)
 	}
 
 	get() {

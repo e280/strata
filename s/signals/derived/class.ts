@@ -19,7 +19,7 @@ export class Derived<Value> {
 	}
 
 	get value() {
-		return (this as Derived<any>).get()
+		return this.get()
 	}
 
 	get() {
