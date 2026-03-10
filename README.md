@@ -333,24 +333,20 @@ note, the *items* that the tracker tracks can be any object, or symbol.. the tra
 <a id="react"></a>
 
 ## 🍋 react bindings
-> *easy peasy*
 
 ### ⚛️ react setup
+setup your `strata.ts` module
+```ts
+import * as react from "react"
+import {react as strata} from "@e280/strata"
 
-1. setup your `strata.ts` module
-    ```ts
-    import * as react from "react"
-    import {react as strata} from "@e280/strata"
-
-    export const {component, useStrata} = strata(react)
-    ```
-1. now you import `component` and `useStrata` from your module
-    ```ts
-    import {component, useStrata} from "./strata.js"
-    ```
+export const {component, useStrata} = strata(react)
+```
 
 ### ⚛️ `component` enables fully automatic reactive re-rendering
 ```ts
+import {component, useStrata} from "./strata.js"
+
 const $count = signal(0)
 
 export const MyCounter = component(() => {
@@ -359,8 +355,10 @@ export const MyCounter = component(() => {
 })
 ```
 
-### ⚛️ `useStrata` for a manual hands-on approach
+### ⚛️ `useStrata` for a manual hands-on approach (plays nicer with hmr)
 ```ts
+import {component, useStrata} from "./strata.js"
+
 const $count = signal(0)
 
 export const MyCounter = () => {
