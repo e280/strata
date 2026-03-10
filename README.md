@@ -334,8 +334,7 @@ note, the *items* that the tracker tracks can be any object, or symbol.. the tra
 
 ## 🍋 react bindings
 
-### ⚛️ react setup
-setup your `strata.ts` module
+### ⚛️ setup your `strata.ts` module
 ```ts
 import * as react from "react"
 import {react as strata} from "@e280/strata"
