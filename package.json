@@ -14,8 +14,7 @@
 		".": "./x/index.js",
 		"./prism": "./x/prism/index.js",
 		"./signals": "./x/signals/index.js",
-		"./tracker": "./x/tracker/index.js",
-		"./tree": "./x/tree/index.js"
+		"./tracker": "./x/tracker/index.js"
 	},
 	"scripts": {
 		"build": "rm -rf x && mkdir x && ln -s '$(realpath node_modules)' x/node_modules && tsc",
