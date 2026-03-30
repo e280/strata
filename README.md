@@ -339,12 +339,18 @@ note, the *items* that the tracker tracks can be any object, or symbol.. the tra
 import * as react from "react"
 import {react as strata} from "@e280/strata"
 
-export const {component, useStrata} = strata(react)
+export const {
+  component,
+  useStrata,
+  useOnce,
+  useSignal,
+  useDerived,
+} = strata(react)
 ```
 
 ### ⚛️ `component` enables fully automatic reactive re-rendering
 ```ts
-import {component, useStrata} from "./strata.js"
+import {component} from "./strata.js"
 
 const $count = signal(0)
 
@@ -356,7 +362,7 @@ export const MyCounter = component(() => {
 
 ### ⚛️ `useStrata` for a manual hands-on approach (plays nicer with hmr)
 ```ts
-import {component, useStrata} from "./strata.js"
+import {useStrata} from "./strata.js"
 
 const $count = signal(0)
 
@@ -364,6 +370,17 @@ export const MyCounter = () => {
   const count = useStrata(() => $count())
   const add = () => $count.value++
   return <button onClick={add}>{count}</button>
+}
+```
+
+### ⚛️ `useSignal` for local component state
+```ts
+import {useSignal} from "./strata.js"
+
+export const MyCounter = () => {
+  const $count = useSignal(0)
+  const add = () => $count.value++
+  return <button onClick={add}>{$count()}</button>
 }
 ```
 
