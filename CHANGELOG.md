@@ -10,6 +10,9 @@
 
 ## v0.3
 
+### v0.3.1
+- 🍏 improved react integration, added `useOnce`, `useSignal`, `useDerived` react hooks
+
 ### v0.3.0
 - 🟥 reworked effects
   - 🟥 `collectorEffect` renamed to `watch`
