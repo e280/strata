@@ -12,37 +12,39 @@ export class Lens<State> implements LensLike<State> {
 
 	;[_optic]: Optic<State>
 	#previous: State
-	#mutable: CacheCell<State>
-	#immutable: CacheCell<Immutable<State>>
-	#onPublishDebounced = microbounce(() => this.on.publish(this.state))
+	#stateCache: CacheCell<State>
+	#frozenCache: CacheCell<Immutable<State>>
+	#onPublishDebounced = microbounce(() => this.on.publish(this.frozen))
 
 	constructor(optic: Optic<State>) {
 		this[_optic] = optic
 		this.#previous = deep.clone(optic.getState())
-		this.#mutable = new CacheCell(() => deep.clone(optic.getState()))
-		this.#immutable = new CacheCell(() => immute(optic.getState()))
+		this.#stateCache = new CacheCell(() => deep.clone(optic.getState()))
+		this.#frozenCache = new CacheCell(() => immute(optic.getState()))
 	}
 
 	async update() {
 		const state = this[_optic].getState()
 		const isChanged = !deep.equal(state, this.#previous)
 		if (isChanged) {
-			this.#mutable.invalidate()
-			this.#immutable.invalidate()
+			this.#stateCache.invalidate()
+			this.#frozenCache.invalidate()
 			this.#previous = deep.clone(state)
 			this.#onPublishDebounced()
 			await tracker.notifyWrite(this)
 		}
 	}
 
-	get mutable() {
-		tracker.notifyRead(this)
-		return this.#mutable.get()
-	}
-
+	/** get a snapshot of the current state. it's typed as mutable, but you should not mutate it. */
 	get state() {
 		tracker.notifyRead(this)
-		return this.#immutable.get()
+		return this.#stateCache.get()
+	}
+
+	/** get an immutable readonly snapshot of the current state. */
+	get frozen() {
+		tracker.notifyRead(this)
+		return this.#frozenCache.get()
 	}
 
 	async mutate<R>(fn: (state: State) => R) {

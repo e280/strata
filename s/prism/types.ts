@@ -2,7 +2,8 @@
 import {Lens} from "./lens.js"
 
 export type LensLike<State> = {
-	readonly state: Immutable<State>
+	readonly state: State
+	readonly frozen: Immutable<State>
 	mutate<R>(fn: (state: State) => R): Promise<R>
 	lens<S2>(selector: (state: State) => S2): Lens<S2>
 }

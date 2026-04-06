@@ -12,11 +12,15 @@ export class Chrono<State> implements LensLike<State> {
 	) {}
 
 	get chronicle() {
-		return this.basis.state
+		return this.basis.frozen
 	}
 
 	get state() {
 		return this.basis.state.present
+	}
+
+	get frozen() {
+		return this.basis.frozen.present
 	}
 
 	get undoable() {
