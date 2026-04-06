@@ -10,6 +10,12 @@
 
 ## v0.3
 
+### v0.3.2
+- 🔶 rename `EzStore` type to `Cubby`
+- 🔶 `lens.state` is now a mutable state snapshot
+- 🍏 `lens.frozen` is now the immutable state snapshot (this is what lens.state was previously)
+- 🍏 update dependencies
+
 ### v0.3.1
 - 🍏 improved react integration, added `useOnce`, `useSignal`, `useDerived` react hooks
 

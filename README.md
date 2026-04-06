@@ -153,19 +153,21 @@ import {signal, effect, derived, lazy} from "@e280/strata"
     const person = snacks.lens(state => state.person)
     ```
     - you can lens another lens
-- **lenses provide immutable access to state**
+- **lenses provide snapshot access to state**
     ```ts
+    // .state is a mutable snapshot with relaxed typings
     snacks.state.peanuts // 8
     person.state.name // "chase"
-    ```
-- **only formal mutations can change state**
-    ```ts
-    snacks.state.peanuts++
+
+    // .frozen is an immutable snapshot with strict typings
+    snacks.frozen.peanuts // 8
+    snacks.frozen.peanuts++
       // ⛔ error: casual mutations forbidden
     ```
+- **only formal mutations can actually change state**
     ```ts
     snacks.mutate(state => state.peanuts++)
-      // ✅ only proper mutations can make state changes
+      // ✅ formal mutations to change state
 
     snacks.state.peanuts // 9
     ```
