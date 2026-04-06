@@ -12,12 +12,14 @@ export class Lens<State> implements LensLike<State> {
 
 	;[_optic]: Optic<State>
 	#previous: State
+	#mutable: CacheCell<State>
 	#immutable: CacheCell<Immutable<State>>
 	#onPublishDebounced = microbounce(() => this.on.publish(this.state))
 
 	constructor(optic: Optic<State>) {
 		this[_optic] = optic
 		this.#previous = deep.clone(optic.getState())
+		this.#mutable = new CacheCell(() => deep.clone(optic.getState()))
 		this.#immutable = new CacheCell(() => immute(optic.getState()))
 	}
 
@@ -25,11 +27,17 @@ export class Lens<State> implements LensLike<State> {
 		const state = this[_optic].getState()
 		const isChanged = !deep.equal(state, this.#previous)
 		if (isChanged) {
+			this.#mutable.invalidate()
 			this.#immutable.invalidate()
 			this.#previous = deep.clone(state)
 			this.#onPublishDebounced()
 			await tracker.notifyWrite(this)
 		}
+	}
+
+	get mutable() {
+		tracker.notifyRead(this)
+		return this.#mutable.get()
 	}
 
 	get state() {
