@@ -1,7 +1,7 @@
 
-import {EzStore} from "./types.js"
+import {Cubby} from "./types.js"
 
-export class LocalStore<X> implements EzStore<X> {
+export class LocalStore<X> implements Cubby<X> {
 	constructor(
 		private key: string,
 		private storage: Storage = window.localStorage,

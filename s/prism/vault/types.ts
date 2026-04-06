@@ -6,14 +6,17 @@ export type Versioned<State> = {
 	version: number
 }
 
-export type EzStore<X> = {
+export type Cubby<X> = {
 	get(): Promise<X | undefined>
 	set(data: X | undefined): Promise<void>
 }
 
+/** @deprecated renamed to `Cubby` */
+export type EzStore<X> = Cubby<X>
+
 export type VaultOptions<State> = {
 	version: number
 	prism: Prism<State>
-	store: EzStore<Versioned<State>>
+	store: Cubby<Versioned<State>>
 }
 
