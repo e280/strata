@@ -17,8 +17,8 @@
 		"./tracker": "./x/tracker/index.js"
 	},
 	"scripts": {
-		"build": "rm -rf x && mkdir x && ln -s '$(realpath node_modules)' x/node_modules && tsc",
-		"start": "octo 'tsc -w' 'node --watch x/test.js'",
+		"build": "rm -rf x && mkdir x && tsc",
+		"dev": "octo 'node --watch x/test.js' 'tsc -w'",
 		"test": "node x/test.js",
 		"count": "find s -path '*/_archive' -prune -o -name '*.ts' -exec wc -l {} +"
 	},
