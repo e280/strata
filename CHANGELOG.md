@@ -12,8 +12,10 @@
 
 ### v0.3.2
 - 🔶 rename `EzStore` type to `Cubby`
-- 🔶 `lens.state` is now a mutable state snapshot
-- 🍏 `lens.frozen` is now the immutable state snapshot (this is what lens.state was previously)
+- 🔶 `lens.state` is now a mutable state snapshot (was immutable before)
+- 🔶 `lens.on(state => {})` now gives a mutable snapshot (was immutable before)
+- 🍏 `lens.frozen` is now the immutable snapshot
+- 🍏 `lens.onFrozen(frozen => {})` gives an immutable snapshot
 - 🍏 update dependencies
 
 ### v0.3.1

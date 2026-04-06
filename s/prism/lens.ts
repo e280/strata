@@ -8,13 +8,17 @@ import {Immutable, LensLike, Optic} from "./types.js"
 
 /** reactive view into a state prism, with formalized mutations */
 export class Lens<State> implements LensLike<State> {
-	on = sub<[state: Immutable<State>]>()
+	on = sub<[state: State]>()
+	onFrozen = sub<[state: Immutable<State>]>()
 
 	;[_optic]: Optic<State>
 	#previous: State
 	#stateCache: CacheCell<State>
 	#frozenCache: CacheCell<Immutable<State>>
-	#onPublishDebounced = microbounce(() => this.on.publish(this.frozen))
+	#onPublishDebounced = microbounce(() => {
+		this.on.publish(this.state)
+		this.onFrozen.publish(this.frozen)
+	})
 
 	constructor(optic: Optic<State>) {
 		this[_optic] = optic
