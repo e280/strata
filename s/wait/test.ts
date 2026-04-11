@@ -13,7 +13,7 @@ export default suite({
 			return 123
 		})
 		expect(isWaitPending($wait())).is(true)
-		expect(await $wait.done).is(123)
+		expect(await $wait.ready).is(123)
 		expect(needOk(await $wait.result)).is(123)
 		expect(isWaitDone($wait())).is(true)
 		expect(waitNeedOk($wait())).is(123)
@@ -25,7 +25,7 @@ export default suite({
 			throw new Error("uh oh")
 		})
 		expect(isWaitPending($wait())).is(true)
-		expect(await $wait.done).is(undefined)
+		expect(await $wait.ready).is(undefined)
 		expect((await $wait.result).ok).is(false)
 		expect(isWaitErr($wait())).is(true)
 		expect((waitNeedErr($wait()) as any).message).is("uh oh")

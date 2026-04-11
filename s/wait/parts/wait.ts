@@ -1,8 +1,8 @@
 
 import {derived, signal} from "@e280/strata"
-import {attemptAsync, err, getOk, Result} from "@e280/stz"
+import {attemptAsync, getOk, Result} from "@e280/stz"
 import {newWait} from "./new.js"
-import {Wait, WaitSignal} from "./type.js"
+import {Wait, WaitDone, WaitSignal} from "./type.js"
 
 export function wait<Value>(
 		input: Promise<Value> | (() => Promise<Value>),
@@ -24,17 +24,13 @@ function waitResultPromise<Value, E = unknown>(promise: Promise<Result<Value, E>
 	const $wait = signal<Wait<Value, E>>(newWait<Value, E>())
 	const $derived = derived(() => $wait()) as WaitSignal<Value, E>
 
-	$derived.result = promise
+	$derived.result = promise.then(async result => {
+		const r: WaitDone<Value, E> = {done: true, ...result}
+		await $wait(r)
+		return r
+	})
 
-	$derived.done = promise
-		.then(result => {
-			$wait({done: true, ...result})
-			return getOk(result)
-		})
-		.catch(error => {
-			$wait({done: true, ...err(error)})
-			return undefined
-		})
+	$derived.ready = promise.then(result => getOk(result))
 
 	return $derived
 }
