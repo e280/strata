@@ -27,7 +27,7 @@
 <a id="signals"></a>
 
 ## 🍋 strata signals
-> *ephemeral view-level state*
+> *reactive bundles of joy*
 
 ```ts
 import {signal, effect, derived, lazy} from "@e280/strata"
@@ -87,7 +87,19 @@ import {signal, effect, derived, lazy} from "@e280/strata"
     // when $count is changed, the effect fn is run
   ```
 
-### 🚦 computed signals
+### 🚦 .on listeners
+- **yes, you can do direct callbacks to listen for changes**
+  ```ts
+  const off = $count.on(count => console.log(`callback ${count}`))
+
+  $count.value++
+    // "callback 3"
+
+  off()
+    // stop listening
+  ```
+
+### 🚦 derived signals
 - **derived,** for combining signals, like a formula
   ```ts
   const $a = signal(1)
