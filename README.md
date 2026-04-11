@@ -271,7 +271,7 @@ import {signal, effect, derived, lazy} from "@e280/strata"
 ## 🍋 strata wait
 > *represent async operations*
 
-- wait vibes with [stz#ok](https://github.com/e280/stz#ok)
+- wait is designed to vibe with [stz#ok](https://github.com/e280/stz#ok)
     ```ts
     import {ok, err} from "@e280/stz"
     ```
@@ -283,13 +283,16 @@ import {signal, effect, derived, lazy} from "@e280/strata"
     ```
 - helpers to create a `Wait`
     ```ts
-    let waitNumber = newWait<number>()
+    // loading
+    newWait<number>()
       // {done: false}
 
-    waitNumber = newWait(ok(123))
+    // done, ok
+    newWait(ok(123))
       // {done: true, ok: true, value: 123}
 
-    waitNumber = newWait(err("uh oh"))
+    // done, err
+    newWait(err("uh oh"))
       // {done: true, ok: false, error: "uh oh"}
     ```
 
