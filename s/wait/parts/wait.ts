@@ -1,6 +1,7 @@
 
 import {derived, signal} from "@e280/strata"
 import {attemptAsync, getOk, Result} from "@e280/stz"
+
 import {newWait} from "./new.js"
 import {Wait, WaitDone, WaitSignal} from "./type.js"
 
@@ -30,7 +31,7 @@ function waitResultPromise<Value, E = unknown>(promise: Promise<Result<Value, E>
 		return r
 	})
 
-	$derived.ready = promise.then(result => getOk(result))
+	$derived.ready = $derived.result.then(getOk)
 
 	return $derived
 }
