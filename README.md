@@ -16,6 +16,7 @@
 
 🚦 [**signals**](#signals) — ephemeral view-level state  
 🔮 [**prism**](#prism) — app-level state tree  
+⌛ [**wait**](#wait) — simple async waiting state  
 🪄 [**tracker**](#tracker) — reactivity integration hub  
 ⚛️ [**react**](#react) — optional bindings for react  
 
@@ -247,6 +248,116 @@ import {signal, effect, derived, lazy} from "@e280/strata"
 - **initial load**
     ```ts
     await vault.load()
+    ```
+
+
+
+<br/><br/>
+
+<a id="wait"></a>
+
+## 🍋 strata wait
+> *simple async waiting state*
+
+wait is built to mesh with [stz#ok](https://github.com/e280/stz#ok)
+
+```ts
+import {ok, err} from "@e280/stz"
+```
+
+### ⌛ wait primitives
+- imports
+    ```ts
+    import {newWait} from "@e280/strata"
+    ```
+- helpers to create a `Wait`
+    ```ts
+    let waitNumber = newWait<number>()
+      // {done: false}
+
+    waitNumber = newWait(ok(123))
+      // {done: true, ok: true, value: 123}
+
+    waitNumber = newWait(err("uh oh"))
+      // {done: true, ok: false, error: "uh oh"}
+    ```
+
+### ⌛ make a magic reactive wait signal
+- imports
+    ```ts
+    import {nap} from "@e280/stz"
+    import {wait} from "@e280/strata"
+    ```
+- it's a derived signal (readonly) that tracks the result of an async fn
+    ```ts
+    const $wait = wait(async() => {
+      await nap(100) // do some async stuff
+      return 123 // return your value
+    })
+    ```
+- read the current state from the signal
+    ```ts
+    $wait()
+      // {done: false}
+    ```
+- later, when it's ready
+    ```ts
+    await $wait.ready
+      // 123
+      // undefined if there was an error
+
+    $wait()
+      // {done: true, ok: true, value: 123}
+    ```
+
+### ⌛ if you wanna be persnickety
+- do formal rigid error handling because you're super strict and serious
+    ```ts
+    const $wait = waitResult<number, "unlikely lol" | "bad roll">(async() => {
+      if (Math.random() > 0.5)
+        return ok(123)
+
+      if (Math.random() < 0.01)
+        return err("unlikely lol")
+
+      else
+        return err("bad roll")
+    })
+    ```
+- listen for the formal result
+    ```ts
+    await $wait.result
+      // {done: true, ok: true, value: 123} or
+      // {done: true, ok: false, error: "bad roll"}
+    ```
+- btw, wait and waitResult will actually accept a promise if you like
+    ```ts
+    const $wait = wait(Promise.resolve(123))
+    ```
+
+### ⌛ wait helpers
+- check the state
+    ```ts
+    isWaitPending($wait())
+    isWaitDone($wait())
+    isWaitOk($wait())
+    isWaitErr($wait())
+    ```
+- get the finished value or error
+    ```ts
+    waitGetOk($wait())
+      // 123 | undefined
+
+    waitGetErr($wait())
+      // Error | undefined
+    ```
+- select based on the state
+    ```ts
+    const text = waitSelect($wait(), {
+      pending: () => "still loading...",
+      ok: value => `ready: ${value}`,
+      err: error => `ack! ${error}`,
+    })
     ```
 
 
