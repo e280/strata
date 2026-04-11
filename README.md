@@ -257,13 +257,12 @@ import {signal, effect, derived, lazy} from "@e280/strata"
 <a id="wait"></a>
 
 ## 🍋 strata wait
-> *simple async waiting state*
+> *represent async operations*
 
-wait is built to mesh with [stz#ok](https://github.com/e280/stz#ok)
-
-```ts
-import {ok, err} from "@e280/stz"
-```
+- wait vibes with [stz#ok](https://github.com/e280/stz#ok)
+    ```ts
+    import {ok, err} from "@e280/stz"
+    ```
 
 ### ⌛ wait primitives
 - imports
