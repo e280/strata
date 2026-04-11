@@ -9,7 +9,7 @@ import {isWaitDone, isWaitErr, isWaitPending} from "./parts/is.js"
 export default suite({
 	"wait fn, done": test(async() => {
 		const $wait = wait(async() => {
-			await nap(10)
+			await nap()
 			return 123
 		})
 		expect(isWaitPending($wait())).is(true)
@@ -20,15 +20,16 @@ export default suite({
 	}),
 
 	"wait fn, failed": test(async() => {
-		const $wait = wait(async() => {
-			await nap(10)
-			throw new Error("uh oh")
+		const $wait = wait<number, Error>(async() => {
+			await nap()
+			if (!!true) throw new Error("uh oh")
+			return 123
 		})
 		expect(isWaitPending($wait())).is(true)
 		expect(await $wait.ready).is(undefined)
 		expect((await $wait.result).ok).is(false)
 		expect(isWaitErr($wait())).is(true)
-		expect((waitNeedErr($wait()) as any).message).is("uh oh")
+		expect(waitNeedErr($wait()).message).is("uh oh")
 	}),
 })
 

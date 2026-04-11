@@ -5,10 +5,10 @@ import {attemptAsync, getOk, Result} from "@e280/stz"
 import {newWait} from "./new.js"
 import {Wait, WaitDone, WaitSignal} from "./type.js"
 
-export function wait<Value>(
+export function wait<Value, E = unknown>(
 		input: Promise<Value> | (() => Promise<Value>),
 	) {
-	return waitResult(attemptAsync(input))
+	return waitResult<Value, E>(attemptAsync(input))
 }
 
 export function waitResult<Value, E = unknown>(
