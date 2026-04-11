@@ -287,7 +287,7 @@ import {signal, effect, derived, lazy} from "@e280/strata"
     import {nap} from "@e280/stz"
     import {wait} from "@e280/strata"
     ```
-- it's a derived signal (readonly) that tracks the result of an async fn
+- it's a derived signal (readonly) that tracks the result of an async fn or promise
     ```ts
     const $wait = wait(async() => {
       await nap(100) // do some async stuff
@@ -309,7 +309,11 @@ import {signal, effect, derived, lazy} from "@e280/strata"
       // {done: true, ok: true, value: 123}
     ```
 
-### ⌛ if you wanna be persnickety
+### ⌛ persnickety belt-and-suspenders mode
+- imports
+    ```ts
+    import {waitResult} from "@e280/strata"
+    ```
 - do formal rigid error handling because you're super strict and serious
     ```ts
     const $wait = waitResult<number, "unlikely lol" | "bad roll">(async() => {
@@ -344,11 +348,12 @@ import {signal, effect, derived, lazy} from "@e280/strata"
     ```
 - get the finished value or error
     ```ts
-    waitGetOk($wait())
-      // 123 | undefined
-
-    waitGetErr($wait())
-      // Error | undefined
+    waitGetOk($wait()) // 123 | undefined
+    waitNeedOk($wait()) // 123 (or throws an error)
+    ```
+    ```ts
+    waitGetErr($wait()) // "bad roll" | undefined
+    waitNeedErr($wait()) // "bad roll" (or throws an error)
     ```
 - select based on the state
     ```ts
