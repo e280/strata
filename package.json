@@ -24,13 +24,13 @@
 		"count": "find s -path '*/_archive' -prune -o -name '*.ts' -exec wc -l {} +"
 	},
 	"dependencies": {
-		"@e280/stz": "^0.2.31"
+		"@e280/stz": "^0.2.34"
 	},
 	"devDependencies": {
 		"@e280/octo": "^0.1.0",
 		"@e280/science": "^0.1.10",
 		"@types/node": "^25.6.0",
-		"typescript": "^6.0.2"
+		"typescript": "^6.0.3"
 	},
 	"keywords": [
 		"state",
