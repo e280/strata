@@ -10,6 +10,12 @@
 
 ## v0.3
 
+### v0.3.5
+- 🍏 update deps
+
+### v0.3.4
+- 🍏 tweak readme, update deps
+
 ### v0.3.3
 - 🍏 add `wait`
 
