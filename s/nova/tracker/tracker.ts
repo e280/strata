@@ -1,12 +1,12 @@
 
 import {GWeakMap} from "@e280/stz"
 
-export type TrackableItem = object | symbol
+export type Trackable = object | symbol
 
 /**
  * reactivity integration hub
  */
-export class Tracker<Item extends TrackableItem = any> {
+export class Tracker<Item extends Trackable = any> {
 	#busy = new Set<() => void>()
 	#observationLayers: Set<Item>[] = []
 	#subscriptions = new GWeakMap<Item, Set<() => void>>()
@@ -33,12 +33,12 @@ export class Tracker<Item extends TrackableItem = any> {
 	}
 
 	/** collect items that were read during fn */
-	observe<R>(fn: () => R) {
+	observe<Value>(fn: () => Value) {
 		const seen = new Set<Item>()
 		this.#observationLayers.push(seen)
 		try {
-			const ret = fn()
-			return {seen, ret}
+			const value = fn()
+			return {seen, value}
 		}
 		finally {
 			this.#observationLayers.pop()

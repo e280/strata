@@ -1,8 +1,10 @@
 
 import {science} from "@e280/science"
-import nova from "./nova/tracker/test.js"
+import core from "./nova/core/test.js"
+import tracker from "./nova/tracker/test.js"
 
 await science.run({
-	nova,
+	tracker,
+	core,
 })
 

@@ -1,5 +1,5 @@
 
-import {Tracker} from "../tracker.js"
+import {Tracker} from "./tracker.js"
 import {science, test, expect} from "@e280/science"
 
 export default science.suite({
@@ -29,13 +29,13 @@ export default science.suite({
 		const tracker = new Tracker()
 		const item = {}
 
-		const {seen, ret} = tracker.observe(() => {
+		const {seen, value} = tracker.observe(() => {
 			tracker.read(item)
 			return 123
 		})
 
 		expect(seen.has(item)).is(true)
-		expect(ret).is(123)
+		expect(value).is(123)
 	}),
 
 	"nested observe layers are isolated": test(async() => {
@@ -125,5 +125,21 @@ export default science.suite({
 		tracker.subscribe(item, fn)
 
 		expect(() => tracker.write(item)).throws()
+	}),
+
+	"same subscriber rescheduled during flush is forbidden": test(async() => {
+		const tracker = new Tracker()
+		const item = {}
+		let calls = 0
+
+		const fn = () => {
+			calls++
+			tracker.write(item)
+		}
+
+		tracker.subscribe(item, fn)
+
+		expect(() => tracker.write(item)).throws()
+		expect(calls).is(1)
 	}),
 })
