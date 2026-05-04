@@ -3,7 +3,7 @@ import {signal} from "../core/signal.js"
 import {derived} from "../core/derived.js"
 import {tracker} from "../tracker/tracker.js"
 
-export function react(react: {
+export function reactBindings(react: {
 		useEffect: (fn: () => void | (() => void), deps?: unknown[]) => void
 		useState: <X>(x: X | (() => X)) => [
 			value: X,
@@ -11,7 +11,7 @@ export function react(react: {
 		]
 	}) {
 
-	const useTracker = <X>(fn: () => X) => {
+	const useTracked = <X>(fn: () => X) => {
 		const [, setTick] = react.useState(0)
 		const {seen, value} = tracker.observe(fn)
 
@@ -25,7 +25,7 @@ export function react(react: {
 	}
 
 	const component = <P extends object, R>(render: (props: P) => R) => {
-		const c = (props: P) => useTracker(() => render(props))
+		const c = (props: P) => useTracked(() => render(props))
 		c.displayName = (render as any).displayName ?? render.name ?? "Component"
 		return c
 	}
@@ -37,16 +37,16 @@ export function react(react: {
 
 	const useSignal = <X>(value: X) => {
 		const $signal = useOnce(() => signal(value))
-		void useTracker(() => $signal())
+		void useTracked(() => $signal())
 		return $signal
 	}
 
 	const useDerived = <X>(formula: () => X) => {
 		const $derived = useOnce(() => derived(formula))
-		void useTracker(() => $derived())
+		void useTracked(() => $derived())
 		return $derived
 	}
 
-	return {component, useTracker, useOnce, useSignal, useDerived}
+	return {component, useTracked, useOnce, useSignal, useDerived}
 }
 

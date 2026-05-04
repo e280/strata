@@ -1,11 +1,7 @@
 
+import {Derived} from "./types.js"
 import {watch} from "./utils/watch.js"
 import {tracker} from "../tracker/tracker.js"
-
-export type Derived<Value> = {
-	(): Value
-	dispose: () => void
-}
 
 export function derived<Value>(fn: () => Value): Derived<Value> {
 	let value!: Value
