@@ -8,7 +8,7 @@ export class Vault<State> {
 		const {store, version, prism} = this.options
 		const pickle = await store.get()
 		if (pickle && pickle.version === version)
-			await prism.set(pickle.state)
+			prism.set(pickle.state)
 	}
 
 	save = async() => {

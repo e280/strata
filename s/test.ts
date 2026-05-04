@@ -1,9 +1,9 @@
 
 import {science} from "@e280/science"
-import core from "./nova/core/test.js"
-import wait from "./nova/wait/test.js"
-import prism from "./nova/prism/test.js"
-import tracker from "./nova/tracker/test.js"
+import core from "./core/test.js"
+import wait from "./wait/test.js"
+import prism from "./prism/test.js"
+import tracker from "./tracker/test.js"
 
 await science.run({
 	tracker,

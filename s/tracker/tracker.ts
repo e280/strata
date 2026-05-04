@@ -1,62 +1,92 @@
 
-import {sub, Sub} from "@e280/stz"
+import {GWeakMap} from "@e280/stz"
 
-export type TrackableItem = object | symbol
+export type Trackable = object | symbol
 
 /**
  * reactivity integration hub
  */
-export class Tracker<Item extends TrackableItem = any> {
-	#seeables: Set<Item>[] = []
-	#changeables = new WeakMap<Item, Sub>()
-	#changeStack: Set<Promise<void>>[] = []
-	#busy = new Set<Item>()
+export class Tracker<Item extends Trackable = any> {
+	#busy = new Set<() => void>()
+	#observationLayers: Set<Item>[] = []
+	#subscriptions = new GWeakMap<Item, Set<() => void>>()
 
-	/** indicate item was accessed */
-	notifyRead(item: Item) {
-		this.#seeables.at(-1)?.add(item)
+	#batchDepth = 0
+	#batchPending = new Set<() => void>()
+
+	/** indicate to observers that this item was accessed */
+	read(item: Item) {
+		const top = this.#observationLayers.at(-1)
+		top?.add(item)
 	}
 
-	/** indicate item was changed */
-	async notifyWrite(item: Item) {
-		if (this.#busy.has(item))
-			throw new Error("circularity forbidden")
-		const prom = this.#guaranteeChangeable(item).pub()
-		this.#changeStack.at(-1)?.add(prom)
-		return prom
+	/** invoke all subscriptions for this item */
+	write(item: Item) {
+		const fns = this.#subscriptions.get(item)
+		if (!fns) return
+
+		for (const fn of fns)
+			this.#batchPending.add(fn)
+
+		if (this.#batchDepth === 0)
+			this.#flush()
 	}
 
-	/** collect which items were seen during fn */
-	observe<R>(fn: () => R) {
-		this.#seeables.push(new Set())
-		const result = fn()
-		const seen = this.#seeables.pop()!
-		return {seen, result}
-	}
-
-	/** respond to changes by calling fn */
-	subscribe(item: Item, fn: () => Promise<void>) {
-		return this.#guaranteeChangeable(item)(async() => {
-			const collected = new Set<Promise<void>>()
-			this.#changeStack.push(collected)
-			this.#busy.add(item)
-			collected.add(fn())
-			this.#busy.delete(item)
-			await Promise.all(collected)
-			this.#changeStack.pop()
-		})
-	}
-
-	#guaranteeChangeable(item: Item) {
-		let on = this.#changeables.get(item)
-		if (!on) {
-			on = sub()
-			this.#changeables.set(item, on)
+	/** collect items that were read during fn */
+	observe<Value>(fn: () => Value) {
+		const seen = new Set<Item>()
+		this.#observationLayers.push(seen)
+		try {
+			const value = fn()
+			return {seen, value}
 		}
-		return on
+		finally {
+			this.#observationLayers.pop()
+		}
+	}
+
+	/** fn will be called when item changes */
+	subscribe(item: Item, fn: () => void) {
+		const fns = this.#subscriptions.guarantee(item, () => new Set())
+		fns.add(fn)
+		return () => {
+			fns.delete(fn)
+			if (fns.size === 0)
+				this.#subscriptions.delete(item)
+		}
+	}
+
+	batch = <R>(fn: () => R) => {
+		this.#batchDepth++
+		try {
+			return fn()
+		}
+		finally {
+			this.#batchDepth--
+			if (this.#batchDepth === 0)
+				this.#flush()
+		}
+	}
+
+	#run(fn: () => void) {
+		if (this.#busy.has(fn))
+			throw new Error("circularity forbidden")
+		this.#busy.add(fn)
+		try { fn() }
+		finally { this.#busy.delete(fn) }
+	}
+
+	#flush() {
+		while (this.#batchPending.size > 0) {
+			const pending = [...this.#batchPending]
+			this.#batchPending.clear()
+
+			for (const fn of pending)
+				this.#run(fn)
+		}
 	}
 }
 
 /** standard global tracker for integrations */
-export const tracker: Tracker = (globalThis as any)[Symbol.for("e280.tracker")] ??= new Tracker()
+export const tracker: Tracker = (globalThis as any)[Symbol.for("e280.tracker.2")] ??= new Tracker()
 
