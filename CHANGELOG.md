@@ -15,6 +15,8 @@
 - 🟥 wait
   - 🟥 renamed `WaitDone` to `WaitResult` to better match ok/err/result
   - 🟥 renamed `newWait` to `makeWait` because i like it more
+  - 🟥 renamed `WaitSignal` to `WaitDerived` because that's what it is
+  - 🟥 renamed `waitResult` to `waitFormal` because i said so
 
 
 
