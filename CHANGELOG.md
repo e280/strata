@@ -13,7 +13,8 @@
 ### v0.4.0
 - 🟥 huge core rewrite
 - 🟥 wait
-  - 🟥 `WaitDone` renamed to `WaitResult` to better match ok/err/result
+  - 🟥 renamed `WaitDone` to `WaitResult` to better match ok/err/result
+  - 🟥 renamed `newWait` to `makeWait` because i like it more
 
 
 
