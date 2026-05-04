@@ -16,7 +16,7 @@
 
 🚦 [**#signals,**](#signals) sweet little bundles of state  
 🔮 [**#prism,**](#prism) bigger centralized state trees  
-⌛ [**#wait,**](#wait) representing async operations  
+⌛ [**#wait,**](#wait) async state helpers *(think loading spinners)*  
 🪄 [**#tracker,**](#tracker) agnostic reactivity integration hub  
 ⚛️ [**#react,**](#react) optional bindings for react  
 
@@ -269,99 +269,75 @@ import {signal, effect, derived, lazy} from "@e280/strata"
 <a id="wait"></a>
 
 ## 🍋 strata wait
-> *represent async operations*
+> *tiny async state helpers*
 
-- wait is designed to vibe with [stz#ok](https://github.com/e280/stz#ok)
+***wait*** is small. *pending, ok, err.*  
+it extends [stz's ok/err](https://github.com/e280/stz#ok).  
+it's like, for your ui, showing little loading spinners and branching when stuff is loading.  
+
+### ⌛ good things come to those who wait
+- **import stuff**
     ```ts
-    import {ok, err} from "@e280/stz"
+    import {ok, err, nap} from "@e280/stz"
+    import {wait, waitFormal} from "@e280/strata"
     ```
-
-### ⌛ wait primitives
-- imports
+- **wrap any async operation in a fancy wait**
     ```ts
-    import {newWait} from "@e280/strata"
-    ```
-- helpers to create a `Wait`
-    ```ts
-    // loading
-    newWait<number>()
-      // {done: false}
-
-    // done, ok
-    newWait(ok(123))
-      // {done: true, ok: true, value: 123}
-
-    // done, err
-    newWait(err("uh oh"))
-      // {done: true, ok: false, error: "uh oh"}
-    ```
-
-### ⌛ make a magic reactive wait signal
-- imports
-    ```ts
-    import {nap} from "@e280/stz"
-    import {wait} from "@e280/strata"
-    ```
-- it's a derived signal (readonly) that tracks the result of an async fn or promise
-    ```ts
+    // wrap any async operation in a fancy wait
     const $wait = wait(async() => {
-      await nap(100) // do some async stuff
-      return 123 // return your value
+      await nap(100)
+      if (Math.random() > 0.5) return 123
+      else throw new Error("bad luck!")
     })
     ```
-- read the current state from the signal
+    - btw you can pass a promise instead of an async fn
+- **check if it's done**
     ```ts
-    $wait()
-      // {done: false}
+    console.log($wait().done)
+      // false -- sorry bro, its not ready yet
     ```
-- later, when it's ready
+- **okay, we can actually await for the result**
     ```ts
-    await $wait.ready
-      // 123
-      // undefined if there was an error
+    const result = await $wait.result
 
-    $wait()
-      // {done: true, ok: true, value: 123}
+    if (result.ok)
+      console.log(result.value)
+        // 123
+    else
+      console.error(result.error)
+        // Error: bad luck!
     ```
 
-### ⌛ persnickety belt-and-suspenders mode
-- imports
+### ⌛ waitFormal is persnickety belt-and-suspenders mode
+- **you can get super explicit about the types**
     ```ts
-    import {waitResult} from "@e280/strata"
-    ```
-- do formal rigid error handling because you're super strict and serious
-    ```ts
-    const $wait = waitResult<number, "unlikely lol" | "bad roll">(async() => {
+    const $wait = waitFormal<number, "unlucky" | "bad roll">(async() => {
       if (Math.random() > 0.5)
         return ok(123)
 
       if (Math.random() < 0.01)
-        return err("unlikely lol")
+        return err("unlucky")
 
       else
         return err("bad roll")
     })
     ```
-- listen for the formal result
-    ```ts
-    await $wait.result
-      // {done: true, ok: true, value: 123} or
-      // {done: true, ok: false, error: "bad roll"}
-    ```
-- btw, wait and waitResult will actually accept a promise if you like
-    ```ts
-    const $wait = wait(Promise.resolve(123))
-    ```
 
-### ⌛ wait helpers
-- check the state
+### ⌛ wait, there's more
+- maker
+    ```ts
+    makeWait<number>() // pending
+    makeWait(ok(123))
+    makeWait(err("uh oh"))
+    ```
+- status checkers
     ```ts
     isWaitPending($wait())
-    isWaitDone($wait())
+    isWaitDone($wait()) // ok or err
     isWaitOk($wait())
     isWaitErr($wait())
     ```
-- get the finished value or error
+- value grabbers
     ```ts
     waitGetOk($wait()) // 123 | undefined
     waitNeedOk($wait()) // 123 (or throws an error)
@@ -370,7 +346,7 @@ import {signal, effect, derived, lazy} from "@e280/strata"
     waitGetErr($wait()) // "bad roll" | undefined
     waitNeedErr($wait()) // "bad roll" (or throws an error)
     ```
-- select based on the state
+- quick selector
     ```ts
     const text = waitSelect($wait(), {
       pending: () => "still loading...",
