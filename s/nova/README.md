@@ -34,16 +34,16 @@ import {signal, derived, effect, batch} from "@e280/strata"
 ### 🚦 signal
 - **a signal holds a value**
   ```ts
-  const $count = signal(0)
+  const $count = signal(1)
   ```
   > *we kinda like the `$` convention for signals*
 - **read the signal**
   ```ts
-  $count() // 0
+  $count() // 1
   ```
 - **write the signal**
   ```ts
-  $count(1)
+  $count(2)
   ```
 
 ### 🚦 derived
@@ -52,6 +52,7 @@ import {signal, derived, effect, batch} from "@e280/strata"
   const $alpha = signal(1)
   const $bravo = signal(10)
   const $product = derived(() => $alpha() * $bravo())
+  ```
 - **it automatically updates**
   ```ts
   $product() // 10
@@ -59,21 +60,32 @@ import {signal, derived, effect, batch} from "@e280/strata"
   $product() // 🪄 20
   ```
 - **btw,**  
-  deriveds are lazy and don't run the formula fn unless actually demanded. also, they have a `.dispose()` fn you can use to stop them.
+  deriveds are lazy and don't run the formula fn unless actually demanded (unless an effect is watching them). also, they have a `.dispose()` fn you can use to stop them.
 
 ### 🚦 effects
 - **effects run when the relevant signals change**
   ```ts
   effect(() => console.log($count()))
-    // 1
+    // 2
     // the system detects '$count' is relevant
 
-  $count(2)
-    // 2
+  $count(3)
+    // 3
     // when $count is changed, the effect fn is run
   ```
 - **btw,**  
   effects return a dispose fn you can use to stop them. also, you can optionally pass a second parameter fn that receives what the first fn returns, and it's not initially called.
+
+### 🚦 batch
+- **optimize multiple writes into one fat update**
+  ```ts
+  // call downstream effects only once
+  batch(() => {
+    $count(4)
+    $count(5)
+    $count(6)
+  })
+  ```
 
 ### 🚦 types
 - **`Signal<Value>`** — it's a signal fn
@@ -124,10 +136,9 @@ this is the inner sanctum of strata. use the tracker to jack into the reactivity
   ```
 
 ### 🪄 integrate your ui framework for auto-rerendering
-- put on your big-kid pants and have your ai agent read the [source code](./tracker/tracker.ts)
 - use `tracker.observe` to check what is touched by a fn
 - use `tracker.subscribe` to subscribe to the seen items that `observe` returns
-- you'll figure it out, lol, or reach out to me on discord
+- see the [source code](./tracker/tracker.ts)
 
 
 
