@@ -246,10 +246,8 @@ import {signal, derived, effect, batch} from "@e280/strata"
 ## 🍋 strata wait
 > *tiny async state helpers*
 
-***wait is small.***  
 it's about states like *pending, ok, err.*  
-wait extends [stz's ok/err](https://github.com/e280/stz#ok) toolkit.  
-it's mostly for showing little loading spinners in your ui.  
+wait extends [stz's ok/err](https://github.com/e280/stz#ok) toolkit, and it's mostly for showing little loading spinners in your ui.  
 
 ### ⌛ good things come to those who wait
 - **import stuff**
