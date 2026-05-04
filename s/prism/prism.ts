@@ -1,5 +1,4 @@
 
-import {microbounce, sub} from "@e280/stz"
 import {Lens} from "./lens.js"
 import {tracker} from "../tracker/tracker.js"
 
@@ -8,31 +7,27 @@ export class Prism<State> {
 	#state: State
 	#lenses = new Set<Lens<any>>()
 
-	on = sub<[state: State]>()
-	#onPublishDebounced = microbounce(() => this.on.publish(this.#state))
-
 	constructor(state: State) {
 		this.#state = state
 	}
 
 	get() {
-		tracker.notifyRead(this)
+		tracker.read(this)
 		return this.#state
 	}
 
-	async set(state: State) {
+	set(state: State) {
 		this.#state = state
-		await Promise.all([...this.#lenses].map(lens => lens.update()))
-		await this.#onPublishDebounced()
-		await tracker.notifyWrite(this)
+		for (const lens of this.#lenses) lens.update()
+		tracker.write(this)
 	}
 
 	lens<State2>(selector: (state: State) => State2) {
 		const lens = new Lens<State2>({
 			getState: () => selector(this.#state),
-			mutate: async fn => {
+			mutate: fn => {
 				const result = fn(selector(this.#state))
-				await this.set(this.#state)
+				this.set(this.#state)
 				return result
 			},
 			registerLens: lens => this.#lenses.add(lens),

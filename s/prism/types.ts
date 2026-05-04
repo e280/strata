@@ -4,13 +4,13 @@ import {Lens} from "./lens.js"
 export type LensLike<State> = {
 	readonly state: State
 	readonly frozen: Immutable<State>
-	mutate<R>(fn: (state: State) => R): Promise<R>
+	mutate<R>(fn: (state: State) => R): R
 	lens<S2>(selector: (state: State) => S2): Lens<S2>
 }
 
 export type Optic<State> = {
 	getState: () => State
-	mutate: <R>(fn: (state: State) => R) => Promise<R>
+	mutate: <R>(fn: (state: State) => R) => R
 	registerLens: (lens: Lens<any>) => void
 }
 

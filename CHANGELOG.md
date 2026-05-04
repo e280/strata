@@ -8,6 +8,32 @@
 
 <br/>
 
+## v0.4
+
+### v0.4.0
+- 🟥 **huge core rewrite**
+  - 🟥 everything is now sync, not async anymore. stripped of all debouncing and async shenanigans, now calling `tracker.write` (and thus setting signals, updating prism state, etc) immediately executes all downstream subscribers without any delay. this greatly improves our ability to detect and prevent scary catastropic circular-loop crashes. this also avoids async fatigue spreading through your codebases. the downside is that this could lead to worse performance.
+  - 🍏 new `batch` fn helps you optimize performance -- batched tracker writes are deduped and flushed at the end of the batch, meaning, effects are only called once.
+- 🟥 **tracker**
+  - 🟥 renamed `tracker.notifyRead` to `tracker.read`
+  - 🟥 renamed `tracker.notifyWrite` to `tracker.write`
+- 🟥 **signals/derived**
+  - 🟥 eliminated all the funky magic class+fn implementations for dead-simple minimal implementations... new signal module is 18 lines...
+  - 🟥 removed `$count.on` direct subscriptions -- just use effects
+  - 🟥 removed `$count.value` accessors -- just use hipster-fn syntax
+  - 🟥 removed `$count.get()` and `$count.set(v)` methods -- just use hipster-fn syntax
+  - 🟥 removed comparison logic, now all signal value setting always notifies the tracker, doesn't care if there was a real change
+  - 🟥 removed `lazy` completely removed -- obsoleted by superior new derived implementation that is lazy
+- 🟥 **wait**
+  - 🟥 renamed `WaitDone` to `WaitResult` to better match ok/err/result
+  - 🟥 renamed `newWait` to `makeWait` because i like it more
+  - 🟥 renamed `WaitSignal` to `WaitDerived` because that's what it is
+  - 🟥 renamed `waitResult` to `waitFormal` because i said so
+
+
+
+<br/>
+
 ## v0.3
 
 ### v0.3.5
