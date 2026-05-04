@@ -62,7 +62,8 @@ import {signal, derived, effect, batch} from "@e280/strata"
   $product() // 🪄 20
   ```
 - **btw,**  
-  deriveds are lazy and don't run the formula fn unless actually demanded (unless an effect is watching them). also, they have a `.dispose()` fn you can use to stop them.
+  deriveds are lazy, only run the fn when demanded.  
+  also, they have a `.dispose()` fn if you need to stop them.  
 
 ### 🚦 effects
 - **effects run when the relevant signals change**
@@ -76,7 +77,8 @@ import {signal, derived, effect, batch} from "@e280/strata"
     // when $count is changed, the effect fn is run
   ```
 - **btw,**  
-  effects return a dispose fn you can use to stop them. also, you can optionally pass a second parameter fn that receives what the first fn returns, and it's not initially called.
+  you can also pass an optional second fn param, which receives what the first fn returns, and is not called initially.  
+  also, effect returns a dispose fn if you need to stop it.  
 
 ### 🚦 batch
 - **optimize multiple writes into one fat update**
@@ -134,17 +136,21 @@ import {signal, derived, effect, batch} from "@e280/strata"
     const person = snacks.lens(state => state.person)
     ```
     - you can lens another lens
-- **lenses provide snapshot access to state**
+- **`lens.state` is a cloned mutable snapshot with chill typings**
     ```ts
-    // .state is a mutable snapshot with relaxed typings
     snacks.state.peanuts // 8
     person.state.name // "chase"
-      // ⛔ casual mutations ignored
 
-    // .frozen is an immutable snapshot with strict typings
-    snacks.frozen.peanuts // 8
+    snacks.state.peanuts++
+      // ⛔ attempted state mutation: silently ignored
+    ```
+- **`lens.frozen` provides a deep-frozen immutable snapshot with strict typings**
+    ```ts
+    snacks.frozen.peanuts // 8 (readonly)
+    person.frozen.name // "chase" (readonly)
+
     snacks.frozen.peanuts++
-      // ⛔ casual mutations throw errors
+      // ⛔ attempted frozen mutation: throw errors
     ```
 - **only formal mutations can actually change state**
     ```ts
