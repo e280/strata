@@ -8,6 +8,17 @@
 
 <br/>
 
+## v0.4
+
+### v0.4.0
+- 🟥 huge core rewrite
+- 🟥 wait
+  - 🟥 `WaitDone` renamed to `WaitResult` to better match ok/err/result
+
+
+
+<br/>
+
 ## v0.3
 
 ### v0.3.5
