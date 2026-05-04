@@ -246,9 +246,10 @@ import {signal, derived, effect, batch} from "@e280/strata"
 ## 🍋 strata wait
 > *tiny async state helpers*
 
-***wait*** is small. *pending, ok, err.*  
-it extends [stz's ok/err](https://github.com/e280/stz#ok).  
-it's like, for your ui, showing little loading spinners and branching when stuff is loading.  
+***wait is small.***  
+it's about states like *pending, ok, err.*  
+wait extends [stz's ok/err](https://github.com/e280/stz#ok) toolkit.  
+it's mostly for showing little loading spinners in your ui.  
 
 ### ⌛ good things come to those who wait
 - **import stuff**
@@ -385,9 +386,6 @@ this is the inner sanctum of strata. use the tracker to jack into the reactivity
 <a id="react"></a>
 
 ## 🍋 react bindings
-
-```ts
-```
 
 ### ⚛️ setup your `strata.ts` module
 ```ts
