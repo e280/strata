@@ -15,6 +15,7 @@
   - 🟥 everything is now sync, not async anymore. stripped of all debouncing and async shenanigans, now calling `tracker.write` (and thus setting signals, updating prism state, etc) immediately executes all downstream subscribers without any delay. this greatly improves our ability to detect and prevent scary catastropic circular-loop crashes. this also avoids async fatigue spreading through your codebases. the downside is that this could lead to worse performance.
   - 🍏 new `batch` fn helps you optimize performance -- batched tracker writes are deduped and flushed at the end of the batch, meaning, effects are only called once.
 - 🟥 **tracker**
+  - 🟥 ⚠️⚠️ global symbol changed from `e280.tracker` to `e280.tracker.2` -- this means strata v0.3 and v0.4 are treated like totally different state management libraries, they are FULLY incompatible, eg, if you have one dependency on strata 0.3 and another on 0.4, the `effect` from one will be blind to signals from the other.
   - 🟥 renamed `tracker.notifyRead` to `tracker.read`
   - 🟥 renamed `tracker.notifyWrite` to `tracker.write`
 - 🟥 **signals/derived**
