@@ -16,6 +16,7 @@
 
 🚦 [**#signals,**](#signals) sweet little bundles of state  
 ⌛ [**#wait,**](#wait) helpers for async operation states  
+🔮 [**#prism,**](#prism) bigger centralized state trees  
 🪄 [**#tracker,**](#tracker) agnostic reactivity integration hub  
 ⚛️ [**#react,**](#react) optional bindings for react  
 
@@ -208,6 +209,143 @@ import {signal, derived, effect, batch} from "@e280/strata"
       ok: value => `ready: ${value}`,
       err: error => `ack! ${error}`,
     })
+    ```
+
+
+
+<br/><br/>
+
+<a id="prism"></a>
+
+## 🍋 strata prism
+> *persistent app-level state*
+
+- single-source-of-truth state tree
+- no spooky-dookie proxy magic — just god's honest javascript
+- immutable except for `mutate(fn)` calls
+- use many lenses, efficient reactivity
+- chrono provides undo/redo history
+- persistence, localstorage, cross-tab sync
+
+### 🔮 prism and lenses
+- **import prism**
+    ```ts
+    import {Prism} from "@e280/strata"
+    ```
+- **prism is a state tree**
+    ```ts
+    const prism = new Prism({
+      snacks: {
+        peanuts: 8,
+        bag: ["popcorn", "butter"],
+        person: {
+          name: "chase",
+          incredi: true,
+        },
+      },
+    })
+    ```
+- **create lenses, which are views into state subtrees**
+    ```ts
+    const snacks = prism.lens(state => state.snacks)
+    const person = snacks.lens(state => state.person)
+    ```
+    - you can lens another lens
+- **lenses provide snapshot access to state**
+    ```ts
+    // .state is a mutable snapshot with relaxed typings
+    snacks.state.peanuts // 8
+    person.state.name // "chase"
+      // ⛔ casual mutations ignored
+
+    // .frozen is an immutable snapshot with strict typings
+    snacks.frozen.peanuts // 8
+    snacks.frozen.peanuts++
+      // ⛔ casual mutations throw errors
+    ```
+- **only formal mutations can actually change state**
+    ```ts
+    snacks.mutate(state => state.peanuts++)
+      // ✅ formal mutations to change state
+
+    snacks.state.peanuts // 9
+    ```
+- **array mutations are unironically based, actually**
+    ```ts
+    snacks.mutate(state => state.bag.push("salt"))
+    ```
+
+### 🔮 chrono for time travel
+- **import stuff**
+    ```ts
+    import {Chrono, chronicle} from "@e280/strata"
+    ```
+- **create a chronicle in your state**
+    ```ts
+    const prism = new Prism({
+
+        // chronicle stores history
+        //        👇
+      snacks: chronicle({
+        peanuts: 8,
+        bag: ["popcorn", "butter"],
+        person: {
+          name: "chase",
+          incredi: true,
+        },
+      }),
+    })
+    ```
+    - *big-brain moment:* the whole chronicle *itself* is stored in the state.. serializable.. think persistence — user can close their project, reopen, and their undo/redo history is still chillin' — *brat girl summer*
+- **create a chrono-wrapped lens to interact with your chronicle**
+    ```ts
+    const snacks = new Chrono(64, prism.lens(state => state.snacks))
+      //                      👆
+      // how many past snapshots to store
+    ```
+- **mutations will advance history,** and undo/redo works
+    ```ts
+    snacks.mutate(s => s.peanuts = 101)
+
+    snacks.undo()
+      // back to 8 peanuts
+
+    snacks.redo()
+      // forward to 101 peanuts
+    ```
+- **check how many undoable or redoable steps are available**
+    ```ts
+    snacks.undoable // 1
+    snacks.redoable // 0
+    ```
+- **you can make sub-lenses of a chrono,** all their mutations advance history too
+- **plz pinky-swear right now,** that you won't create a chrono under a lens under another chrono 💀
+
+### 🔮 persistence to localStorage
+- **import prism**
+    ```ts
+    import {Vault, LocalStore} from "@e280/strata"
+    ```
+- **create a local storage store**
+    ```ts
+    const store = new LocalStore("myAppState")
+    ```
+- **make a vault for your prism**
+    ```ts
+    const vault = new Vault({
+      prism,
+      store,
+      version: 1, // 👈 bump this when you break your state schema!
+    })
+    ```
+    - `store` type is compatible with [`@e280/kv`](https://github.com/e280/kv)
+- **cross-tab sync (load on storage events)**
+    ```ts
+    store.onStorageEvent(vault.load)
+    ```
+- **initial load**
+    ```ts
+    await vault.load()
     ```
 
 
