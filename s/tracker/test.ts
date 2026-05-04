@@ -117,6 +117,17 @@ export default science.suite({
 		expect(calls.join(",")).is("a,b")
 	}),
 
+	"writing to a different item in a subscriber is ok": test(async() => {
+		const tracker = new Tracker()
+		const alpha = {}
+		const bravo = {}
+
+		const fn = () => tracker.write(bravo)
+		tracker.subscribe(alpha, fn)
+
+		expect(() => tracker.write(alpha)).not.throws()
+	}),
+
 	"circularity is forbidden": test(async() => {
 		const tracker = new Tracker()
 		const item = {}
@@ -143,3 +154,4 @@ export default science.suite({
 		expect(calls).is(1)
 	}),
 })
+

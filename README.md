@@ -66,7 +66,7 @@ import {signal, derived, effect, batch} from "@e280/strata"
   also, they have a `.dispose()` fn if you need to stop them.  
 
 ### 🚦 effects
-- **effects run when the relevant signals change**
+- **effects run immediately, then again when relevant signals change**
   ```ts
   effect(() => console.log($count()))
     // 2
@@ -77,8 +77,7 @@ import {signal, derived, effect, batch} from "@e280/strata"
     // when $count is changed, the effect fn is run
   ```
 - **btw,**  
-  you can also pass an optional second fn param, which receives what the first fn returns, and is not called initially.  
-  also, effect returns a dispose fn if you need to stop it.  
+  effect returns a dispose fn if you need to stop it.  
 
 ### 🚦 batch
 - **optimize multiple writes into one fat update**

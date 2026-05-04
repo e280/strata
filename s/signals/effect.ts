@@ -1,11 +1,7 @@
 
 import {watch} from "./utils/watch.js"
 
-export function effect<Collected>(
-		collector: () => Collected,
-		responder: (collected: Collected) => void = () => {},
-	) {
-
+export function effect(fn: () => void) {
 	let unwatch = () => {}
 
 	const dispose = () => {
@@ -15,13 +11,11 @@ export function effect<Collected>(
 
 	const update = () => {
 		dispose()
-		const watched = watch(collector, update)
+		const watched = watch(fn, update)
 		unwatch = watched.dispose
-		responder(watched.value)
 	}
 
-	const watched = watch(collector, update)
-	unwatch = watched.dispose
+	update()
 
 	return dispose
 }

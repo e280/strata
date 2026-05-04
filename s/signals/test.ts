@@ -10,15 +10,18 @@ export default science.suite({
 	"effect": test(async() => {
 		const item = {}
 		let calls = 0
-		const stop = effect(() => tracker.read(item), () => calls++)
-		expect(calls).is(0)
+		const stop = effect(() => {
+			tracker.read(item)
+			calls++
+		})
+		expect(calls).is(1)
 
 		tracker.write(item)
-		expect(calls).is(1)
+		expect(calls).is(2)
 
 		stop()
 		tracker.write(item)
-		expect(calls).is(1)
+		expect(calls).is(2)
 	}),
 
 	"signal read/write": test(async() => {
@@ -31,10 +34,13 @@ export default science.suite({
 	"signal triggers effects": test(async() => {
 		const $count = signal(1)
 		let calls = 0
-		effect(() => $count(), () => calls++)
-		expect(calls).is(0)
-		$count(2)
+		effect(() => {
+			$count()
+			calls++
+		})
 		expect(calls).is(1)
+		$count(2)
+		expect(calls).is(2)
 	}),
 
 	"shorthand effect syntax": test(async() => {
@@ -86,19 +92,23 @@ export default science.suite({
 			derivedCalls++
 			return $alpha() * $bravo()
 		})
-		effect(() => $derived(), () => effectCalls++)
+		effect(() => {
+			$derived()
+			effectCalls++
+		})
 		expect(derivedCalls).is(1)
-		expect(effectCalls).is(0)
+		expect(effectCalls).is(1)
 		$alpha(3)
 		expect(derivedCalls).is(2)
-		expect(effectCalls).is(1)
+		expect(effectCalls).is(2)
 	}),
 
 	"batching signal effects seems to work": test(async() => {
 		const $alpha = signal(2)
 		const $bravo = signal(10)
 		let calls: number[] = []
-		effect(() => $alpha() * $bravo(), value => calls.push(value))
+		effect(() => calls.push($alpha() * $bravo()))
+		calls = []
 		batch(() => {
 			$alpha(3)
 			$alpha(4)
@@ -110,29 +120,53 @@ export default science.suite({
 		expect(calls[0]).is(55)
 	}),
 
-	"direct circularity forbidden": test(async() => {
-		const $count = signal(1)
-		effect(() => $count(), count => $count(count + 1))
-		expect(() => $count(2)).throws()
+	"evil circularity is no problem": test(async() => {
+		const $alpha = signal(1)
+		let count = 0
+		effect(() => {
+			count++
+			if (count < 10)
+				$alpha($alpha() + 1)
+		})
+		expect(count).lt(5)
 	}),
 
-	"indirect effect circular write is forbidden": test(async() => {
+	"sneaky evil circularity is no problem": test(async() => {
 		const $alpha = signal(1)
 		const $bravo = signal(1)
+
+		let countAlpha = 0
+		effect(() => {
+			countAlpha++
+			if (countAlpha < 10)
+				$alpha($bravo() + 1)
+		})
+
+		let countBravo = 0
+		effect(() => {
+			countBravo++
+			if (countBravo < 10)
+				$bravo($alpha() + 1)
+		})
+
+		$alpha(99)
+		$bravo(99)
+		expect(countAlpha).lt(5)
+		expect(countBravo).lt(5)
+	}),
+
+	"effect writes are self-damped": test(async() => {
+		const $count = signal(1)
 		let calls = 0
 
-		effect(() => $alpha(), a => {
+		effect(() => {
 			calls++
-			$bravo(a + 1)
+			if (calls < 10)
+				$count($count() + 1)
 		})
 
-		effect(() => $bravo(), b => {
-			calls++
-			$alpha(b + 1)
-		})
-
-		expect(() => $alpha(2)).throws()
-		expect(calls).is(2)
+		expect(calls).is(1)
+		expect($count()).is(2)
 	}),
 })
 

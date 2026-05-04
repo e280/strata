@@ -90,9 +90,12 @@ export default suite({
 			const prism = new Prism({data: {array: ["lol"]}})
 			const lens = prism.lens(s => s.data)
 			let happenings = 0
-			effect(() => lens.state, () => happenings++)
+			effect(() => {
+				void lens.state
+				happenings++
+			})
 			lens.mutate(s => s.array.push("lmao"))
-			expect(happenings).is(1)
+			expect(happenings).is(2)
 			expect(lens.frozen.array.length).is(2)
 		}),
 
@@ -143,11 +146,17 @@ export default suite({
 			const lensB = prism.lens(s => s.b)
 			let happeningsA = 0
 			let happeningsB = 0
-			effect(() => lensA.state, () => happeningsA++)
-			effect(() => lensB.state, () => happeningsB++)
+			effect(() => {
+				void lensA.state
+				happeningsA++
+			})
+			effect(() => {
+				void lensB.state
+				happeningsB++
+			})
 			lensA.mutate(s => s.count++)
-			expect(happeningsA).is(1)
-			expect(happeningsB).is(0)
+			expect(happeningsA).is(2)
+			expect(happeningsB).is(1)
 		}),
 
 		"outside mutations ignored for effects": test(async() => {
