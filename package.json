@@ -13,8 +13,8 @@
 	"exports": {
 		".": "./x/index.js",
 		"./bindings": "./x/bindings/index.js",
-		"./core": "./x/core/index.js",
 		"./prism": "./x/prism/index.js",
+		"./signals": "./x/signals/index.js",
 		"./tracker": "./x/tracker/index.js",
 		"./wait": "./x/wait/index.js"
 	},

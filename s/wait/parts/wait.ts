@@ -2,8 +2,8 @@
 import {attemptAsync, getOk, Result} from "@e280/stz"
 
 import {makeWait} from "./make.js"
-import {signal} from "../../core/signal.js"
-import {derived} from "../../core/derived.js"
+import {signal} from "../../signals/signal.js"
+import {derived} from "../../signals/derived.js"
 import {Wait, WaitResult, WaitDerived} from "./type.js"
 
 export function wait<Value, E = unknown>(

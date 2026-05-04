@@ -1,6 +1,6 @@
 
-import {signal} from "../core/signal.js"
-import {derived} from "../core/derived.js"
+import {signal} from "../signals/signal.js"
+import {derived} from "../signals/derived.js"
 import {tracker} from "../tracker/tracker.js"
 
 export function reactBindings(react: {

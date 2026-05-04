@@ -2,10 +2,10 @@
 import {suite, test, expect} from "@e280/science"
 
 import {Prism} from "./prism.js"
-import {effect} from "../core/effect.js"
+import {effect} from "../signals/effect.js"
 import {Chrono} from "./chrono/chrono.js"
 import {chronicle} from "./chrono/chronicle.js"
-import { batch } from "../core/batch.js"
+import { batch } from "../signals/batch.js"
 
 export default suite({
 	"prism": suite({

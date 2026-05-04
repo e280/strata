@@ -1,6 +1,6 @@
 
 import {Err, Ok, Result} from "@e280/stz"
-import {Derived} from "../../core/types.js"
+import {Derived} from "../../signals/types.js"
 
 export type WaitPending = {done: false}
 export type WaitResult<Value, E = unknown> = {done: true} & Result<Value, E>
