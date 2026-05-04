@@ -1,6 +1,6 @@
 
 import {GMap} from "@e280/stz"
-import {tracker} from "../../tracker/tracker.js"
+import {tracker} from "../../tracker/global.js"
 
 export class RMap<K, V> extends GMap<K, V> {
 	get size() {

@@ -1,7 +1,7 @@
 
 import {deep} from "@e280/stz"
 import {immute} from "./utils/immute.js"
-import {tracker} from "../tracker/tracker.js"
+import {tracker} from "../tracker/global.js"
 import {_optic} from "./utils/optic-symbol.js"
 import {CacheCell} from "./utils/cache-cell.js"
 import {Immutable, LensLike, Optic} from "./types.js"

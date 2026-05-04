@@ -1,5 +1,5 @@
 
-import {tracker} from "../../tracker/tracker.js"
+import {tracker} from "../../tracker/global.js"
 
 export function watch<Value>(collector: () => Value, onChange: () => void) {
 	const {seen, value} = tracker.observe(collector)

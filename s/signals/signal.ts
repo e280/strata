@@ -1,6 +1,6 @@
 
 import {Signal} from "./types.js"
-import {tracker} from "../tracker/tracker.js"
+import {tracker} from "../tracker/global.js"
 
 export function signal<Value>(value: Value): Signal<Value> {
 	return function sig() {

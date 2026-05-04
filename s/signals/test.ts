@@ -4,7 +4,7 @@ import {batch} from "./batch.js"
 import {effect} from "./effect.js"
 import {signal} from "./signal.js"
 import {derived} from "./derived.js"
-import {tracker} from "../tracker/tracker.js"
+import {tracker} from "../tracker/global.js"
 
 export default science.suite({
 	"effect": test(async() => {

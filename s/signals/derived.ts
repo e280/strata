@@ -1,7 +1,7 @@
 
 import {Derived} from "./types.js"
 import {watch} from "./utils/watch.js"
-import {tracker} from "../tracker/tracker.js"
+import {tracker} from "../tracker/global.js"
 
 export function derived<Value>(fn: () => Value): Derived<Value> {
 	let value!: Value

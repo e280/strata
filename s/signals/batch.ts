@@ -1,5 +1,5 @@
 
-import {tracker} from "../tracker/tracker.js"
+import {tracker} from "../tracker/global.js"
 
 export const batch = tracker.batch
 

@@ -1,7 +1,7 @@
 
 import {signal} from "../signals/signal.js"
+import {tracker} from "../tracker/global.js"
 import {derived} from "../signals/derived.js"
-import {tracker} from "../tracker/tracker.js"
 
 export function reactBindings(react: {
 		useEffect: (fn: () => void | (() => void), deps?: unknown[]) => void

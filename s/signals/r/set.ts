@@ -1,6 +1,6 @@
 
 import {GSet} from "@e280/stz"
-import {tracker} from "../../tracker/tracker.js"
+import {tracker} from "../../tracker/global.js"
 
 export class RSet<T> extends GSet<T> {
 	get size() {
