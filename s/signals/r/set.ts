@@ -3,6 +3,11 @@ import {GSet} from "@e280/stz"
 import {tracker} from "../../tracker/global.js"
 
 export class RSet<T> extends GSet<T> {
+
+	//
+	// reading
+	//
+
 	get size() {
 		tracker.read(this)
 		return super.size
@@ -23,6 +28,10 @@ export class RSet<T> extends GSet<T> {
 		return super.has(item)
 	}
 
+	//
+	// writing
+	//
+
 	add(item: T) {
 		super.add(item)
 		tracker.write(this)
@@ -30,9 +39,9 @@ export class RSet<T> extends GSet<T> {
 	}
 
 	delete(item: T) {
-		const r = super.delete(item)
+		const ret = super.delete(item)
 		tracker.write(this)
-		return r
+		return ret
 	}
 
 	clear() {
