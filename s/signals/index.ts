@@ -1,4 +1,5 @@
 
+export * from "./helpers/after-effect.js"
 export * from "./r/map.js"
 export * from "./r/set.js"
 export * from "./batch.js"

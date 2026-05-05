@@ -26,6 +26,7 @@
   - 🟥 removed comparison logic, now all signal value setting always notifies the tracker, doesn't care if there was a real change
   - 🟥 removed `lazy` completely removed -- obsoleted by superior new derived implementation that is lazy
   - 🟥 `effect` is now simpler and only takes one simple callback fn
+  - 🍏 new `afterEffect` takes a collector fn and responder fn like the old `effect` did
 - 🟥 **wait**
   - 🟥 renamed `WaitDone` to `WaitResult` to better match ok/err/result
   - 🟥 renamed `newWait` to `makeWait` because i like it more
