@@ -2,7 +2,7 @@
 import {GSet} from "@e280/stz"
 import {tracker} from "../../tracker/global.js"
 
-export class RSet<T> extends GSet<T> {
+export class RSet<V> extends GSet<V> {
 
 	//
 	// reading
@@ -18,12 +18,19 @@ export class RSet<T> extends GSet<T> {
 		return super[Symbol.iterator]()
 	}
 
+	forEach(callbackFn: (value: V, value2: V, set: RSet<V>) => void) {
+		tracker.read(this)
+		for (const value of this)
+			callbackFn(value, value, this)
+		return this
+	}
+
 	values() {
 		tracker.read(this)
 		return super.values()
 	}
 
-	has(item: T) {
+	has(item: V) {
 		tracker.read(this)
 		return super.has(item)
 	}
@@ -32,13 +39,13 @@ export class RSet<T> extends GSet<T> {
 	// writing
 	//
 
-	add(item: T) {
+	add(item: V) {
 		super.add(item)
 		tracker.write(this)
 		return this
 	}
 
-	delete(item: T) {
+	delete(item: V) {
 		const ret = super.delete(item)
 		tracker.write(this)
 		return ret

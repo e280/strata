@@ -19,6 +19,13 @@ export class RMap<K, V> extends GMap<K, V> {
 		return super[Symbol.iterator]()
 	}
 
+	forEach(callbackFn: (value: V, key: K, map: RMap<K, V>) => void) {
+		tracker.read(this)
+		for (const [key, value] of this)
+			callbackFn(value, key, this)
+		return this
+	}
+
 	keys() {
 		tracker.read(this)
 		return super.keys()
@@ -32,11 +39,6 @@ export class RMap<K, V> extends GMap<K, V> {
 	entries() {
 		tracker.read(this)
 		return super.entries()
-	}
-
-	forEach(callbackFn: (value: V, key: K, map: Map<K, V>) => void) {
-		tracker.read(this)
-		return super.forEach(callbackFn)
 	}
 
 	has(key: K) {
