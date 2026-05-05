@@ -254,7 +254,7 @@ wait extends [stz's ok/err](https://github.com/e280/stz#ok) toolkit, and it's mo
     import {ok, err, nap} from "@e280/stz"
     import {wait, waitFormal} from "@e280/strata"
     ```
-- **wrap any async operation in a fancy wait**
+- **wrap any async operation and get a "Waiter"**
     ```ts
     // wrap any async operation in a fancy wait
     const $wait = wait(async() => {

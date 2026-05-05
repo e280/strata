@@ -4,7 +4,7 @@ import {attemptAsync, getOk, Result} from "@e280/stz"
 import {makeWait} from "./make.js"
 import {signal} from "../../signals/signal.js"
 import {derived} from "../../signals/derived.js"
-import {Wait, WaitResult, WaitDerived} from "./type.js"
+import {Wait, WaitResult, Waiter} from "./type.js"
 
 export function wait<Value, E = unknown>(
 		input: Promise<Value> | (() => Promise<Value>),
@@ -24,7 +24,7 @@ export function waitFormal<Value, E = unknown>(
 
 function waitFormalPromise<Value, E = unknown>(promise: Promise<Result<Value, E>>) {
 	const $wait = signal<Wait<Value, E>>(makeWait<Value, E>())
-	const $derived = derived(() => $wait()) as WaitDerived<Value, E>
+	const $derived = derived(() => $wait()) as Waiter<Value, E>
 
 	$derived.result = promise.then(result => {
 		const r: WaitResult<Value, E> = {done: true, ...result}

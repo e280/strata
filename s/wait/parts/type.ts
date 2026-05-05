@@ -11,7 +11,7 @@ export type Wait<Value, E = unknown> =
 	| WaitPending
 	| WaitResult<Value, E>
 
-export type WaitDerived<Value, E = unknown> = Derived<Wait<Value, E>> & {
+export type Waiter<Value, E = unknown> = Derived<Wait<Value, E>> & {
 	ready: Promise<Value | undefined>
 	result: Promise<WaitResult<Value, E>>
 }
