@@ -1,63 +1,80 @@
 
 import {GMap} from "@e280/stz"
-import {tracker} from "../../tracker/tracker.js"
+import {batch} from "../batch.js"
+import {tracker} from "../../tracker/global.js"
 
 export class RMap<K, V> extends GMap<K, V> {
+
+	//
+	// reading
+	//
+
 	get size() {
-		tracker.notifyRead(this)
+		tracker.read(this)
 		return super.size
 	}
 
 	;[Symbol.iterator]() {
-		tracker.notifyRead(this)
+		tracker.read(this)
 		return super[Symbol.iterator]()
 	}
 
+	forEach(callbackFn: (value: V, key: K, map: RMap<K, V>) => void) {
+		tracker.read(this)
+		for (const [key, value] of this)
+			callbackFn(value, key, this)
+		return this
+	}
+
 	keys() {
-		tracker.notifyRead(this)
+		tracker.read(this)
 		return super.keys()
 	}
 
 	values() {
-		tracker.notifyRead(this)
+		tracker.read(this)
 		return super.values()
 	}
 
 	entries() {
-		tracker.notifyRead(this)
+		tracker.read(this)
 		return super.entries()
 	}
 
-	forEach(callbackFn: (value: V, key: K, map: Map<K, V>) => void) {
-		tracker.notifyRead(this)
-		return super.forEach(callbackFn)
-	}
-
 	has(key: K) {
-		tracker.notifyRead(this)
+		tracker.read(this)
 		return super.has(key)
 	}
 
 	get(key: K) {
-		tracker.notifyRead(this)
+		tracker.read(this)
 		return super.get(key)
 	}
 
+	//
+	// writing
+	//
+
 	set(key: K, value: V) {
-		const r = super.set(key, value)
-		tracker.notifyWrite(this)
-		return r
+		super.set(key, value)
+		tracker.write(this)
+		return this
 	}
 
 	delete(key: K) {
-		const r = super.delete(key)
-		tracker.notifyWrite(this)
-		return r
+		const ret = super.delete(key)
+		tracker.write(this)
+		return ret
+	}
+
+	setEntries(entries: Iterable<[K, V]>) {
+		return batch(() => super.setEntries(entries))
 	}
 
 	clear() {
 		super.clear()
-		tracker.notifyWrite(this)
+		tracker.write(this)
+		return this
 	}
 }
 

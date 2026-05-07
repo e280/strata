@@ -1,6 +1,6 @@
 {
 	"name": "@e280/strata",
-	"version": "0.3.5",
+	"version": "0.4.0-next.6",
 	"description": "state management",
 	"license": "MIT",
 	"author": "Chase Moskal <chasemoskal@gmail.com>",
@@ -12,6 +12,7 @@
 	],
 	"exports": {
 		".": "./x/index.js",
+		"./bindings": "./x/bindings/index.js",
 		"./prism": "./x/prism/index.js",
 		"./signals": "./x/signals/index.js",
 		"./tracker": "./x/tracker/index.js",
@@ -24,7 +25,7 @@
 		"count": "find s -path '*/_archive' -prune -o -name '*.ts' -exec wc -l {} +"
 	},
 	"dependencies": {
-		"@e280/stz": "^0.2.35"
+		"@e280/stz": "^0.2.36"
 	},
 	"devDependencies": {
 		"@e280/octo": "^0.1.1",

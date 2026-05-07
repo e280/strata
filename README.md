@@ -16,7 +16,7 @@
 
 🚦 [**#signals,**](#signals) sweet little bundles of state  
 🔮 [**#prism,**](#prism) bigger centralized state trees  
-⌛ [**#wait,**](#wait) representing async operations  
+⌛ [**#wait,**](#wait) async state helpers *(think loading spinners)*  
 🪄 [**#tracker,**](#tracker) agnostic reactivity integration hub  
 ⚛️ [**#react,**](#react) optional bindings for react  
 
@@ -30,101 +30,70 @@
 > *reactive bundles of joy*
 
 ```ts
-import {signal, effect, derived, lazy} from "@e280/strata"
+import {signal, derived, effect, batch} from "@e280/strata"
 ```
 
-### 🚦 each signal holds a value
-- **make signal**
+### 🚦 signal
+- **a signal holds a value**
   ```ts
-  const $count = signal(0)
+  const $count = signal(1)
   ```
-  > *maybe you like the `$` prefix convention for signals?*
-- **read signal**
+  > *we kinda like the `$` convention for signals*
+- **read the signal**
   ```ts
-  $count() // 0
+  $count() // 1
   ```
-- **write signal**
+- **write the signal**
   ```ts
-  $count(1)
+  $count(2)
   ```
-- 🤯 **await all downstream effects**
-  ```ts
-  await $count(2)
-  ```
-  > *this is supposed to impress you*
 
-### 🚦 pick your poison
-- **signal hipster-fn syntax**
+### 🚦 derived
+- **combine signals like a formula**
   ```ts
-  $count()        // read
-  await $count(2) // write
+  const $alpha = signal(1)
+  const $bravo = signal(10)
+  const $product = derived(() => $alpha() * $bravo())
   ```
-- **signal get/set syntax**
+- **it automatically updates**
   ```ts
-  $count.get()        // read
-  await $count.set(2) // write
+  $product() // 10
+  $alpha(2)
+  $product() // 🪄 20
   ```
-- **signal .value accessor syntax**
-  ```ts
-  $count.value     // read
-  $count.value = 2 // write
-  ```
-  value pattern is super nice for these vibes
-  ```ts
-  $count.value++
-  $count.value += 1
-  ```
+- **btw,**  
+  deriveds are lazy, only run the fn when demanded.  
+  also, they have a `.dispose()` fn if you need to stop them.  
 
 ### 🚦 effects
-- **effects run when the relevant signals change**
+- **effects run immediately, then again when relevant signals change**
   ```ts
   effect(() => console.log($count()))
-    // 1
+    // 2
     // the system detects '$count' is relevant
 
-  $count.value++
-    // 2
+  $count(3)
+    // 3
     // when $count is changed, the effect fn is run
   ```
+- **btw,**  
+  effect returns a dispose fn if you need to stop it.  
 
-### 🚦 .on listeners
-- **yes, you can do direct callbacks to listen for changes**
+### 🚦 batch
+- **optimize multiple writes into one fat update**
   ```ts
-  const off = $count.on(count => console.log(`callback ${count}`))
-
-  $count.value++
-    // "callback 3"
-
-  off()
-    // stop listening
+  // call downstream effects only once
+  batch(() => {
+    $count(4)
+    $count(5)
+    $count(6)
+  })
   ```
 
-### 🚦 derived signals
-- **derived,** for combining signals, like a formula
-  ```ts
-  const $a = signal(1)
-  const $b = signal(10)
-  const $product = derived(() => $a() * $b())
-
-  $product() // 10
-
-  // change a dependency,
-  // and the derived signal is automatically updated
-  await $a(2)
-
-  $product() // 20
-  ```
-- **lazy,** for making special optimizations.  
-  it's like derived, except it cannot trigger effects,  
-  because it's so damned lazy, it only computes the value on read, and only when necessary.  
-  > *i repeat: lazy signals cannot trigger effects!*
-
-### 🚦 types and such
-- **`Signaly<Value>`** — can be `Signal<Value>` or `Derived<Value>` or `Lazy<Value>`
-  - these are types for the core primitive classes
-- **the classes are funky**
-  - Signal, Derived, and Lazy classes cannot be subclassed or extended, due to spooky magic we've done to make the instances callable as functions (hipster syntax).
-  - however, at least `$count instanceof Signal` works, so at least that's working.
+### 🚦 types
+- **`Signal<Value>`** — it's a signal fn
+- **`Derived<Value>`**  — it's a derived fn
+- **`Valuable<Value>`** — could be `Signal<Value>` or `Derived<Value>`
 
 
 
@@ -166,16 +135,21 @@ import {signal, effect, derived, lazy} from "@e280/strata"
     const person = snacks.lens(state => state.person)
     ```
     - you can lens another lens
-- **lenses provide snapshot access to state**
+- **`lens.state` is a cloned mutable snapshot with chill typings**
     ```ts
-    // .state is a mutable snapshot with relaxed typings
     snacks.state.peanuts // 8
     person.state.name // "chase"
 
-    // .frozen is an immutable snapshot with strict typings
-    snacks.frozen.peanuts // 8
+    snacks.state.peanuts++
+      // ⛔ attempted state mutation: silently ignored
+    ```
+- **`lens.frozen` provides a deep-frozen immutable snapshot with strict typings**
+    ```ts
+    snacks.frozen.peanuts // 8 (readonly)
+    person.frozen.name // "chase" (readonly)
+
     snacks.frozen.peanuts++
-      // ⛔ error: casual mutations forbidden
+      // ⛔ attempted frozen mutation: throw errors
     ```
 - **only formal mutations can actually change state**
     ```ts
@@ -186,7 +160,7 @@ import {signal, effect, derived, lazy} from "@e280/strata"
     ```
 - **array mutations are unironically based, actually**
     ```ts
-    await snacks.mutate(state => state.bag.push("salt"))
+    snacks.mutate(state => state.bag.push("salt"))
     ```
 
 ### 🔮 chrono for time travel
@@ -269,99 +243,74 @@ import {signal, effect, derived, lazy} from "@e280/strata"
 <a id="wait"></a>
 
 ## 🍋 strata wait
-> *represent async operations*
+> *tiny async state helpers*
 
-- wait is designed to vibe with [stz#ok](https://github.com/e280/stz#ok)
+it's about states like *pending, ok, err.*  
+wait extends [stz's ok/err](https://github.com/e280/stz#ok) toolkit, and it's mostly for showing little loading spinners in your ui.  
+
+### ⌛ good things come to those who wait
+- **import stuff**
     ```ts
-    import {ok, err} from "@e280/stz"
+    import {ok, err, nap} from "@e280/stz"
+    import {wait, waitFormal} from "@e280/strata"
     ```
-
-### ⌛ wait primitives
-- imports
+- **wrap any async operation and get a "Waiter"**
     ```ts
-    import {newWait} from "@e280/strata"
-    ```
-- helpers to create a `Wait`
-    ```ts
-    // loading
-    newWait<number>()
-      // {done: false}
-
-    // done, ok
-    newWait(ok(123))
-      // {done: true, ok: true, value: 123}
-
-    // done, err
-    newWait(err("uh oh"))
-      // {done: true, ok: false, error: "uh oh"}
-    ```
-
-### ⌛ make a magic reactive wait signal
-- imports
-    ```ts
-    import {nap} from "@e280/stz"
-    import {wait} from "@e280/strata"
-    ```
-- it's a derived signal (readonly) that tracks the result of an async fn or promise
-    ```ts
+    // wrap any async operation in a fancy wait
     const $wait = wait(async() => {
-      await nap(100) // do some async stuff
-      return 123 // return your value
+      await nap(100)
+      if (Math.random() > 0.5) return 123
+      else throw new Error("bad luck!")
     })
     ```
-- read the current state from the signal
+    - btw you can pass a promise instead of an async fn
+- **check if it's done**
     ```ts
-    $wait()
-      // {done: false}
+    console.log($wait().done)
+      // false -- sorry bro, its not ready yet
     ```
-- later, when it's ready
+- **okay, we can actually await for the result**
     ```ts
-    await $wait.ready
-      // 123
-      // undefined if there was an error
+    const result = await $wait.result
 
-    $wait()
-      // {done: true, ok: true, value: 123}
+    if (result.ok)
+      console.log(result.value)
+        // 123
+    else
+      console.error(result.error)
+        // Error: bad luck!
     ```
 
-### ⌛ persnickety belt-and-suspenders mode
-- imports
+### ⌛ waitFormal is persnickety belt-and-suspenders mode
+- **you can get super explicit about the types**
     ```ts
-    import {waitResult} from "@e280/strata"
-    ```
-- do formal rigid error handling because you're super strict and serious
-    ```ts
-    const $wait = waitResult<number, "unlikely lol" | "bad roll">(async() => {
+    const $wait = waitFormal<number, "unlucky" | "bad roll">(async() => {
       if (Math.random() > 0.5)
         return ok(123)
 
       if (Math.random() < 0.01)
-        return err("unlikely lol")
+        return err("unlucky")
 
       else
         return err("bad roll")
     })
     ```
-- listen for the formal result
-    ```ts
-    await $wait.result
-      // {done: true, ok: true, value: 123} or
-      // {done: true, ok: false, error: "bad roll"}
-    ```
-- btw, wait and waitResult will actually accept a promise if you like
-    ```ts
-    const $wait = wait(Promise.resolve(123))
-    ```
 
-### ⌛ wait helpers
-- check the state
+### ⌛ wait, there's more
+- maker
+    ```ts
+    makeWait<number>() // pending
+    makeWait(ok(123))
+    makeWait(err("uh oh"))
+    ```
+- status checkers
     ```ts
     isWaitPending($wait())
-    isWaitDone($wait())
+    isWaitDone($wait()) // ok or err
     isWaitOk($wait())
     isWaitErr($wait())
     ```
-- get the finished value or error
+- value grabbers
     ```ts
     waitGetOk($wait()) // 123 | undefined
     waitNeedOk($wait()) // 123 (or throws an error)
@@ -370,7 +319,7 @@ import {signal, effect, derived, lazy} from "@e280/strata"
     waitGetErr($wait()) // "bad roll" | undefined
     waitNeedErr($wait()) // "bad roll" (or throws an error)
     ```
-- select based on the state
+- quick selector
     ```ts
     const text = waitSelect($wait(), {
       pending: () => "still loading...",
@@ -392,71 +341,40 @@ import {signal, effect, derived, lazy} from "@e280/strata"
 import {tracker} from "@e280/strata/tracker"
 ```
 
-if you're some kinda framework author, making a new ui thing, or a new state concept -- then you can use the `tracker` to jack into the strata reactivity system, and suddenly your stuff will be fully strata-compatible, reactin' and triggerin' with the best of 'em.
+this is the inner sanctum of strata. use the tracker to jack into the reactivity system, you can make anything fully strata-compatible and you'll be reactin' and triggerin' with the best of 'em. the tracker is also what you'll need if you're trying to create bindings for your own frontend framework to trigger your ui to rerender and stuff.
 
-the tracker is agnostic and independent, and doesn't know about strata specifics like signals or trees -- and it would be perfectly reasonable for you to use strata solely to integrate with the tracker, thus making your stuff reactivity-compatible with other libraries that use the tracker, like [sly](https://github.com/e280/sly).
+### 🪄 invent your own novel state concept
+- let's invent a very simple thing, so you can see how simple the tracker really is.
+  ```ts
+  export class BoomerSignal<Value> {
+    constructor(private value: Value) {}
 
-note, the *items* that the tracker tracks can be any object, or symbol.. the tracker cares about the identity of the item, not the value (tracker holds them in a WeakMap to avoid creating a memory leak)..
-
-### 🪄 integrate your ui's reactivity
-- we need to imagine you have some prerequisites
-    - `myRenderFn` -- your fn that might access some state stuff
-    - `myRerenderFn` -- your fn that is called when some state stuff changes
-    - it's okay if these are the same fn, but they don't have to be
-- `tracker.observe` to check what is touched by a fn
-    ```ts
-    // 🪄 run myRenderFn and collect seen items
-    const {seen, result} = tracker.observe(myRenderFn)
-
-    // a set of items that were accessed during myRenderFn
-    seen
-
-    // the value returned by myRenderFn
-    result
-    ```
-- it's a good idea to debounce your rerender fn
-    ```ts
-    import {microbounce} from "@e280/stz"
-    const myDebouncedRerenderFn = microbounce(myRerenderFn)
-    ```
-- `tracker.subscribe` to respond to changes
-    ```ts
-    const stoppers: (() => void)[] = []
-
-    // loop over every seen item
-    for (const item of seen) {
-
-      // 🪄 react to changes
-      const stop = tracker.subscribe(item, myDebouncedRerenderFn)
-
-      stoppers.push(stop)
+    get() {
+      tracker.read(this) // 🪄 inform tracker our thing was accessed
+      return this.value
     }
-
-    const stopReactivity = () => stoppers.forEach(stop => stop())
-    ```
-
-### 🪄 integrate your own novel state concepts
-- as an example, we'll invent the simplest possible signal
-    ```ts
-    export class SimpleSignal<Value> {
-      constructor(private value: Value) {}
-
-      get() {
-
-        // 🪄 tell the tracker this signal was accessed
-        tracker.notifyRead(this)
-
-        return this.value
-      }
-
-      async set(value: Value) {
-        this.value = value
-
-        // 🪄 tell the tracker this signal has changed
-        await tracker.notifyWrite(this)
-      }
+    
+    set(value: Value) {
+      this.value = value
+      tracker.write(this) // 🪄 inform tracker our thing was changed
     }
-    ```
+  }
+  ```
+- boom, that's it! now we have a new reactive thing we can use, and it'll rerender our ui or whatever.
+  ```ts
+  const $count = new BoomerSignal(1)
+
+  effect(() => console.log($count.get()))
+    // 1
+
+  $count.set(2)
+    // 2
+  ```
+
+### 🪄 integrate your ui framework for auto-rerendering
+- use `tracker.observe` to check what is touched by a fn
+- use `tracker.subscribe` to subscribe to the seen items that `observe` returns
+- see the [source code](./tracker/tracker.ts)
 
 
 
@@ -469,49 +387,51 @@ note, the *items* that the tracker tracks can be any object, or symbol.. the tra
 ### ⚛️ setup your `strata.ts` module
 ```ts
 import * as react from "react"
-import {react as strata} from "@e280/strata"
+import {reactBindings} from "@e280/strata"
 
 export const {
   component,
-  useStrata,
+  useTracked,
   useOnce,
   useSignal,
   useDerived,
-} = strata(react)
+} = reactBindings(react)
 ```
 
 ### ⚛️ `component` enables fully automatic reactive re-rendering
 ```ts
+import {signal} from "@e280/strata"
 import {component} from "./strata.js"
 
 const $count = signal(0)
 
 export const MyCounter = component(() => {
-  const add = () => $count.value++
+  const add = () => $count($count() + 1)
   return <button onClick={add}>{$count()}</button>
 })
 ```
 
-### ⚛️ `useStrata` for a manual hands-on approach (plays nicer with hmr)
+### ⚛️ `useTracked` for a manual hands-on approach (plays nicer with hmr)
 ```ts
-import {useStrata} from "./strata.js"
+import {signal} from "@e280/strata"
+import {useTracked} from "./strata.js"
 
 const $count = signal(0)
 
 export const MyCounter = () => {
-  const count = useStrata(() => $count())
-  const add = () => $count.value++
+  const count = useTracked(() => $count())
+  const add = () => $count($count() + 1)
   return <button onClick={add}>{count}</button>
 }
 ```
 
-### ⚛️ `useSignal` for local component state
+### ⚛️ `useSignal` for local component state (and `useDerived`)
 ```ts
 import {useSignal} from "./strata.js"
 
 export const MyCounter = () => {
   const $count = useSignal(0)
-  const add = () => $count.value++
+  const add = () => $count($count() + 1)
   return <button onClick={add}>{$count()}</button>
 }
 ```

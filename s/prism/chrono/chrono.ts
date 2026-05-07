@@ -42,13 +42,13 @@ export class Chrono<State> implements LensLike<State> {
 	}
 
 	/** progress forwards, depositing history into the past */
-	async mutate<R>(fn: (state: State) => R): Promise<R> {
+	mutate<R>(fn: (state: State) => R): R {
 		return this.basis.mutate(chronicle => this.#mut(chronicle, fn))
 	}
 
 	/** step backwards into the past, by n steps */
-	async undo(n = 1) {
-		await this.basis.mutate(chronicle => {
+	undo(n = 1) {
+		this.basis.mutate(chronicle => {
 			const snapshots = chronicle.past.slice(-n)
 			if (snapshots.length >= n) {
 				const oldPresent = chronicle.present
@@ -60,8 +60,8 @@ export class Chrono<State> implements LensLike<State> {
 	}
 
 	/** step forwards into the future, by n steps */
-	async redo(n = 1) {
-		await this.basis.mutate(chronicle => {
+	redo(n = 1) {
+		this.basis.mutate(chronicle => {
 			const snapshots = chronicle.future.slice(0, n)
 			if (snapshots.length >= n) {
 				const oldPresent = chronicle.present
@@ -73,8 +73,8 @@ export class Chrono<State> implements LensLike<State> {
 	}
 
 	/** wipe past and future snapshots */
-	async wipe() {
-		await this.basis.mutate(chronicle => {
+	wipe() {
+		this.basis.mutate(chronicle => {
 			chronicle.past = []
 			chronicle.future = []
 		})

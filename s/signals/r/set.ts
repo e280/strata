@@ -1,43 +1,59 @@
 
 import {GSet} from "@e280/stz"
-import {tracker} from "../../tracker/tracker.js"
+import {tracker} from "../../tracker/global.js"
 
-export class RSet<T> extends GSet<T> {
+export class RSet<V> extends GSet<V> {
+
+	//
+	// reading
+	//
+
 	get size() {
-		tracker.notifyRead(this)
+		tracker.read(this)
 		return super.size
 	}
 
 	;[Symbol.iterator]() {
-		tracker.notifyRead(this)
+		tracker.read(this)
 		return super[Symbol.iterator]()
 	}
 
-	values() {
-		tracker.notifyRead(this)
-		return super.values()
-	}
-
-	has(item: T) {
-		tracker.notifyRead(this)
-		return super.has(item)
-	}
-
-	add(item: T) {
-		super.add(item)
-		tracker.notifyWrite(this)
+	forEach(callbackFn: (value: V, value2: V, set: RSet<V>) => void) {
+		tracker.read(this)
+		for (const value of this)
+			callbackFn(value, value, this)
 		return this
 	}
 
-	delete(item: T) {
-		const r = super.delete(item)
-		tracker.notifyWrite(this)
-		return r
+	values() {
+		tracker.read(this)
+		return super.values()
+	}
+
+	has(item: V) {
+		tracker.read(this)
+		return super.has(item)
+	}
+
+	//
+	// writing
+	//
+
+	add(item: V) {
+		super.add(item)
+		tracker.write(this)
+		return this
+	}
+
+	delete(item: V) {
+		const ret = super.delete(item)
+		tracker.write(this)
+		return ret
 	}
 
 	clear() {
 		super.clear()
-		tracker.notifyWrite(this)
+		tracker.write(this)
 		return this
 	}
 }

@@ -2,30 +2,30 @@
 import {suite, test, expect} from "@e280/science"
 
 import {Prism} from "./prism.js"
+import {effect} from "../signals/effect.js"
 import {Chrono} from "./chrono/chrono.js"
 import {chronicle} from "./chrono/chronicle.js"
-import {effect} from "../signals/effect/effect.js"
+import { batch } from "../signals/batch.js"
 
 export default suite({
 	"prism": suite({
 		"get/set state": test(async() => {
 			const prism = new Prism({count: 1})
 			expect(prism.get().count).is(1)
-			await prism.set({count: 2})
+			prism.set({count: 2})
 			expect(prism.get().count).is(2)
 		}),
 
 		"get/set state can trigger effects": test(async() => {
 			const prism = new Prism({count: 1})
 			let triggered = 0
-			const stop = effect(() => {
+			effect(() => {
 				void prism.get().count
 				triggered++
 			})
 			expect(triggered).is(1)
-			await prism.set({count: 2})
+			prism.set({count: 2})
 			expect(triggered).is(2)
-			stop()
 		}),
 	}),
 
@@ -45,16 +45,16 @@ export default suite({
 		"proper mutation": test(async() => {
 			const prism = new Prism({data: {count: 1}})
 			const lens = prism.lens(s => s.data)
-			await lens.mutate(s => s.count++)
+			lens.mutate(s => s.count++)
 			expect(lens.frozen.count).is(2)
-			await lens.mutate(s => s.count++)
+			lens.mutate(s => s.count++)
 			expect(lens.frozen.count).is(3)
 		}),
 
 		"state after mutation is frozen": test(async() => {
 			const prism = new Prism({data: {count: 1}})
 			const lens = prism.lens(s => s)
-			await lens.mutate(s => s.data = {count: 2})
+			lens.mutate(s => s.data = {count: 2})
 			expect(lens.frozen.data.count).is(2)
 			expect(() => (lens.frozen.data as any).count++).throws()
 		}),
@@ -63,48 +63,49 @@ export default suite({
 			const prism = new Prism({data: {count: 1}})
 			const lens = prism.lens(s => s.data)
 			let happenings = 0
-			const stop = effect(() => {
+			effect(() => {
 				void lens.frozen.count
 				happenings++
 			})
-			await lens.mutate(s => s.count++)
+			lens.mutate(s => s.count++)
 			expect(happenings).is(2)
-			stop()
 		}),
 
-		"lens.on is debounced": test(async() => {
+		"effects can be batched": test(async() => {
 			const prism = new Prism({data: {count: 1}})
 			const lens = prism.lens(s => s.data)
 			let happenings = 0
-			const stop = lens.on(() => void happenings++)
-			await Promise.all([
-				lens.mutate(s => s.count++),
-				lens.mutate(s => s.count++),
-			])
-			expect(happenings).is(1)
-			stop()
+			effect(() => {
+				void lens.frozen.count
+				happenings++
+			})
+			batch(() => {
+				lens.mutate(s => s.count++)
+				lens.mutate(s => s.count++)
+			})
+			expect(happenings).is(2)
 		}),
 
 		"array pushes are reactive": test(async() => {
 			const prism = new Prism({data: {array: ["lol"]}})
 			const lens = prism.lens(s => s.data)
 			let happenings = 0
-			const stop = lens.on(() => void happenings++)
-			await lens.mutate(s => s.array.push("lmao"))
-			expect(happenings).is(1)
+			effect(() => {
+				void lens.state
+				happenings++
+			})
+			lens.mutate(s => s.array.push("lmao"))
+			expect(happenings).is(2)
 			expect(lens.frozen.array.length).is(2)
-			stop()
 		}),
 
 		"sync coherence": test(async() => {
 			const prism = new Prism({data: {count: 1}})
 			const lens = prism.lens(s => s.data)
-			const p1 = lens.mutate(s => s.count++)
+			lens.mutate(s => s.count++)
 			expect(lens.frozen.count).is(2)
-			const p2 = lens.mutate(s => s.count++)
+			lens.mutate(s => s.count++)
 			expect(lens.frozen.count).is(3)
-			await p1
-			await p2
 		}),
 
 		"nullable selector": test(async() => {
@@ -112,7 +113,7 @@ export default suite({
 			const prism = new Prism<S>({a: {b: {count: 1}}})
 			const lens = prism.lens(s => s.a?.b)
 			expect(lens.frozen?.count).is(1)
-			await prism.set({a: undefined})
+			prism.set({a: undefined})
 			expect(lens.frozen?.count).is(undefined)
 		}),
 
@@ -129,11 +130,11 @@ export default suite({
 			const prism = new Prism({a: {b: {count: 1}}})
 			const lensA = prism.lens(s => s.a)
 			const lensB = lensA.lens(s => s.b)
-			await lensB.mutate(s => s.count++)
+			lensB.mutate(s => s.count++)
 			expect(prism.get().a.b.count).is(2)
 			expect(lensA.frozen.b.count).is(2)
 			expect(lensB.frozen.count).is(2)
-			await lensA.mutate(s => s.b = {count: 3})
+			lensA.mutate(s => s.b = {count: 3})
 			expect(prism.get().a.b.count).is(3)
 			expect(lensA.frozen.b.count).is(3)
 			expect(lensB.frozen.count).is(3)
@@ -145,13 +146,17 @@ export default suite({
 			const lensB = prism.lens(s => s.b)
 			let happeningsA = 0
 			let happeningsB = 0
-			const stopA = lensA.on(() => void happeningsA++)
-			const stopB = lensB.on(() => void happeningsA++)
-			await lensA.mutate(s => s.count++)
-			expect(happeningsA).is(1)
-			expect(happeningsB).is(0)
-			stopA()
-			stopB()
+			effect(() => {
+				void lensA.state
+				happeningsA++
+			})
+			effect(() => {
+				void lensB.state
+				happeningsB++
+			})
+			lensA.mutate(s => s.count++)
+			expect(happeningsA).is(2)
+			expect(happeningsB).is(1)
 		}),
 
 		"outside mutations ignored for effects": test(async() => {
@@ -160,19 +165,17 @@ export default suite({
 			const lensB = prism.lens(s => s.b)
 			let happeningsA = 0
 			let happeningsB = 0
-			const stopA = effect(() => {
+			effect(() => {
 				void lensA.frozen.count
 				happeningsA++
 			})
-			const stopB = effect(() => {
+			effect(() => {
 				void lensB.frozen.count
 				happeningsB++
 			})
-			await lensA.mutate(s => s.count++)
+			lensA.mutate(s => s.count++)
 			expect(happeningsA).is(2)
 			expect(happeningsB).is(1)
-			stopA()
-			stopB()
 		}),
 	}),
 
@@ -188,9 +191,9 @@ export default suite({
 			const prism = new Prism({data: chronicle({count: 1})})
 			const lens = prism.lens(s => s.data)
 			const chrono = new Chrono(64, lens)
-			await chrono.mutate(s => s.count++)
+			chrono.mutate(s => s.count++)
 			expect(chrono.frozen.count).is(2)
-			await chrono.mutate(s => s.count++)
+			chrono.mutate(s => s.count++)
 			expect(chrono.frozen.count).is(3)
 		}),
 
@@ -200,17 +203,17 @@ export default suite({
 			const chrono = new Chrono(64, lens)
 			expect(chrono.undoable).is(0)
 			expect(chrono.redoable).is(0)
-			await chrono.mutate(s => s.count++)
+			chrono.mutate(s => s.count++)
 			expect(chrono.undoable).is(1)
-			await chrono.mutate(s => s.count++)
+			chrono.mutate(s => s.count++)
 			expect(chrono.undoable).is(2)
-			await chrono.undo()
+			chrono.undo()
 			expect(chrono.undoable).is(1)
 			expect(chrono.redoable).is(1)
-			await chrono.undo()
+			chrono.undo()
 			expect(chrono.undoable).is(0)
 			expect(chrono.redoable).is(2)
-			await chrono.redo()
+			chrono.redo()
 			expect(chrono.undoable).is(1)
 			expect(chrono.redoable).is(1)
 		}),
@@ -220,10 +223,10 @@ export default suite({
 			const lens = prism.lens(s => s.data)
 			const chrono = new Chrono(64, lens)
 
-			await chrono.mutate(s => s.count++)
+			chrono.mutate(s => s.count++)
 			expect(chrono.frozen.count).is(2)
 
-			await chrono.undo()
+			chrono.undo()
 			expect(chrono.frozen.count).is(1)
 		}),
 
@@ -244,13 +247,13 @@ export default suite({
 			const lens = prism.lens(s => s.data)
 			const chrono = new Chrono(64, lens)
 
-			await chrono.mutate(s => s.count++)
+			chrono.mutate(s => s.count++)
 			expect(chrono.frozen.count).is(2)
 
-			await chrono.undo()
+			chrono.undo()
 			expect(chrono.frozen.count).is(1)
 
-			await chrono.redo()
+			chrono.redo()
 			expect(chrono.frozen.count).is(2)
 		}),
 
@@ -259,30 +262,30 @@ export default suite({
 			const lens = prism.lens(s => s.data)
 			const chrono = new Chrono(64, lens)
 
-			await chrono.mutate(s => s.count++)
-			await chrono.mutate(s => s.count++)
-			await chrono.mutate(s => s.count++)
+			chrono.mutate(s => s.count++)
+			chrono.mutate(s => s.count++)
+			chrono.mutate(s => s.count++)
 			expect(chrono.frozen.count).is(4)
 
-			await chrono.undo()
+			chrono.undo()
 			expect(chrono.frozen.count).is(3)
 
-			await chrono.undo()
+			chrono.undo()
 			expect(chrono.frozen.count).is(2)
 
-			await chrono.redo()
+			chrono.redo()
 			expect(chrono.frozen.count).is(3)
 
-			await chrono.redo()
+			chrono.redo()
 			expect(chrono.frozen.count).is(4)
 
-			await chrono.undo()
+			chrono.undo()
 			expect(chrono.frozen.count).is(3)
 
-			await chrono.undo()
+			chrono.undo()
 			expect(chrono.frozen.count).is(2)
 
-			await chrono.undo()
+			chrono.undo()
 			expect(chrono.frozen.count).is(1)
 		}),
 
@@ -290,7 +293,7 @@ export default suite({
 			const prism = new Prism({data: chronicle({count: 1})})
 			const lens = prism.lens(s => s.data)
 			const chrono = new Chrono(64, lens)
-			await chrono.undo()
+			chrono.undo()
 			expect(chrono.frozen.count).is(1)
 		}),
 
@@ -298,7 +301,7 @@ export default suite({
 			const prism = new Prism({data: chronicle({count: 1})})
 			const lens = prism.lens(s => s.data)
 			const chrono = new Chrono(64, lens)
-			await chrono.redo()
+			chrono.redo()
 			expect(chrono.frozen.count).is(1)
 		}),
 
@@ -306,11 +309,11 @@ export default suite({
 			const prism = new Prism({data: chronicle({count: 1})})
 			const lens = prism.lens(s => s.data)
 			const chrono = new Chrono(64, lens)
-			await chrono.mutate(s => s.count++)
-			await chrono.mutate(s => s.count++)
-			await chrono.mutate(s => s.count++)
+			chrono.mutate(s => s.count++)
+			chrono.mutate(s => s.count++)
+			chrono.mutate(s => s.count++)
 			expect(chrono.frozen.count).is(4)
-			await chrono.undo(2)
+			chrono.undo(2)
 			expect(chrono.frozen.count).is(2)
 		}),
 
@@ -318,13 +321,13 @@ export default suite({
 			const prism = new Prism({data: chronicle({count: 1})})
 			const lens = prism.lens(s => s.data)
 			const chrono = new Chrono(64, lens)
-			await chrono.mutate(s => s.count++)
-			await chrono.mutate(s => s.count++)
-			await chrono.mutate(s => s.count++)
+			chrono.mutate(s => s.count++)
+			chrono.mutate(s => s.count++)
+			chrono.mutate(s => s.count++)
 			expect(chrono.frozen.count).is(4)
-			await chrono.undo(2)
+			chrono.undo(2)
 			expect(chrono.frozen.count).is(2)
-			await chrono.redo(2)
+			chrono.redo(2)
 			expect(chrono.frozen.count).is(4)
 		}),
 
@@ -333,9 +336,9 @@ export default suite({
 			const chrono = new Chrono(64, prism.lens(s => s.data))
 			const sublens = chrono.lens(s => s.a)
 			expect(sublens.frozen.count).is(1)
-			await sublens.mutate(s => s.count++)
+			sublens.mutate(s => s.count++)
 			expect(sublens.frozen.count).is(2)
-			await chrono.undo()
+			chrono.undo()
 			expect(sublens.frozen.count).is(1)
 		}),
 	}),
