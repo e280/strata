@@ -114,6 +114,78 @@ export default science.suite({
 		expect(effectCalls).is(2)
 	}),
 
+	"derived tracks dynamic dependencies": test(async() => {
+		const $useAlpha = signal(true)
+		const $alpha = signal(2)
+		const $bravo = signal(10)
+		let calls = 0
+
+		const $derived = derived(() => {
+			calls++
+			return $useAlpha()
+				? $alpha()
+				: $bravo()
+		})
+
+		expect($derived()).is(2)
+		expect(calls).is(1)
+
+		$bravo(11)
+		expect($derived()).is(2)
+		expect(calls).is(1)
+
+		$useAlpha(false)
+		expect($derived()).is(11)
+		expect(calls).is(2)
+
+		$alpha(3)
+		expect($derived()).is(11)
+		expect(calls).is(2)
+
+		$bravo(12)
+		expect($derived()).is(12)
+		expect(calls).is(3)
+	}),
+
+	"derived remains subscribed after a thrown recompute": test(async() => {
+		const $throws = signal(false)
+		const $count = signal(1)
+		const values: (number | "err")[] = []
+
+		const $derived = derived(() => {
+			if ($throws())
+				throw new Error("boom")
+			return $count() * 2
+		})
+
+		effect(() => {
+			try {
+				values.push($derived())
+			}
+			catch {
+				values.push("err")
+			}
+		})
+
+		expect(values.join(",")).is("2")
+
+		$throws(true)
+		expect(values.join(",")).is("2,err")
+
+		$throws(false)
+		expect(values.join(",")).is("2,err,2")
+
+		$count(3)
+		expect(values.join(",")).is("2,err,2,6")
+	}),
+
+	"derived circular reads throw": test(async() => {
+		let $derived!: () => number
+		$derived = derived(() => $derived() + 1)
+
+		expect(() => $derived()).throws()
+	}),
+
 	"batching signal effects seems to work": test(async() => {
 		const $alpha = signal(2)
 		const $bravo = signal(10)
@@ -180,4 +252,3 @@ export default science.suite({
 		expect($count()).is(2)
 	}),
 })
-
