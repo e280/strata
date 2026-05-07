@@ -22,9 +22,11 @@ export function derived<Value>(fn: () => Value): Derived<Value> {
 	}
 
 	const compute = () => {
+		unwatch()
+		unwatch = () => {}
+
 		const watched = watch(fn, invalidate)
 
-		unwatch()
 		unwatch = watched.dispose
 
 		value = watched.value
