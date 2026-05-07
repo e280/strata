@@ -63,6 +63,17 @@ export default science.suite({
 		expect($derived()).is(30)
 	}),
 
+	"derived more": test(async() => {
+		const $alpha = signal(2)
+		const $bravo = signal(10)
+		const $derived = derived(() => $alpha() * $bravo())
+		expect($derived()).is(20)
+		$alpha(3)
+		expect($derived()).is(30)
+		$alpha(4)
+		expect($derived()).is(40)
+	}),
+
 	"derived is lazy": test(async() => {
 		const $alpha = signal(2)
 		const $bravo = signal(10)
