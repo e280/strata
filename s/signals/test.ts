@@ -203,6 +203,25 @@ export default science.suite({
 		expect(calls[0]).is(55)
 	}),
 
+	"nested batching is fine": test(async() => {
+		const $alpha = signal(2)
+		const $bravo = signal(10)
+		let calls: number[] = []
+		effect(() => calls.push($alpha() * $bravo()))
+		calls = []
+		batch(() => {
+			$alpha(3)
+			$alpha(4)
+			batch(() => {
+				$alpha(5)
+				$bravo(1)
+			})
+			$bravo(11)
+		})
+		expect(calls.length).is(1)
+		expect(calls[0]).is(55)
+	}),
+
 	"evil circularity is no problem": test(async() => {
 		const $alpha = signal(1)
 		let count = 0
