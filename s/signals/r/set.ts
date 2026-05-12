@@ -1,8 +1,7 @@
 
-import {GSet} from "@e280/stz"
 import {tracker} from "../../tracker/global.js"
 
-export class RSet<V> extends GSet<V> {
+export class RSet<V> extends Set<V> {
 
 	//
 	// reading

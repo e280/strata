@@ -1,5 +1,5 @@
 
-import {GWeakMap} from "@e280/stz"
+import {guarantee} from "@e280/stz"
 
 export type Trackable = object | symbol
 
@@ -9,7 +9,7 @@ export type Trackable = object | symbol
 export class Tracker<Item extends Trackable = any> {
 	#busy = new Set<() => void>()
 	#observationLayers: Set<Item>[] = []
-	#subscriptions = new GWeakMap<Item, Set<() => void>>()
+	#subscriptions = new WeakMap<Item, Set<() => void>>()
 
 	#batchDepth = 0
 	#batchPending = new Set<() => void>()
@@ -47,7 +47,7 @@ export class Tracker<Item extends Trackable = any> {
 
 	/** fn will be called when item changes */
 	subscribe(item: Item, fn: () => void) {
-		const fns = this.#subscriptions.guarantee(item, () => new Set())
+		const fns = guarantee(this.#subscriptions, item, () => new Set())
 		fns.add(fn)
 		return () => {
 			fns.delete(fn)

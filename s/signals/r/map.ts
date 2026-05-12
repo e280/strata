@@ -1,9 +1,7 @@
 
-import {GMap} from "@e280/stz"
-import {batch} from "../batch.js"
 import {tracker} from "../../tracker/global.js"
 
-export class RMap<K, V> extends GMap<K, V> {
+export class RMap<K, V> extends Map<K, V> {
 
 	//
 	// reading
@@ -65,10 +63,6 @@ export class RMap<K, V> extends GMap<K, V> {
 		const ret = super.delete(key)
 		tracker.write(this)
 		return ret
-	}
-
-	setEntries(entries: Iterable<[K, V]>) {
-		return batch(() => super.setEntries(entries))
 	}
 
 	clear() {
