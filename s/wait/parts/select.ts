@@ -4,18 +4,24 @@ import {isWaitOk, isWaitPending} from "./is.js"
 import {waitNeedErr, waitNeedOk} from "./get.js"
 
 export function waitSelect<Ret, Value, E = unknown>(wait: Wait<Value, E>, select: {
-		pending: () => Ret,
-		ok: (value: Value) => Ret
-		err: (error: E) => Ret
+		pending?: () => Ret
+		ok?: (value: Value) => Ret
+		err?: (error: E) => Ret
 	}) {
 
+	const {
+		pending = () => {},
+		ok = () => {},
+		err = () => {},
+	} = select
+
 	if (isWaitPending(wait))
-		return select.pending()
+		return pending()
 
 	else if (isWaitOk(wait))
-		return select.ok(waitNeedOk(wait))
+		return ok(waitNeedOk(wait))
 
 	else
-		return select.err(waitNeedErr(wait))
+		return err(waitNeedErr(wait))
 }
 

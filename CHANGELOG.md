@@ -8,6 +8,39 @@
 
 <br/>
 
+## v0.4
+
+### v0.4.0
+- 🟥 **huge core rewrite**
+  - 🟥 everything is now sync, not async anymore. stripped of all debouncing and async shenanigans, now calling `tracker.write` (and thus setting signals, updating prism state, etc) immediately executes all downstream subscribers without any delay. this greatly improves our ability to detect and prevent scary catastropic circular-loop crashes. this also avoids async fatigue spreading through your codebases. the downside is that this could lead to worse performance.
+  - 🍏 new `batch` fn helps you optimize performance -- batched tracker writes are deduped and flushed at the end of the batch, meaning, effects are only called once.
+- 🟥 **tracker**
+  - 🟥 ⚠️⚠️ global symbol changed from `e280.tracker` to `e280.tracker.2` -- this means strata v0.3 and v0.4 are treated like totally different state management libraries, they are FULLY incompatible, eg, if you have one dependency on strata 0.3 and another on 0.4, the `effect` from one will be blind to signals from the other.
+  - 🟥 renamed `tracker.notifyRead` to `tracker.read`
+  - 🟥 renamed `tracker.notifyWrite` to `tracker.write`
+- 🟥 **signals/derived/effects**
+  - 🟥 eliminated all the funky magic class+fn implementations for dead-simple minimal implementations... new signal module is 18 lines...
+  - 🟥 removed `$count.on` direct subscriptions -- just use effects
+  - 🟥 removed `$count.value` accessors -- just use hipster-fn syntax
+  - 🟥 removed `$count.get()` and `$count.set(v)` methods -- just use hipster-fn syntax
+  - 🟥 removed comparison logic, now all signal value setting always notifies the tracker, doesn't care if there was a real change
+  - 🟥 removed `lazy` completely removed -- obsoleted by superior new derived implementation that is lazy
+  - 🟥 `effect` is now simpler and only takes one simple callback fn
+  - 🟥 renamed type `Signaly` / `SignalyFn` to `Valuable`
+  - 🍏 new `afterEffect` takes a collector fn and responder fn like the old `effect` did
+- 🟥 **wait**
+  - 🟥 renamed `WaitDone` to `WaitResult` to better match ok/err/result
+  - 🟥 renamed `newWait` to `makeWait` because i like it more
+  - 🟥 renamed `WaitSignal` to `Waiter`
+  - 🟥 renamed `waitResult` to `waitFormal` because i said so
+- 🟥 **react bindings**
+  - 🟥 renamed `react` fn to `reactBindings`
+  - 🟥 renamed `useStrata` hook to `useTracked`
+
+
+
+<br/>
+
 ## v0.3
 
 ### v0.3.5

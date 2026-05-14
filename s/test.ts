@@ -1,12 +1,11 @@
 
-import {Science} from "@e280/science"
-
+import {science} from "@e280/science"
 import prism from "./prism/test.js"
 import signals from "./signals/test.js"
 import tracker from "./tracker/test.js"
 import wait from "./wait/test.js"
 
-await Science.run({
+await science.run({
 	prism,
 	signals,
 	tracker,

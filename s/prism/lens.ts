@@ -1,24 +1,17 @@
 
-import {deep, microbounce, sub} from "@e280/stz"
+import {deep} from "@e280/stz"
 import {immute} from "./utils/immute.js"
-import {tracker} from "../tracker/tracker.js"
+import {tracker} from "../tracker/global.js"
 import {_optic} from "./utils/optic-symbol.js"
 import {CacheCell} from "./utils/cache-cell.js"
 import {Immutable, LensLike, Optic} from "./types.js"
 
 /** reactive view into a state prism, with formalized mutations */
 export class Lens<State> implements LensLike<State> {
-	on = sub<[state: State]>()
-	onFrozen = sub<[state: Immutable<State>]>()
-
 	;[_optic]: Optic<State>
 	#previous: State
 	#stateCache: CacheCell<State>
 	#frozenCache: CacheCell<Immutable<State>>
-	#onPublishDebounced = microbounce(() => {
-		this.on.publish(this.state)
-		this.onFrozen.publish(this.frozen)
-	})
 
 	constructor(optic: Optic<State>) {
 		this[_optic] = optic
@@ -27,31 +20,30 @@ export class Lens<State> implements LensLike<State> {
 		this.#frozenCache = new CacheCell(() => immute(optic.getState()))
 	}
 
-	async update() {
+	update() {
 		const state = this[_optic].getState()
 		const isChanged = !deep.equal(state, this.#previous)
 		if (isChanged) {
 			this.#stateCache.invalidate()
 			this.#frozenCache.invalidate()
 			this.#previous = deep.clone(state)
-			this.#onPublishDebounced()
-			await tracker.notifyWrite(this)
+			tracker.write(this)
 		}
 	}
 
 	/** get a snapshot of the current state. it's typed as mutable, but you should not mutate it. */
 	get state() {
-		tracker.notifyRead(this)
+		tracker.read(this)
 		return this.#stateCache.get()
 	}
 
 	/** get an immutable readonly snapshot of the current state. */
 	get frozen() {
-		tracker.notifyRead(this)
+		tracker.read(this)
 		return this.#frozenCache.get()
 	}
 
-	async mutate<R>(fn: (state: State) => R) {
+	mutate<R>(fn: (state: State) => R) {
 		return this[_optic].mutate(fn)
 	}
 
