@@ -11,6 +11,9 @@
 ## v0.4
 
 ### v0.4.0
+- 🍏 v0.4.1
+
+### v0.4.0
 - 🟥 **huge core rewrite**
   - 🟥 everything is now sync, not async anymore. stripped of all debouncing and async shenanigans, now calling `tracker.write` (and thus setting signals, updating prism state, etc) immediately executes all downstream subscribers without any delay. this greatly improves our ability to detect and prevent scary catastropic circular-loop crashes. this also avoids async fatigue spreading through your codebases. the downside is that this could lead to worse performance.
   - 🍏 new `batch` fn helps you optimize performance -- batched tracker writes are deduped and flushed at the end of the batch, meaning, effects are only called once.
