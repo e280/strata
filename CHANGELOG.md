@@ -10,6 +10,11 @@
 
 ## v0.4
 
+### v0.4.2
+- 🔶 rename `waitGetOk` to `waitGet`
+- 🔶 rename `waitNeedOk` to `waitGot`
+- 🔶 rename `waitNeedErr` to `waitGotErr`
+
 ### v0.4.1
 - 🍏 update deps
 

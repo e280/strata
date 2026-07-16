@@ -312,12 +312,12 @@ wait extends [stz's ok/err](https://github.com/e280/stz#ok) toolkit, and it's mo
     ```
 - value grabbers
     ```ts
-    waitGetOk($wait()) // 123 | undefined
-    waitNeedOk($wait()) // 123 (or throws an error)
+    waitGet($wait()) // 123 | undefined
+    waitGot($wait()) // 123 (or throws an error)
     ```
     ```ts
     waitGetErr($wait()) // "bad roll" | undefined
-    waitNeedErr($wait()) // "bad roll" (or throws an error)
+    waitGotErr($wait()) // "bad roll" (or throws an error)
     ```
 - quick selector
     ```ts

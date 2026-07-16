@@ -1,9 +1,9 @@
 
-import {nap, needOk} from "@e280/stz"
+import {nap, gotOk} from "@e280/stz"
 import {expect, suite, test} from "@e280/science"
 
 import {wait} from "./parts/wait.js"
-import {waitNeedErr, waitNeedOk} from "./parts/get.js"
+import {waitGotErr, waitGot} from "./parts/get.js"
 import {isWaitDone, isWaitErr, isWaitPending} from "./parts/is.js"
 
 export default suite({
@@ -14,9 +14,9 @@ export default suite({
 		})
 		expect(isWaitPending($wait())).is(true)
 		expect(await $wait.ready).is(123)
-		expect(needOk(await $wait.result)).is(123)
+		expect(gotOk(await $wait.result)).is(123)
 		expect(isWaitDone($wait())).is(true)
-		expect(waitNeedOk($wait())).is(123)
+		expect(waitGot($wait())).is(123)
 	}),
 
 	"wait fn, failed": test(async() => {
@@ -29,7 +29,7 @@ export default suite({
 		expect(await $wait.ready).is(undefined)
 		expect((await $wait.result).ok).is(false)
 		expect(isWaitErr($wait())).is(true)
-		expect(waitNeedErr($wait()).message).is("uh oh")
+		expect(waitGotErr($wait()).message).is("uh oh")
 	}),
 })
 
