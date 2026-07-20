@@ -1,5 +1,5 @@
 
-import {Cubby} from "./types.js"
+import {Cubby} from "@e280/stz"
 
 export class LocalStore<X> implements Cubby<X> {
 	constructor(

@@ -1,14 +1,12 @@
 
+import {Cubby} from "@e280/stz"
 import {Prism} from "../prism.js"
+
+export {Cubby}
 
 export type Versioned<State> = {
 	state: State
 	version: number
-}
-
-export type Cubby<X> = {
-	get(): Promise<X | undefined>
-	set(data: X | undefined): Promise<void>
 }
 
 /** @deprecated renamed to `Cubby` */
