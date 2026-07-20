@@ -226,7 +226,7 @@ import {signal, derived, effect, batch} from "@e280/strata"
       version: 1, // 👈 bump this when you break your state schema!
     })
     ```
-    - `store` type is compatible with [`@e280/kv`](https://github.com/e280/kv)
+    - `store` type is compatible with a [`@e280/kv`](https://github.com/e280/kv) store
 - **cross-tab sync (load on storage events)**
     ```ts
     store.onStorageEvent(vault.load)
