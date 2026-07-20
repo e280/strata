@@ -10,6 +10,10 @@
 
 ## v0.4
 
+### v0.4.3
+- 🍏 update dependencies
+- 🔶 move `Cubby` type to `@e280/stz` library, but we re-export it, so nothing should break
+
 ### v0.4.2
 - 🔶 rename `waitGetOk` to `waitGet`
 - 🔶 rename `waitNeedOk` to `waitGot`
