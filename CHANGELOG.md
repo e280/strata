@@ -10,6 +10,9 @@
 
 ## v0.4
 
+### v0.4.4
+- 🍏 update dependencies and readme
+
 ### v0.4.3
 - 🍏 update dependencies
 - 🔶 move `Cubby` type to `@e280/stz` library, but we re-export it, so nothing should break
