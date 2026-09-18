@@ -244,7 +244,7 @@ import {signal, derived, effect, batch} from "@e280/strata"
 ## 🍋 strata wait
 > *tiny async state helpers*
 
-it's about states like *pending, ok, err.*  
+it's about "wait states" like *pending, ok, err.*  
 wait extends [stz's ok/err](https://github.com/e280/stz#ok) toolkit, and it's mostly for showing little loading spinners in your ui.  
 
 ### ⌛ good things come to those who wait
@@ -253,7 +253,7 @@ wait extends [stz's ok/err](https://github.com/e280/stz#ok) toolkit, and it's mo
     import {ok, err, nap} from "@e280/stz"
     import {wait, waitFormal} from "@e280/strata"
     ```
-- **wrap any async operation and get a "Waiter"**
+- **wrap any async operation and get a `Wait`**
     ```ts
     // wrap any async operation in a fancy wait
     const $wait = wait(async() => {
@@ -298,9 +298,9 @@ wait extends [stz's ok/err](https://github.com/e280/stz#ok) toolkit, and it's mo
 ### ⌛ wait, there's more
 - maker
     ```ts
-    makeWait<number>() // pending
-    makeWait(ok(123))
-    makeWait(err("uh oh"))
+    makeWaitState<number>() // pending
+    makeWaitState(ok(123))
+    makeWaitState(err("uh oh"))
     ```
 - status checkers
     ```ts
