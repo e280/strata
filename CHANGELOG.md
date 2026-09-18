@@ -8,6 +8,16 @@
 
 <br/>
 
+## v0.5
+
+### v0.5.0
+- 🟥 rename `Wait` to `WaitState`
+- 🟥 rename `Waiter` to `Wait` -- this way, the `wait` fn returns a `Wait` which is more clear and natural than the previous naming
+
+
+
+<br/>
+
 ## v0.4
 
 ### v0.4.4
