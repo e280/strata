@@ -1,9 +1,9 @@
 
 export type Signal<Value> = {
 	(): Value
-	(value: Value): Value
+	<V extends Value>(value: V): V
 	get(): Value
-	set(value: Value): Value
+	set<V extends Value>(value: V): V
 }
 
 export type Derived<Value> = {

@@ -10,6 +10,16 @@
 
 ## v0.5
 
+### v0.5.2
+- 🍏 sharpen signal setter return types
+    ```ts
+    const $count = signal<number | null>(null)
+
+    const newCount = $count(5)
+      // previously, newCount's type would have been (number | null)
+      // but now, newCount's type narrows to (5)
+    ```
+
 ### v0.5.1
 - 🔶 deleted old deprecated names from 0.4
 
