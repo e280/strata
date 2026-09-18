@@ -56,6 +56,7 @@ export function derived<Value>(fn: () => Value): Derived<Value> {
 		return value
 	}
 
+	d.get = () => d()
 	d.dispose = dispose
 	return d
 }

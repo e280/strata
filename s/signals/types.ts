@@ -9,6 +9,7 @@ export type Signal<Value> = {
 export type Derived<Value> = {
 	(): Value
 	dispose: () => void
+	get(): Value
 }
 
 export type Valuable<Value> = Signal<Value> | Derived<Value>
