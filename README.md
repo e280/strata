@@ -47,6 +47,11 @@ import {signal, derived, effect, batch} from "@e280/strata"
   ```ts
   $count(2)
   ```
+- 🆕 **alternative get/set syntax**
+  ```ts
+  $count.get() // 2
+  $count.set(3) // 3
+  ```
 
 ### 🚦 derived
 - **combine signals like a formula**
