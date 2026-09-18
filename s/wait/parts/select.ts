@@ -1,9 +1,9 @@
 
-import {Wait} from "./type.js"
+import {WaitState} from "./type.js"
 import {isWaitOk, isWaitPending} from "./is.js"
 import {waitGotErr, waitGot} from "./get.js"
 
-export function waitSelect<Ret, Value, E = unknown>(wait: Wait<Value, E>, select: {
+export function waitSelect<Ret, Value, E = unknown>(state: WaitState<Value, E>, select: {
 		pending?: () => Ret
 		ok?: (value: Value) => Ret
 		err?: (error: E) => Ret
@@ -15,13 +15,13 @@ export function waitSelect<Ret, Value, E = unknown>(wait: Wait<Value, E>, select
 		err = () => {},
 	} = select
 
-	if (isWaitPending(wait))
+	if (isWaitPending(state))
 		return pending()
 
-	else if (isWaitOk(wait))
-		return ok(waitGot(wait))
+	else if (isWaitOk(state))
+		return ok(waitGot(state))
 
 	else
-		return err(waitGotErr(wait))
+		return err(waitGotErr(state))
 }
 

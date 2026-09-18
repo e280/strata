@@ -7,11 +7,11 @@ export type WaitResult<Value, E = unknown> = {done: true} & Result<Value, E>
 export type WaitOk<Value> = {done: true} & Ok<Value>
 export type WaitErr<E = unknown> = {done: true} & Err<E>
 
-export type Wait<Value, E = unknown> =
+export type WaitState<Value, E = unknown> =
 	| WaitPending
 	| WaitResult<Value, E>
 
-export type Waiter<Value, E = unknown> = Derived<Wait<Value, E>> & {
+export type Wait<Value, E = unknown> = Derived<WaitState<Value, E>> & {
 	ready: Promise<Value | undefined>
 	result: Promise<WaitResult<Value, E>>
 }

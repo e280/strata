@@ -1,8 +1,8 @@
 
 import {Result} from "@e280/stz"
-import {Wait} from "./type.js"
+import {WaitState} from "./type.js"
 
-export function makeWait<Value, E = unknown>(result?: Result<Value, E>): Wait<Value, E> {
+export function makeWaitState<Value, E = unknown>(result?: Result<Value, E>): WaitState<Value, E> {
 	return result
 		? {done: true, ...result}
 		: {done: false}
