@@ -31,6 +31,13 @@ export default science.suite({
 		expect($count()).is(2)
 	}),
 
+	"signal .get and .set": test(async() => {
+		const $count = signal(1)
+		expect($count.get()).is(1)
+		$count.set(2)
+		expect($count.get()).is(2)
+	}),
+
 	"signal triggers effects": test(async() => {
 		const $count = signal(1)
 		let calls = 0
