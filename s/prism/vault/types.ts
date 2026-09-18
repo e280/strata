@@ -9,9 +9,6 @@ export type Versioned<State> = {
 	version: number
 }
 
-/** @deprecated renamed to `Cubby` */
-export type EzStore<X> = Cubby<X>
-
 export type VaultOptions<State> = {
 	version: number
 	prism: Prism<State>

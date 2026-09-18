@@ -24,12 +24,3 @@ export function waitGotErr<E = unknown>(wait: WaitState<unknown, E>) {
 	return gotErr(wait)
 }
 
-/** @deprecated renamed to `waitGet` */
-export const waitGetOk = waitGet
-
-/** @deprecated renamed to `waitGot` */
-export const waitNeedOk = waitGot
-
-/** @deprecated renamed to `waitGotErr` */
-export const waitNeedErr = waitGotErr
-
