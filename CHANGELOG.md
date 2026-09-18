@@ -10,6 +10,9 @@
 
 ## v0.5
 
+### v0.5.1
+- 🔶 deleted old deprecated names from 0.4
+
 ### v0.5.0
 - 🍏 add signal `.get`, eg, `$count.get()`
 - 🍏 add signal `.set`, eg, `$count.set(2)`
