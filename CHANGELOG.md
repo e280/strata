@@ -11,6 +11,9 @@
 ## v0.5
 
 ### v0.5.0
+- 🍏 add signal `.get`, eg, `$count.get()`
+- 🍏 add signal `.set`, eg, `$count.set(2)`
+- 🍏 add derived `.get`, eg, `$product.get()`
 - 🟥 rename `Wait` to `WaitState`
 - 🟥 rename `Waiter` to `Wait` -- this way, the `wait` fn returns a `Wait` which is more clear and natural than the previous naming
 
