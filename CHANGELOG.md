@@ -10,6 +10,10 @@
 
 ## v0.5
 
+### v0.5.3
+- 🍏 update deps
+- 🍏 tweak readme intro
+
 ### v0.5.2
 - 🍏 sharpen signal setter return types
     ```ts
