@@ -38,6 +38,15 @@ export default science.suite({
 		expect($count.get()).is(2)
 	}),
 
+	"signal .on": test(async() => {
+		const $count = signal(1)
+		let a = 0
+		$count.on(x => a = x)
+		expect(a).is(0)
+		$count(2)
+		expect(a).is(2)
+	}),
+
 	"signal triggers effects": test(async() => {
 		const $count = signal(1)
 		let calls = 0

@@ -10,6 +10,9 @@
 
 ## v0.5
 
+### v0.5.5
+- 🍏 add `signal.on` subscriber fn
+
 ### v0.5.4
 - 🍏 update deps
 
