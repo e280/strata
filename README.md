@@ -17,7 +17,7 @@
 
 🚦 [**#signals,**](#signals) sweet little bundles of state  
 🔮 [**#prism,**](#prism) bigger centralized state trees  
-⌛ [**#wait,**](#wait) async state helpers *(think loading spinners)*  
+⌛ [**#wait,**](#wait) async helpers for loading spinners  
 🪄 [**#tracker,**](#tracker) reactivity hub for making custom state  
 ⚛️ [**#react,**](#react) optional bindings for react  
 
