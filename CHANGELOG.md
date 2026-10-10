@@ -10,6 +10,9 @@
 
 ## v0.5
 
+### v0.5.4
+- 🍏 update deps
+
 ### v0.5.3
 - 🍏 update deps
 - 🍏 tweak readme intro
