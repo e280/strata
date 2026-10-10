@@ -11,7 +11,9 @@
 ## v0.5
 
 ### v0.5.5
-- 🍏 add `signal.on` subscriber fn
+- 🍏 add `signal.on(fn)`
+- 🍏 add `lens.on(fn)`
+- 🍏 add `prism.on(fn)`
 
 ### v0.5.4
 - 🍏 update deps

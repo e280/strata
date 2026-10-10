@@ -1,5 +1,5 @@
 
-import {deepClone, deepEqual} from "@e280/stz"
+import {deepClone, deepEqual, subby} from "@e280/stz"
 import {immute} from "./utils/immute.js"
 import {tracker} from "../tracker/global.js"
 import {_optic} from "./utils/optic-symbol.js"
@@ -12,12 +12,17 @@ export class Lens<State> implements LensLike<State> {
 	#previous: State
 	#stateCache: CacheCell<State>
 	#frozenCache: CacheCell<Immutable<State>>
+	#on = subby<[state: State]>()
 
 	constructor(optic: Optic<State>) {
 		this[_optic] = optic
 		this.#previous = deepClone(optic.getState())
 		this.#stateCache = new CacheCell(() => deepClone(optic.getState()))
 		this.#frozenCache = new CacheCell(() => immute(optic.getState()))
+	}
+
+	get on() {
+		return this.#on.on
 	}
 
 	update() {
@@ -28,6 +33,8 @@ export class Lens<State> implements LensLike<State> {
 			this.#frozenCache.invalidate()
 			this.#previous = deepClone(state)
 			tracker.write(this)
+			if (this.#on.set.size)
+				this.#on.publish(this.#stateCache.get())
 		}
 	}
 

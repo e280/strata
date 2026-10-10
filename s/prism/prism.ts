@@ -1,4 +1,5 @@
 
+import {subby} from "@e280/stz"
 import {Lens} from "./lens.js"
 import {tracker} from "../tracker/global.js"
 
@@ -6,9 +7,14 @@ import {tracker} from "../tracker/global.js"
 export class Prism<State> {
 	#state: State
 	#lenses = new Set<Lens<any>>()
+	#on = subby<[state: State]>()
 
 	constructor(state: State) {
 		this.#state = state
+	}
+
+	get on() {
+		return this.#on.on
 	}
 
 	get() {
@@ -20,6 +26,7 @@ export class Prism<State> {
 		this.#state = state
 		for (const lens of this.#lenses) lens.update()
 		tracker.write(this)
+		this.#on.publish(this.#state)
 	}
 
 	lens<State2>(selector: (state: State) => State2) {
