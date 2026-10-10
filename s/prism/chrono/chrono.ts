@@ -1,5 +1,5 @@
 
-import {deep} from "@e280/stz"
+import {deepClone} from "@e280/stz"
 import {Lens} from "../lens.js"
 import {Chronicle} from "./types.js"
 import {LensLike} from "../types.js"
@@ -33,7 +33,7 @@ export class Chrono<State> implements LensLike<State> {
 
 	#mut<R>(chronicle: Chronicle<State>, fn: (state: State) => R) {
 		const limit = Math.max(0, this.limit)
-		const snapshot = deep.clone(this.chronicle.present) as State
+		const snapshot = deepClone(this.chronicle.present) as State
 		const result = fn(chronicle.present)
 		chronicle.past.push(snapshot)
 		chronicle.past = chronicle.past.slice(-limit)
