@@ -48,10 +48,14 @@ import {signal, derived, effect, batch} from "@e280/strata"
   ```ts
   $count(2)
   ```
-- 🆕 **alternative get/set syntax**
+- 🆕 **get/set alternative syntax**
   ```ts
   $count.get() // 2
   $count.set(3) // 3
+  ```
+- 🆕 **.on to attach listener fns**
+  ```ts
+  $count.on(n => console.log(n))
   ```
 
 ### 🚦 derived
