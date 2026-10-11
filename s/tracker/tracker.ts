@@ -3,49 +3,36 @@ import {guarantee} from "@e280/stz"
 
 export type Trackable = object | symbol
 
-/** reactivity integration hub. invalidate synchronously; react after propagation. */
+/**
+ * reactivity integration hub
+ */
 export class Tracker<Item extends Trackable = any> {
 	#busy = new Set<() => void>()
 	#observationLayers: Set<Item>[] = []
 	#subscriptions = new WeakMap<Item, Set<() => void>>()
-	#invalidators = new WeakMap<Item, Set<() => void>>()
 
-	#pendingReactions = new Set<() => void>()
 	#batchDepth = 0
-	#writeDepth = 0
-	#flushing = false
+	#batchPending = new Set<() => void>()
 
-	/** indicate that an item was accessed. */
+	/** indicate to observers that this item was accessed */
 	read(item: Item) {
-		this.#observationLayers.at(-1)?.add(item)
+		const top = this.#observationLayers.at(-1)
+		top?.add(item)
 	}
 
-	/** invalidate dependents immediately; defer reactions until propagation finishes. */
+	/** invoke all subscriptions for this item */
 	write(item: Item) {
-		this.#writeDepth++
+		const fns = this.#subscriptions.get(item)
+		if (!fns) return
 
-		try {
-			for (const fn of [...(this.#invalidators.get(item) ?? [])])
-				this.#run(fn)
+		for (const fn of fns)
+			this.#batchPending.add(fn)
 
-			for (const fn of this.#subscriptions.get(item) ?? []) {
-				if (this.#busy.has(fn))
-					throw new Error("circularity forbidden")
-				this.#pendingReactions.add(fn)
-			}
-		}
-		catch (error) {
-			this.#pendingReactions.clear()
-			throw error
-		}
-		finally {
-			this.#writeDepth--
-		}
-
-		this.#flush()
+		if (this.#batchDepth === 0)
+			this.#flush()
 	}
 
-	/** collect items read while executing a function. */
+	/** collect items that were read during fn */
 	observe<Value>(fn: () => Value) {
 		const seen = new Set<Item>()
 		this.#observationLayers.push(seen)
@@ -58,37 +45,26 @@ export class Tracker<Item extends Trackable = any> {
 		}
 	}
 
-	/** subscribe to reactions, which run after invalidations settle. */
+	/** fn will be called when item changes */
 	subscribe(item: Item, fn: () => void) {
-		return this.#subscribe(this.#subscriptions, item, fn)
-	}
-
-	/** subscribe to synchronous, transitively propagated invalidations. */
-	subscribeInvalidator(item: Item, fn: () => void) {
-		return this.#subscribe(this.#invalidators, item, fn)
-	}
-
-	#subscribe(
-			map: WeakMap<Item, Set<() => void>>,
-			item: Item,
-			fn: () => void,
-		) {
-		const fns = guarantee(map, item, () => new Set<() => void>())
+		const fns = guarantee(this.#subscriptions, item, () => new Set())
 		fns.add(fn)
 		return () => {
 			fns.delete(fn)
 			if (fns.size === 0)
-				map.delete(item)
+				this.#subscriptions.delete(item)
 		}
 	}
 
-	/** defer reactions until the outermost batch ends; invalidations remain immediate. */
-	batch = <R>(fn: () => R): R => {
+	batch = <R>(fn: () => R) => {
 		this.#batchDepth++
-		try { return fn() }
+		try {
+			return fn()
+		}
 		finally {
 			this.#batchDepth--
-			this.#flush()
+			if (this.#batchDepth === 0)
+				this.#flush()
 		}
 	}
 
@@ -101,31 +77,12 @@ export class Tracker<Item extends Trackable = any> {
 	}
 
 	#flush() {
-		if (this.#flushing || this.#batchDepth || this.#writeDepth)
-			return
+		while (this.#batchPending.size > 0) {
+			const pending = [...this.#batchPending]
+			this.#batchPending.clear()
 
-		this.#flushing = true
-		const runs = new Map<() => void, number>()
-
-		try {
-			while (this.#pendingReactions.size) {
-				const fn = this.#pendingReactions.values().next().value!
-				this.#pendingReactions.delete(fn)
-
-				const count = (runs.get(fn) ?? 0) + 1
-				if (count > 100)
-					throw new Error("reactive feedback loop detected")
-
-				runs.set(fn, count)
+			for (const fn of pending)
 				this.#run(fn)
-			}
-		}
-		catch (error) {
-			this.#pendingReactions.clear()
-			throw error
-		}
-		finally {
-			this.#flushing = false
 		}
 	}
 }

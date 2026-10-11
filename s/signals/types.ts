@@ -11,9 +11,11 @@ export type Signal<Value> = {
 
 export type Derived<Value> = {
 	(): Value
-	dispose: () => void
 	get(): Value
 	on: On<[value: Value]>
+
+	/** @deprecated disposing deriveds is not a thing anymore. delete this. */
+	dispose: () => void
 }
 
 export type Valuable<Value> = Signal<Value> | Derived<Value>

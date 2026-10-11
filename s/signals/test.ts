@@ -5,7 +5,6 @@ import {effect} from "./effect.js"
 import {signal} from "./signal.js"
 import {derived} from "./derived.js"
 import {tracker} from "../tracker/global.js"
-import {Tracker} from "../tracker/tracker.js"
 
 export default science.suite({
 	"effect": test(async() => {
@@ -134,27 +133,6 @@ export default science.suite({
 		expect(values.join(",")).is("10")
 	}),
 
-	"derived dispose is terminal": test(async() => {
-		const $source = signal(1)
-		const $double = derived(() => $source() * 2)
-		expect($double()).is(2)
-		$double.dispose()
-		$double.dispose() // idempotent
-		$source(3)
-		expect(() => $double()).throws()
-		expect(() => $double.on(() => {})).throws()
-	}),
-
-	"derived dispose includes .on": test(async() => {
-		const $source = signal(1)
-		const $double = derived(() => $source() * 2)
-		let onned = 0
-		$double.on(x => onned = x)
-		$double.dispose()
-		$source(2)
-		expect(onned).is(0)
-	}),
-
 	"derived complex effect": test(async() => {
 		const $source = signal(1)
 		const $double = derived(() => $source() * 2)
@@ -197,26 +175,6 @@ export default science.suite({
 		expect($derived()).is(40)
 	}),
 
-	"derived is lazy": test(async() => {
-		const $alpha = signal(2)
-		const $bravo = signal(10)
-		let calls = 0
-		const $derived = derived(() => {
-			calls++
-			return $alpha() * $bravo()
-		})
-		expect(calls).is(0)
-		expect($derived()).is(20)
-		expect(calls).is(1)
-		expect($derived()).is(20)
-		expect(calls).is(1)
-		$alpha(3)
-		$alpha(4)
-		expect(calls).is(1)
-		expect($derived()).is(40)
-		expect(calls).is(2)
-	}),
-
 	"derived triggers effects": test(async() => {
 		const $alpha = signal(2)
 		const $bravo = signal(10)
@@ -235,39 +193,6 @@ export default science.suite({
 		$alpha(3)
 		expect(derivedCalls).is(2)
 		expect(effectCalls).is(2)
-	}),
-
-	"derived tracks dynamic dependencies": test(async() => {
-		const $useAlpha = signal(true)
-		const $alpha = signal(2)
-		const $bravo = signal(10)
-		let calls = 0
-
-		const $derived = derived(() => {
-			calls++
-			return $useAlpha()
-				? $alpha()
-				: $bravo()
-		})
-
-		expect($derived()).is(2)
-		expect(calls).is(1)
-
-		$bravo(11)
-		expect($derived()).is(2)
-		expect(calls).is(1)
-
-		$useAlpha(false)
-		expect($derived()).is(11)
-		expect(calls).is(2)
-
-		$alpha(3)
-		expect($derived()).is(11)
-		expect(calls).is(2)
-
-		$bravo(12)
-		expect($derived()).is(12)
-		expect(calls).is(3)
 	}),
 
 	"derived remains subscribed after a thrown recompute": test(async() => {
@@ -356,7 +281,7 @@ export default science.suite({
 		expect(count).lt(5)
 	}),
 
-	"bounded effect feedback terminates": test(async() => {
+	"sneaky evil circularity is no problem": test(async() => {
 		const $alpha = signal(1)
 		const $bravo = signal(1)
 
@@ -376,8 +301,8 @@ export default science.suite({
 
 		$alpha(99)
 		$bravo(99)
-		expect(countAlpha).is(10)
-		expect(countBravo).is(9)
+		expect(countAlpha).lt(5)
+		expect(countBravo).lt(5)
 	}),
 
 	"effect writes are self-damped": test(async() => {
@@ -392,30 +317,6 @@ export default science.suite({
 
 		expect(calls).is(1)
 		expect($count()).is(2)
-	}),
-
-	"invalidators run before reactions": test(async() => {
-		const tracker = new Tracker()
-		const source = {}
-		const child = {}
-		const calls: string[] = []
-
-		tracker.subscribe(source, () => calls.push("react"))
-
-		tracker.subscribeInvalidator(source, () => {
-			calls.push("invalidate source")
-			tracker.write(child)
-		})
-
-		tracker.subscribeInvalidator(child, () => {
-			calls.push("invalidate child")
-		})
-
-		tracker.write(source)
-
-		expect(calls.join(",")).is(
-			"invalidate source,invalidate child,react"
-		)
 	}),
 })
 
