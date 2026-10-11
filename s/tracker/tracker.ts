@@ -15,7 +15,7 @@ export class Tracker<Item extends Trackable = any> {
 	#batchDepth = 0
 	#pendingInvalidations = new Set<() => void>()
 	#pendingReactions = new Set<() => void>()
-	#flushing = false
+	#invalidating = false
 
 	/** indicate to observers that this item was accessed */
 	read(item: Item) {
@@ -101,33 +101,34 @@ export class Tracker<Item extends Trackable = any> {
 	}
 
 	#flush() {
-		if (this.#flushing || this.#batchDepth)
+		if (this.#batchDepth || this.#invalidating)
 			return
 
-		this.#flushing = true
-
-		try {
-			while (
+		while (
 				this.#pendingInvalidations.size ||
 				this.#pendingReactions.size
 			) {
-				// drain ALL invalidations first
+
+			// finish all invalidations before reactions
+			this.#invalidating = true
+
+			try {
 				while (this.#pendingInvalidations.size) {
 					const fn = this.#pendingInvalidations.values().next().value!
 					this.#pendingInvalidations.delete(fn)
 					this.#run(fn)
 				}
-
-				// run ONE reaction
-				if (this.#pendingReactions.size) {
-					const fn = this.#pendingReactions.values().next().value!
-					this.#pendingReactions.delete(fn)
-					this.#run(fn)
-				}
 			}
-		}
-		finally {
-			this.#flushing = false
+			finally {
+				this.#invalidating = false
+			}
+
+			// execute one reaction, allowing nested flushes
+			if (this.#pendingReactions.size) {
+				const fn = this.#pendingReactions.values().next().value!
+				this.#pendingReactions.delete(fn)
+				this.#run(fn)
+			}
 		}
 	}
 }
