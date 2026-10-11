@@ -13,6 +13,7 @@ export type Derived<Value> = {
 	(): Value
 	dispose: () => void
 	get(): Value
+	on: On<[value: Value]>
 }
 
 export type Valuable<Value> = Signal<Value> | Derived<Value>

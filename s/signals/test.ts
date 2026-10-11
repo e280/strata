@@ -88,6 +88,63 @@ export default science.suite({
 		expect($derived.get()).is(30)
 	}),
 
+	"derived .on": test(async() => {
+		const $count = signal(1)
+		const $double = derived(() => $count() * 2)
+		const values: number[] = []
+
+		const off = $double.on(n => values.push(n))
+
+		expect(values.length).is(0)
+
+		$count(2)
+		expect(values.join(",")).is("4")
+
+		batch(() => {
+			$count(3)
+			$count(4)
+		})
+		expect(values.join(",")).is("4,8")
+
+		off()
+		$count(5)
+		expect(values.join(",")).is("4,8")
+	}),
+
+	"derived complex": test(async() => {
+		const $source = signal(1)
+		const $double = derived(() => $source() * 2)
+		const $triple = derived(() => $source() * 3)
+		const $sum = derived(() => $double() + $triple())
+		expect($sum()).is(5)
+		$source(2)
+		expect($sum()).is(10)
+	}),
+
+	"derived complex .on": test.skip(async() => {
+		const $source = signal(1)
+		const $double = derived(() => $source() * 2)
+		const $triple = derived(() => $source() * 3)
+		const $sum = derived(() => $double() + $triple())
+		let values: number[] = []
+		$sum.on(n => values.push(n))
+		expect(values.join(",")).is("")
+		$source(2)
+		expect(values.join(",")).is("5,10")
+	}),
+
+	"derived complex effect": test(async() => {
+		const $source = signal(1)
+		const $double = derived(() => $source() * 2)
+		const $triple = derived(() => $source() * 3)
+		const $sum = derived(() => $double() + $triple())
+		let values: number[] = []
+		effect(() => values.push($sum()))
+		expect(values.join(",")).is("5")
+		$source(2)
+		expect(values.join(",")).is("5,10") // FAILS, got "5,7,10"
+	}),
+
 	"derived more": test(async() => {
 		const $alpha = signal(2)
 		const $bravo = signal(10)

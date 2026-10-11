@@ -58,6 +58,12 @@ export function derived<Value>(fn: () => Value): Derived<Value> {
 
 	d.get = () => d()
 	d.dispose = dispose
+
+	d.on = (fn: (value: Value) => unknown) => {
+		d()
+		return tracker.subscribe(d, () => fn(d()))
+	}
+
 	return d
 }
 
