@@ -2,6 +2,7 @@
 ![](https://i.imgur.com/V6XuzLn.png)
 
 
+
 <br/><br/>
 
 # ⛏️ strata
@@ -178,6 +179,13 @@ import {signal, derived, effect, batch} from "@e280/strata"
     ```ts
     snacks.mutate(state => state.bag.push("salt"))
     ```
+- **effects can automatically react to changes**
+    ```ts
+    effect(() => console.log(snacks.state.peanuts))
+
+    snacks.mutate(state => state.peanuts++)
+      // effect is run
+    ```
 
 ### 🔮 chrono for time travel
 - **import stuff**
@@ -269,7 +277,7 @@ wait extends [stz's ok/err](https://github.com/e280/stz#ok) toolkit, and it's mo
     import {ok, err, nap} from "@e280/stz"
     import {wait, waitFormal} from "@e280/strata"
     ```
-- **wrap any async operation and get a `Wait`**
+- **wrap any async operation and get a `Wait` (which is a derived signal)**
     ```ts
     // wrap any async operation in a fancy wait
     const $wait = wait(async() => {
@@ -281,8 +289,9 @@ wait extends [stz's ok/err](https://github.com/e280/stz#ok) toolkit, and it's mo
     - btw you can pass a promise instead of an async fn
 - **check if it's done**
     ```ts
-    console.log($wait().done)
+    effect(() => console.log($wait().done))
       // false -- sorry bro, its not ready yet
+      // true -- it's ready!
     ```
 - **okay, we can actually await for the result**
     ```ts
