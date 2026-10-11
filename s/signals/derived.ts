@@ -1,7 +1,7 @@
 
 import {Derived} from "./types.js"
-import {watch} from "./utils/watch.js"
 import {tracker} from "../tracker/global.js"
+import {watchInvalidator} from "./utils/watch.js"
 
 export function derived<Value>(fn: () => Value): Derived<Value> {
 	let value!: Value
@@ -29,7 +29,7 @@ export function derived<Value>(fn: () => Value): Derived<Value> {
 
 		computing = true
 		try {
-			const watched = watch(fn, () => invalidate())
+			const watched = watchInvalidator(fn, () => invalidate())
 
 			unwatch()
 			unwatch = watched.dispose

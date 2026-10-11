@@ -5,6 +5,7 @@ import {effect} from "./effect.js"
 import {signal} from "./signal.js"
 import {derived} from "./derived.js"
 import {tracker} from "../tracker/global.js"
+import {Tracker} from "../tracker/tracker.js"
 
 export default science.suite({
 	"effect": test(async() => {
@@ -121,7 +122,7 @@ export default science.suite({
 		expect($sum()).is(10)
 	}),
 
-	"derived complex .on": test.skip(async() => {
+	"derived complex .on": test(async() => {
 		const $source = signal(1)
 		const $double = derived(() => $source() * 2)
 		const $triple = derived(() => $source() * 3)
@@ -130,7 +131,7 @@ export default science.suite({
 		$sum.on(n => values.push(n))
 		expect(values.join(",")).is("")
 		$source(2)
-		expect(values.join(",")).is("5,10")
+		expect(values.join(",")).is("10")
 	}),
 
 	"derived complex effect": test(async() => {
@@ -142,7 +143,7 @@ export default science.suite({
 		effect(() => values.push($sum()))
 		expect(values.join(",")).is("5")
 		$source(2)
-		expect(values.join(",")).is("5,10") // FAILS, got "5,7,10"
+		expect(values.join(",")).is("5,10")
 	}),
 
 	"derived more": test(async() => {
@@ -352,4 +353,29 @@ export default science.suite({
 		expect(calls).is(1)
 		expect($count()).is(2)
 	}),
+
+	"invalidators run before reactions": test(async() => {
+		const tracker = new Tracker()
+		const source = {}
+		const child = {}
+		const calls: string[] = []
+
+		tracker.subscribe(source, () => calls.push("react"))
+
+		tracker.subscribeInvalidator(source, () => {
+			calls.push("invalidate source")
+			tracker.write(child)
+		})
+
+		tracker.subscribeInvalidator(child, () => {
+			calls.push("invalidate child")
+		})
+
+		tracker.write(source)
+
+		expect(calls.join(",")).is(
+			"invalidate source,invalidate child,react"
+		)
+	}),
 })
+
