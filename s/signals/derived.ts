@@ -1,13 +1,12 @@
 
-import {On} from "@e280/stz"
 import {Derived} from "./types.js"
-import {afterEffect} from "./helpers/after-effect.js"
+import {effect} from "./effect.js"
 
-export function derived<Value>(fn: () => Value): Derived<Value> {
-	const d = () => fn()
+export function derived<Value>(fn: () => Value) {
+	const d = (() => fn()) as Derived<Value>
 	d.get = d
-	d.on = <On<[value: Value]>>(sub => afterEffect(fn, sub))
-	d.dispose = () => {} // deprecated
+	d.on = sub => effect(fn, sub)
+	d.dispose = () => {}
 	return d
 }
 

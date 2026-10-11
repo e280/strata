@@ -12,8 +12,10 @@
 
 ### v0.5.6
 - 🍏 add `derived.on(fn)`.
-- 🍏 fix complex derived graph stuff by adding `tracker.subscribeInvalidator`.
+- 🍏 add optional effect responder fn `effect(collector, responder)`.
 - 🔶 `derived` redesigned -- simpler and less buggy -- non-lazy worse performance.
+- 🔶 `derived .dispose` deprecated -- it's removed and no longer does anything.
+- 🔶 `afterEffect` deprecated in favor of `effect(collector, responder)`.
 
 ### v0.5.5
 - 🍏 add `signal.on(fn)`

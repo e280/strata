@@ -1,6 +1,7 @@
 
 import {effect} from "../effect.js"
 
+/** @deprecated use `effect` instead, it now takes collector and responder. */
 export function afterEffect<C>(
 		collector: () => C,
 		responder: (collected: C) => void,

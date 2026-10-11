@@ -14,7 +14,7 @@ export type Derived<Value> = {
 	get(): Value
 	on: On<[value: Value]>
 
-	/** @deprecated disposing deriveds is not a thing anymore. delete this. */
+	/** @deprecated not a thing anymore, delete this. */
 	dispose: () => void
 }
 

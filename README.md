@@ -64,16 +64,13 @@ import {signal, derived, effect, batch} from "@e280/strata"
   const $bravo = signal(10)
   const $product = derived(() => $alpha() * $bravo())
   ```
-- **it automatically updates**
   ```ts
   $product() // 10
   $alpha(2)
   $product() // 🪄 20
   ```
 - **btw,**  
-  deriveds are lazy, only run the fn when demanded.  
-  for advanced situations, you can stop them with `.dispose()` fn.  
-  if you dispose a derived, subsequent accesses will throw errors.  
+  derived also gives you `.get()` and `.on()`.  
 
 ### 🚦 effects
 - **effects run immediately, then again when relevant signals change**
@@ -85,6 +82,15 @@ import {signal, derived, effect, batch} from "@e280/strata"
   $count(3)
     // 3
     // when $count is changed, the effect fn is run
+  ```
+- **you can pass 2nd responder fn, which does not run at first**
+  ```ts
+  effect(() => $count(), count => console.log(count))
+    // *nothing is initially logged*
+
+  $count(3)
+    // 3
+    // when $count is changed, the responder fn is run
   ```
 - **btw,**  
   effect returns a dispose fn if you need to stop it.  

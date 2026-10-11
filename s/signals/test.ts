@@ -24,6 +24,46 @@ export default science.suite({
 		expect(calls).is(2)
 	}),
 
+	"effect with responder": test(async() => {
+		const item = {}
+		const unrelated = {}
+		let value = 10
+		let collects = 0
+		let responses = 0
+		let received = 0
+
+		const stop = effect(
+			() => {
+				tracker.read(item)
+				collects++
+				return value
+			},
+			result => {
+				tracker.read(unrelated)
+				responses++
+				received = result
+			},
+		)
+
+		expect(collects).is(1)
+		expect(responses).is(0)
+
+		value = 20
+		tracker.write(item)
+		expect(collects).is(2)
+		expect(responses).is(1)
+		expect(received).is(20)
+
+		tracker.write(unrelated)
+		expect(collects).is(2)
+		expect(responses).is(1)
+
+		stop()
+		tracker.write(item)
+		expect(collects).is(2)
+		expect(responses).is(1)
+	}),
+
 	"signal read/write": test(async() => {
 		const $count = signal(1)
 		expect($count()).is(1)

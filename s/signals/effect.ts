@@ -1,7 +1,12 @@
 
 import {watch} from "./utils/watch.js"
 
-export function effect(fn: () => void) {
+export function effect<Value>(
+		collector: () => Value,
+		responder?: (value: Value) => void,
+	) {
+
+	let first = true
 	let unwatch = () => {}
 
 	const dispose = () => {
@@ -11,12 +16,15 @@ export function effect(fn: () => void) {
 
 	const update = () => {
 		dispose()
-		const watched = watch(fn, update)
+		const watched = watch(collector, update)
 		unwatch = watched.dispose
+		if (!first)
+			responder?.(watched.value)
 	}
 
 	update()
 
+	first = false
 	return dispose
 }
 

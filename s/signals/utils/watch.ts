@@ -8,10 +8,3 @@ export function watch<Value>(collector: () => Value, onChange: () => void) {
 	return {value, dispose}
 }
 
-export function watchInvalidator<Value>(collector: () => Value, onChange: () => void) {
-	const {seen, value} = tracker.observe(collector)
-	const disposers = [...seen].map(item => tracker.subscribeInvalidator(item, onChange))
-	const dispose = () => disposers.forEach(d => d())
-	return {value, dispose}
-}
-
