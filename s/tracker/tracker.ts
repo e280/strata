@@ -3,45 +3,49 @@ import {guarantee} from "@e280/stz"
 
 export type Trackable = object | symbol
 
-/**
- * reactivity integration hub
- */
+/** reactivity integration hub. invalidate synchronously; react after propagation. */
 export class Tracker<Item extends Trackable = any> {
 	#busy = new Set<() => void>()
 	#observationLayers: Set<Item>[] = []
 	#subscriptions = new WeakMap<Item, Set<() => void>>()
 	#invalidators = new WeakMap<Item, Set<() => void>>()
 
-	#batchDepth = 0
-	#pendingInvalidations = new Set<() => void>()
 	#pendingReactions = new Set<() => void>()
-	#invalidating = false
+	#batchDepth = 0
+	#writeDepth = 0
+	#flushing = false
 
-	/** indicate to observers that this item was accessed */
+	/** indicate that an item was accessed. */
 	read(item: Item) {
-		const top = this.#observationLayers.at(-1)
-		top?.add(item)
+		this.#observationLayers.at(-1)?.add(item)
 	}
 
+	/** invalidate dependents immediately; defer reactions until propagation finishes. */
 	write(item: Item) {
-		for (const fn of this.#invalidators.get(item) ?? [])
-			this.#enqueue(this.#pendingInvalidations, fn)
+		this.#writeDepth++
 
-		for (const fn of this.#subscriptions.get(item) ?? [])
-			this.#enqueue(this.#pendingReactions, fn)
+		try {
+			for (const fn of [...(this.#invalidators.get(item) ?? [])])
+				this.#run(fn)
 
-		if (this.#batchDepth === 0)
-			this.#flush()
+			for (const fn of this.#subscriptions.get(item) ?? []) {
+				if (this.#busy.has(fn))
+					throw new Error("circularity forbidden")
+				this.#pendingReactions.add(fn)
+			}
+		}
+		catch (error) {
+			this.#pendingReactions.clear()
+			throw error
+		}
+		finally {
+			this.#writeDepth--
+		}
+
+		this.#flush()
 	}
 
-	#enqueue(queue: Set<() => void>, fn: () => void) {
-		if (this.#busy.has(fn))
-			throw new Error("circularity forbidden")
-
-		queue.add(fn)
-	}
-
-	/** collect items that were read during fn */
+	/** collect items read while executing a function. */
 	observe<Value>(fn: () => Value) {
 		const seen = new Set<Item>()
 		this.#observationLayers.push(seen)
@@ -54,12 +58,12 @@ export class Tracker<Item extends Trackable = any> {
 		}
 	}
 
-	/** fn will be called when item changes */
+	/** subscribe to reactions, which run after invalidations settle. */
 	subscribe(item: Item, fn: () => void) {
 		return this.#subscribe(this.#subscriptions, item, fn)
 	}
 
-	/** fn will invalidate downstream computed state */
+	/** subscribe to synchronous, transitively propagated invalidations. */
 	subscribeInvalidator(item: Item, fn: () => void) {
 		return this.#subscribe(this.#invalidators, item, fn)
 	}
@@ -69,10 +73,8 @@ export class Tracker<Item extends Trackable = any> {
 			item: Item,
 			fn: () => void,
 		) {
-
 		const fns = guarantee(map, item, () => new Set<() => void>())
 		fns.add(fn)
-
 		return () => {
 			fns.delete(fn)
 			if (fns.size === 0)
@@ -80,15 +82,13 @@ export class Tracker<Item extends Trackable = any> {
 		}
 	}
 
-	batch = <R>(fn: () => R) => {
+	/** defer reactions until the outermost batch ends; invalidations remain immediate. */
+	batch = <R>(fn: () => R): R => {
 		this.#batchDepth++
-		try {
-			return fn()
-		}
+		try { return fn() }
 		finally {
 			this.#batchDepth--
-			if (this.#batchDepth === 0)
-				this.#flush()
+			this.#flush()
 		}
 	}
 
@@ -101,34 +101,30 @@ export class Tracker<Item extends Trackable = any> {
 	}
 
 	#flush() {
-		if (this.#batchDepth || this.#invalidating)
+		if (this.#flushing || this.#batchDepth || this.#writeDepth)
 			return
 
-		while (
-				this.#pendingInvalidations.size ||
-				this.#pendingReactions.size
-			) {
+		this.#flushing = true
+		const ran = new Set<() => void>()
 
-			// finish all invalidations before reactions
-			this.#invalidating = true
-
-			try {
-				while (this.#pendingInvalidations.size) {
-					const fn = this.#pendingInvalidations.values().next().value!
-					this.#pendingInvalidations.delete(fn)
-					this.#run(fn)
-				}
-			}
-			finally {
-				this.#invalidating = false
-			}
-
-			// execute one reaction, allowing nested flushes
-			if (this.#pendingReactions.size) {
+		try {
+			while (this.#pendingReactions.size) {
 				const fn = this.#pendingReactions.values().next().value!
 				this.#pendingReactions.delete(fn)
+
+				// a reaction can only run once per flush; feedback is damped.
+				if (ran.has(fn)) continue
+				ran.add(fn)
 				this.#run(fn)
 			}
+		}
+		catch (error) {
+			// do not run failed-transaction callbacks during a later write.
+			this.#pendingReactions.clear()
+			throw error
+		}
+		finally {
+			this.#flushing = false
 		}
 	}
 }
