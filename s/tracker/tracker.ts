@@ -105,21 +105,22 @@ export class Tracker<Item extends Trackable = any> {
 			return
 
 		this.#flushing = true
-		const ran = new Set<() => void>()
+		const runs = new Map<() => void, number>()
 
 		try {
 			while (this.#pendingReactions.size) {
 				const fn = this.#pendingReactions.values().next().value!
 				this.#pendingReactions.delete(fn)
 
-				// a reaction can only run once per flush; feedback is damped.
-				if (ran.has(fn)) continue
-				ran.add(fn)
+				const count = (runs.get(fn) ?? 0) + 1
+				if (count > 100)
+					throw new Error("reactive feedback loop detected")
+
+				runs.set(fn, count)
 				this.#run(fn)
 			}
 		}
 		catch (error) {
-			// do not run failed-transaction callbacks during a later write.
 			this.#pendingReactions.clear()
 			throw error
 		}

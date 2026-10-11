@@ -146,6 +146,25 @@ export default science.suite({
 		expect(values.join(",")).is("5,10")
 	}),
 
+	"derived .on survives cascading writes": test(async() => {
+		const $a = signal(1)
+		const $b = signal(1)
+		const $sum = derived(() => $a() + $b())
+		const values: number[] = []
+
+		$sum.on(n => values.push(n))
+
+		effect(() => {
+			if ($a() === 2)
+				$b(2)
+		})
+
+		$a(2)
+
+		expect($sum()).is(4)
+		expect(values.join(",")).is("3,4")
+	}),
+
 	"derived more": test(async() => {
 		const $alpha = signal(2)
 		const $bravo = signal(10)
@@ -316,7 +335,7 @@ export default science.suite({
 		expect(count).lt(5)
 	}),
 
-	"sneaky evil circularity is no problem": test(async() => {
+	"bounded effect feedback terminates": test(async() => {
 		const $alpha = signal(1)
 		const $bravo = signal(1)
 
@@ -336,8 +355,8 @@ export default science.suite({
 
 		$alpha(99)
 		$bravo(99)
-		expect(countAlpha).lt(5)
-		expect(countBravo).lt(5)
+		expect(countAlpha).is(10)
+		expect(countBravo).is(9)
 	}),
 
 	"effect writes are self-damped": test(async() => {
