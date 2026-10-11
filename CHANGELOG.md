@@ -11,8 +11,9 @@
 ## v0.5
 
 ### v0.5.6
-- 🍏 add `derived.on(fn)`
-- 🍏 fix complex derived graph stuff by adding `tracker.subscribeInvalidator`
+- 🍏 add `derived.on(fn)`.
+- 🍏 fix complex derived graph stuff by adding `tracker.subscribeInvalidator`.
+- 🔶 deriveds now throw errors when accessed after .dispose is called.
 
 ### v0.5.5
 - 🍏 add `signal.on(fn)`

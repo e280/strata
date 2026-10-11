@@ -1,4 +1,5 @@
 
+import {once} from "@e280/stz"
 import {Derived} from "./types.js"
 import {tracker} from "../tracker/global.js"
 import {watchInvalidator} from "./utils/watch.js"
@@ -9,14 +10,21 @@ export function derived<Value>(fn: () => Value): Derived<Value> {
 	let failed = false
 	let computing = false
 	let unwatch = () => {}
+	let disposed = false
 
-	const dispose = () => {
+	const dispose = once(() => {
+		disposed = true
 		unwatch()
 		unwatch = () => {}
-		dirty = true
+	})
+
+	const assertAlive = () => {
+		if (disposed)
+			throw new Error("derived has been disposed")
 	}
 
 	const invalidate = () => {
+		if (disposed) return
 		if (!dirty || failed) {
 			dirty = true
 			tracker.write(d)
@@ -48,6 +56,7 @@ export function derived<Value>(fn: () => Value): Derived<Value> {
 	}
 
 	function d() {
+		assertAlive()
 		tracker.read(d)
 
 		if (dirty)
@@ -60,6 +69,7 @@ export function derived<Value>(fn: () => Value): Derived<Value> {
 	d.dispose = dispose
 
 	d.on = (fn: (value: Value) => unknown) => {
+		assertAlive()
 		if (dirty) compute()
 		return tracker.subscribe(d, () => fn(d()))
 	}

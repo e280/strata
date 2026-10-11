@@ -134,6 +134,27 @@ export default science.suite({
 		expect(values.join(",")).is("10")
 	}),
 
+	"derived dispose is terminal": test(async() => {
+		const $source = signal(1)
+		const $double = derived(() => $source() * 2)
+		expect($double()).is(2)
+		$double.dispose()
+		$double.dispose() // idempotent
+		$source(3)
+		expect(() => $double()).throws()
+		expect(() => $double.on(() => {})).throws()
+	}),
+
+	"derived dispose includes .on": test(async() => {
+		const $source = signal(1)
+		const $double = derived(() => $source() * 2)
+		let onned = 0
+		$double.on(x => onned = x)
+		$double.dispose()
+		$source(2)
+		expect(onned).is(0)
+	}),
+
 	"derived complex effect": test(async() => {
 		const $source = signal(1)
 		const $double = derived(() => $source() * 2)

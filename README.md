@@ -72,7 +72,8 @@ import {signal, derived, effect, batch} from "@e280/strata"
   ```
 - **btw,**  
   deriveds are lazy, only run the fn when demanded.  
-  also, they have a `.dispose()` fn if you need to stop them.  
+  for advanced situations, you can stop them with `.dispose()` fn.  
+  if you dispose a derived, subsequent accesses will throw errors.  
 
 ### 🚦 effects
 - **effects run immediately, then again when relevant signals change**
