@@ -449,7 +449,5 @@ export const MyCounter = () => {
 
 <br/><br/>
 
-## 🧑‍💻 strata is by e280
-free and open source by https://e280.org/  
-join us if you're cool and good at dev  
+🧑‍💻 *https://e280.org/*
 
