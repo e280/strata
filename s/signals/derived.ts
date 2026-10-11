@@ -60,7 +60,7 @@ export function derived<Value>(fn: () => Value): Derived<Value> {
 	d.dispose = dispose
 
 	d.on = (fn: (value: Value) => unknown) => {
-		d()
+		if (dirty) compute()
 		return tracker.subscribe(d, () => fn(d()))
 	}
 
