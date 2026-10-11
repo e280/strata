@@ -77,11 +77,11 @@ import {signal, derived, effect, batch} from "@e280/strata"
 - **effects run immediately, then again when relevant signals change**
   ```ts
   effect(() => console.log($count()))
-    // 2
+    // 3
     // the system detects '$count' is relevant
 
-  $count(3)
-    // 3
+  $count(4)
+    // 4
     // when $count is changed, the effect fn is run
   ```
 - **you can pass 2nd responder fn, which does not run at first**
@@ -89,8 +89,8 @@ import {signal, derived, effect, batch} from "@e280/strata"
   effect(() => $count(), count => console.log(count))
     // *nothing is initially logged*
 
-  $count(3)
-    // 3
+  $count(5)
+    // 5
     // when $count is changed, the responder fn is run
   ```
 - **btw,**  
@@ -101,9 +101,9 @@ import {signal, derived, effect, batch} from "@e280/strata"
   ```ts
   // call downstream effects only once
   batch(() => {
-    $count(4)
-    $count(5)
     $count(6)
+    $count(7)
+    $count(8)
   })
   ```
 
@@ -158,7 +158,7 @@ import {signal, derived, effect, batch} from "@e280/strata"
     person.state.name // "chase"
 
     snacks.state.peanuts++
-      // ⛔ attempted state mutation: silently ignored
+      // ⛔ attempted state mutation: uselessly changed temp snapshot
     ```
 - **`lens.frozen` provides a deep-frozen immutable snapshot with strict typings**
     ```ts
@@ -186,6 +186,7 @@ import {signal, derived, effect, batch} from "@e280/strata"
     snacks.mutate(state => state.peanuts++)
       // effect is run
     ```
+    - it's the reading of the `.state` getter that allows `effect` to know what's relevant.
 
 ### 🔮 chrono for time travel
 - **import stuff**
@@ -398,7 +399,7 @@ this is the inner sanctum of strata. use the tracker to jack into the reactivity
 ### 🪄 integrate your ui framework for auto-rerendering
 - use `tracker.observe` to check what is touched by a fn
 - use `tracker.subscribe` to subscribe to the seen items that `observe` returns
-- see the [source code](./tracker/tracker.ts)
+- see the [tracker.ts](./s/tracker/tracker.ts) source code
 
 
 
