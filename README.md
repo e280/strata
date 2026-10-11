@@ -26,7 +26,7 @@
 
 <a id="signals"></a>
 
-## 🍋 strata signals
+## 🚦 strata signals
 > *reactive bundles of joy*
 
 ```ts
@@ -117,7 +117,7 @@ import {signal, derived, effect, batch} from "@e280/strata"
 
 <a id="prism"></a>
 
-## 🍋 strata prism
+## 🔮 strata prism
 > *persistent app-level state*
 
 - single-source-of-truth state tree
@@ -257,7 +257,7 @@ import {signal, derived, effect, batch} from "@e280/strata"
 
 <a id="wait"></a>
 
-## 🍋 strata wait
+## ⌛ strata wait
 > *tiny async state helpers*
 
 it's about "wait states" like *pending, ok, err.*  
@@ -349,7 +349,7 @@ wait extends [stz's ok/err](https://github.com/e280/stz#ok) toolkit, and it's mo
 
 <a id="tracker"></a>
 
-## 🍋 strata tracker
+## 🪄 strata tracker
 > *reactivity integration hub*
 
 ```ts
@@ -397,7 +397,7 @@ this is the inner sanctum of strata. use the tracker to jack into the reactivity
 
 <a id="react"></a>
 
-## 🍋 react bindings
+## ⚛️ react bindings
 
 ### ⚛️ setup your `strata.ts` module
 ```ts
