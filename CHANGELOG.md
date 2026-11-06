@@ -10,6 +10,9 @@
 
 ## v0.5
 
+### v0.5.7
+- 🍏 update deps.
+
 ### v0.5.6
 - 🍏 add `derived.on(fn)`.
 - 🍏 add optional effect responder fn `effect(collector, responder)`.
