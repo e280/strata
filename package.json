@@ -25,10 +25,10 @@
 		"count": "find s -path '*/_archive' -prune -o -name '*.ts' -exec wc -l {} +"
 	},
 	"dependencies": {
-		"@e280/stz": "^0.4.9"
+		"@e280/stz": "^0.4.15"
 	},
 	"devDependencies": {
-		"@e280/octo": "^0.1.6",
+		"@e280/octo": "^0.1.7",
 		"@e280/science": "^0.1.14",
 		"typescript": "^7.0.2"
 	},
